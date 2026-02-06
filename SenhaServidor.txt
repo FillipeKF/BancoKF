@@ -1,0 +1,12 @@
+
+
+
+host:
+db.csujcbotccgylynbxdhu.supabase.co
+porta  5432
+database:postgres
+user:postgres
+
+
+
+postgresql://postgres:Fillipe222@db.csujcbotccgylynbxdhu.supabase.co:5432/postgres

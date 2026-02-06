@@ -1,0 +1,16 @@
+# Node modules
+node_modules/
+
+# Banco de dados local
+db/
+*.sqlite
+
+# Arquivos de ambiente
+.env
+
+# Logs
+*.log
+
+# Sistema
+.DS_Store
+Thumbs.db
