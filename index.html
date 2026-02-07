@@ -774,19 +774,22 @@ function editarItem(id) {
     }
 
     try {
-        // Atualiza no Supabase
-        const { error } = await supabase
-            .from('itens') // nome da tabela
-            .update({
+        // Envia para o backend usando a URL base
+        const res = await fetch(`${API_BASE}/itens/${itemAtualEditar.id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
                 nome: novoNome,
                 quantidade: novaQuantidade,
                 setor: novoSetor
             })
-            .eq('id', itemAtualEditar.id); // assume que cada item tem um id único
+        });
 
-        if (error) throw error;
+        const data = await res.json();
 
-        // Atualiza localmente também
+        if (!data.ok) throw data.error || "Erro ao atualizar item";
+
+        // Atualiza localmente e no HTML
         itemAtualEditar.nome = novoNome;
         itemAtualEditar.quantidade = novaQuantidade;
         itemAtualEditar.setor = novoSetor;
@@ -797,10 +800,11 @@ function editarItem(id) {
         itemAtualEditar = null;
 
     } catch (err) {
+        alert("Falha ao editar item: " + err);
         console.error(err);
-        alert("Erro ao editar item!");
     }
 }
+
 
 
 
