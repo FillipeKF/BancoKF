@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <!-- Biblioteca JSZip para gerar ZIP no navegador -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<!-- Biblioteca FileSaver para salvar o ZIP no PC -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
 <meta charset="UTF-8">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KF Engenharia - Gestor de Campo</title>
 <style>
@@ -686,10 +686,18 @@ async function backupCIsDoMes() {
             if (ci.fotos && ci.fotos.length > 0) {
                 const folder = zip.folder(`${ci.id}-${ci.inicio}/fotos`);
                 for (let i = 0; i < ci.fotos.length; i++) {
-                    const url = ci.fotos[i];
-                    const fotoBlob = await fetch(url).then(r => r.blob());
-                    folder.file(`foto${i + 1}.jpg`, fotoBlob);
-                }
+
+    const foto = ci.fotos[i];
+
+    const fotoUrl = foto.startsWith("http")
+        ? foto
+        : `${API_BASE}${foto}`;
+
+    const fotoBlob = await fetch(fotoUrl).then(r => r.blob());
+
+    folder.file(`foto${i + 1}.jpg`, fotoBlob);
+}
+
             }
         }
 
