@@ -227,25 +227,6 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
         <div id="listaAndamento"></div>
     </div>
 </div>
-<!-- MODAL EQUIPE EDICAO -->
-<div id="modalEditarAtividade" class="modal">
-  <div class="modal-content">
-    <h3>Editar Atividade</h3>
-    <label>CI: <input type="text" id="editCI"></label><br>
-    <label>Serviço:
-      <select id="editServico">
-        <option>Pintura</option>
-        <option>Elétrica</option>
-        <option>Hidráulica</option>
-        <option>Civil</option>
-      </select>
-    </label><br>
-    <label>Local: <input type="text" id="editLocal"></label><br>
-    <label>Equipe (separar por vírgula): <input type="text" id="editEquipe"></label><br>
-    <button onclick="confirmarEdicaoAtividade()">Salvar</button>
-    <button onclick="fecharModal('modalEditarAtividade')">Cancelar</button>
-  </div>
-</div>
 
 <!-- MODAL ALMOXARIFADO -->
 <div id="modalAlmoxarifado" class="modal">
@@ -452,24 +433,56 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
         <div id="listaHistorico"></div>
     </div>
 </div>
+<!-- MODAL EDITAR ATIVIDADE -->
+<div id="modalEditarAtividade" class="modal">
+    <div class="container-modal">
+        <span class="btn-fechar" onclick="fecharModal('modalEditarAtividade')">&times;</span>
+        <h2 style="color:#f59e0b">Editar Atividade</h2>
+
+        <label>CI:</label>
+        <input type="text" id="editCi">
+
+        <label>Serviço:</label>
+        <input type="text" id="editServico">
+
+        <label>Local:</label>
+        <input type="text" id="editLocal">
+
+        <label>Equipe (separado por vírgula):</label>
+        <input type="text" id="editEquipe">
+
+        <button onclick="salvarEdicaoAtividade()" 
+                style="background:#0d6efd; color:white; border:none; padding:6px 12px; border-radius:6px; margin-top:10px; cursor:pointer;">
+            Salvar Edição
+        </button>
+    </div>
+</div>
+
+
+<!-- MODAL FINALIZAR -->
 <!-- MODAL FINALIZAR -->
 <div id="modalFinalizar" class="modal">
     <div class="container-modal">
         <span class="btn-fechar" onclick="fecharModal('modalFinalizar')">&times;</span>
         <h2 style="color:var(--success)">Concluir Trabalho</h2>
+
         <div id="detalhesServico" style="padding:10px; background:#16191f; border-radius:10px; margin-bottom:15px; font-size:13px;"></div>
-        
+
+        <!-- BOTÃO EDITAR CI -->
+        <button id="btnEditarCi" 
+                style="background:#f59e0b; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; margin-bottom:10px;"
+                onclick="abrirModalEdicao()">✏️ Editar CI</button>
+
         <label>Fotos da Conclusão</label>
         <input type="file" id="fFotos" multiple accept="image/*" onchange="previewImages(this)">
         <div id="previewFotos"></div>
-        
+
         <label>Descrição / Observações</label>
         <textarea id="fRelato" rows="3" placeholder="Relate o que foi feito..."></textarea>
 
         <button class="btn-acao btn-finalizar" onclick="finalizarAtividade()">Finalizar e Sincronizar</button>
     </div>
 </div>
-
 
 
 
@@ -811,69 +824,95 @@ function limparForm(){
     document.getElementById('fAtividade').selectedIndex = 0;
     document.getElementById('fTipoLocal').selectedIndex = 0;
 }
+
+// MODAL EQUIPEEDICAO
+
+function abrirModalEdicao() {
+    if (!atividadeAtual) return;
+
+    document.getElementById('editCi').value = atividadeAtual.ci;
+    document.getElementById('editServico').value = atividadeAtual.servico;
+    document.getElementById('editLocal').value = atividadeAtual.local;
+    document.getElementById('editEquipe').value = atividadeAtual.equipe.join(", ");
+
+    abrirModal('modalEditarAtividade');
+}
+function salvarEdicaoAtividade() {
+    if (!atividadeAtual) return;
+
+    const novaCi = document.getElementById('editCi').value.trim();
+    const novoServico = document.getElementById('editServico').value.trim();
+    const novoLocal = document.getElementById('editLocal').value.trim();
+    const novaEquipe = document.getElementById('editEquipe').value
+                        .split(",")
+                        .map(e => e.trim())
+                        .filter(e => e);
+
+    if (!novaCi || !novoServico || !novoLocal || !novaEquipe.length) {
+        alert("Preencha todos os campos!");
+        return;
+    }
+
+    // Atualiza atividadeAtual
+    atividadeAtual.ci = novaCi;
+    atividadeAtual.servico = novoServico;
+    atividadeAtual.local = novoLocal;
+    atividadeAtual.equipe = novaEquipe;
+
+    // Fecha modal de edição e volta para modal finalizar
+    fecharModal('modalEditarAtividade');
+
+    document.getElementById('detalhesServico').innerHTML =
+        `CI: ${atividadeAtual.ci} | Serviço: ${atividadeAtual.servico} | Local: ${atividadeAtual.local}<br>
+         Equipe: ${atividadeAtual.equipe.join(", ")}`;
+
+    mostrarToast("Atividade atualizada! Agora finalize o trabalho.");
+}
 // MODAL EQUIPE
 function abrirEquipe(){ abrirModal('modalEquipe'); atualizarEquipeCampo(); }
-function atualizarEquipeCampo() {
+function atualizarEquipeCampo(){
     const lista = document.getElementById('listaAndamento');
     lista.innerHTML = atividadesAtivas.length ? "" : "Nenhuma atividade em andamento.";
 
     // Cria um Set para armazenar funcionários únicos
     const funcionariosUnicos = new Set();
 
-    atividadesAtivas.forEach((a, index) => {
+    atividadesAtivas.forEach((a,index)=>{
         // Adiciona cada membro da equipe no Set
         a.equipe.forEach(nome => funcionariosUnicos.add(nome));
 
         // COR POR SERVIÇO
-        const serv = normalizar(a.servico);
+       const serv = normalizar(a.servico);
 
-        const mapa = {
-            pintura: { classe: "card-pintura", icone: "🎨" },
-            eletrica: { classe: "card-eletrica", icone: "💡" },
-            hidraulica: { classe: "card-hidraulica", icone: "🚰" },
-            civil: { classe: "card-civil", icone: "🔨" }
-        };
+const mapa = {
+    pintura: { classe: "card-pintura", icone: "🎨" },
+    eletrica: { classe: "card-eletrica", icone: "💡" },
+    hidraulica: { classe: "card-hidraulica", icone: "🚰" },
+    civil: { classe: "card-civil", icone: "🔨" }
+};
 
-        const cfg = mapa[serv] || { classe: "", icone: "🛠️" };
-        const classeServico = cfg.classe;
-        const iconeServico = cfg.icone;
+const cfg = mapa[serv] || { classe: "", icone: "🛠️" };
 
+let classeServico = cfg.classe;
+let iconeServico = cfg.icone;
         // Cria card da atividade
         const card = document.createElement('div');
         card.className = `card-lista ${classeServico}`;
-        card.innerHTML = `
-            <strong>${iconeServico} CI ${a.ci}</strong><br>
-            Serviço: ${a.servico}<br>
-            Local: ${a.local}<br>
-            Equipe: ${a.equipe.join(", ")}<br>
-            <button onclick="editarAtividadeAntesDeFinalizar(${index})" 
-                style="margin-top:5px; background:#0d6efd; color:white; border:none; padding:3px 8px; cursor:pointer; border-radius:4px;">
-                ✏️ Editar CI
-            </button>
-        `;
-
-        // Clique no card abre modal de finalização (opcional)
-        card.onclick = () => {
-            atividadeAtual = atividadesAtivas[index];
-            abrirModal('modalFinalizar');
-            document.getElementById('detalhesServico').innerHTML = 
-                `CI: ${atividadeAtual.ci} | Serviço: ${atividadeAtual.servico} | Local: ${atividadeAtual.local}<br>
-                 Equipe: ${atividadeAtual.equipe.join(", ")}`;
-        };
+        card.innerHTML = `<strong>${iconeServico} CI ${a.ci}</strong><br>Serviço: ${a.servico}<br>Local: ${a.local}<br>Equipe: ${a.equipe.join(", ")}`;
+        card.onclick = ()=>prepararFinalizacao(index);
 
         lista.appendChild(card);
     });
 
     // Atualiza o badge com número de funcionários únicos
     const badge = document.getElementById('badgeFuncionarios');
-    if (funcionariosUnicos.size > 0) {
+    if(funcionariosUnicos.size > 0){
         badge.textContent = funcionariosUnicos.size + " Funcionário(s)";
         badge.style.display = 'block';
     } else {
         badge.style.display = 'none';
     }
 }
-
 
 // FINALIZAR
 function prepararFinalizacao(idx){
@@ -945,51 +984,6 @@ fetch(`${API_BASE}/atividades/finalizar`, { method: "POST", body: formData })
         alert("Erro ao salvar atividade!");
     });
 }
-
-//Edicao Ci
-function editarAtividadeAntesDeFinalizar(idx) {
-    atividadeAtual = atividadesAtivas[idx];
-
-    document.getElementById('editCI').value = atividadeAtual.ci;
-    document.getElementById('editServico').value = atividadeAtual.servico;
-    document.getElementById('editLocal').value = atividadeAtual.local;
-    document.getElementById('editEquipe').value = atividadeAtual.equipe.join(", ");
-
-    abrirModal('modalEditarAtividade');
-}
-
-function confirmarEdicaoAtividade() {
-    if (!atividadeAtual) return;
-
-    const novoCI = document.getElementById('editCI').value.trim();
-    const novoServico = document.getElementById('editServico').value;
-    const novoLocal = document.getElementById('editLocal').value.trim();
-    const novaEquipe = document.getElementById('editEquipe').value
-        .split(",")
-        .map(e => e.trim())
-        .filter(Boolean);
-
-    if (!novoCI || !novoServico || !novoLocal || !novaEquipe.length) {
-        alert("Preencha todos os campos!");
-        return;
-    }
-
-    // Atualiza a atividade atual
-    atividadeAtual.ci = novoCI;
-    atividadeAtual.servico = novoServico;
-    atividadeAtual.local = novoLocal;
-    atividadeAtual.equipe = novaEquipe;
-
-    fecharModal('modalEditarAtividade');
-
-    // Atualiza a visualização
-    atualizarEquipeCampo();
-
-    // Agora abre modal de finalização
-    abrirModal('modalFinalizar');
-}
-
-
 //Historico
 function abrirHistorico(){
 
