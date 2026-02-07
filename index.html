@@ -670,49 +670,65 @@ async function backupCIsDoMes() {
         if (!res.ok) throw "Erro ao buscar CIs";
 
         const data = await res.json();
-        if (data.length === 0) {
+
+        if (!Array.isArray(data) || data.length === 0) {
             alert("Não há CIs nesse período");
             return;
         }
 
-        // Cria um novo zip
         const zip = new JSZip();
 
         for (const ci of data) {
-            // Adiciona um arquivo .txt com os dados da CI
+
+            // TXT da CI
             zip.file(`${ci.id}-${ci.inicio}.txt`, JSON.stringify(ci, null, 2));
 
-            // Adiciona fotos, se houver
-            if (ci.fotos && ci.fotos.length > 0) {
+            // ===============================
+            // CONVERTE FOTOS PARA ARRAY REAL
+            // ===============================
+            let fotos = [];
+
+            try {
+                fotos = Array.isArray(ci.fotos) ? ci.fotos : JSON.parse(ci.fotos || "[]");
+            } catch {
+                fotos = [];
+            }
+
+            // ===============================
+            // BAIXA FOTOS
+            // ===============================
+            if (fotos.length > 0) {
+
                 const folder = zip.folder(`${ci.id}-${ci.inicio}/fotos`);
-                for (let i = 0; i < ci.fotos.length; i++) {
 
-    const foto = ci.fotos[i];
+                for (let i = 0; i < fotos.length; i++) {
 
-    const fotoUrl = foto.startsWith("http")
-        ? foto
-        : `${API_BASE}${foto}`;
+                    const foto = fotos[i];
 
-    const fotoBlob = await fetch(fotoUrl).then(r => r.blob());
+                    if (!foto || !foto.startsWith("http")) continue;
 
-    folder.file(`foto${i + 1}.jpg`, fotoBlob);
-}
+                    const fotoBlob = await fetch(foto).then(r => r.blob());
 
+                    folder.file(`foto${i + 1}.jpg`, fotoBlob);
+                }
             }
         }
 
-        // Gera o arquivo zip e salva
+        // Gera ZIP
         const content = await zip.generateAsync({ type: "blob" });
         saveAs(content, `backup_CI_${month}-${year}.zip`);
 
-        // Pergunta se quer apagar as CIs do servidor
+        // Apagar do servidor
         if (confirm("Backup concluído! Deseja apagar essas CIs do servidor?")) {
+
             const ids = data.map(c => c.id);
+
             await fetch(`${API_BASE}/atividades/apagar`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ ids })
             });
+
             alert("CIs apagadas do servidor!");
             atualizarHistorico();
         }
@@ -722,7 +738,6 @@ async function backupCIsDoMes() {
         alert("Erro no backup: " + err);
     }
 }
-
 
 // ------------------- RESTORE CIs TEMPORÁRIO -------------------
 async function restaurarCIs() {
