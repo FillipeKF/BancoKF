@@ -684,7 +684,7 @@ async function backupCIsDoMes() {
             zip.file(`${ci.id}-${ci.inicio}.txt`, JSON.stringify(ci, null, 2));
 
             // ===============================
-            // CONVERTE FOTOS PARA ARRAY REAL
+            // GARANTE ARRAY REAL DE FOTOS
             // ===============================
             let fotos = [];
 
@@ -695,7 +695,7 @@ async function backupCIsDoMes() {
             }
 
             // ===============================
-            // BAIXA FOTOS
+            // BAIXA FOTOS COM BLINDAGEM
             // ===============================
             if (fotos.length > 0) {
 
@@ -703,22 +703,37 @@ async function backupCIsDoMes() {
 
                 for (let i = 0; i < fotos.length; i++) {
 
-                    const foto = fotos[i];
+                    let foto = String(fotos[i])
+                        .replace("[", "")
+                        .replace("]", "")
+                        .replace(/"/g, "")
+                        .trim();
 
-                    if (!foto || !foto.startsWith("http")) continue;
+                    if (!foto.startsWith("http")) {
+                        console.warn("Foto ignorada:", foto);
+                        continue;
+                    }
 
-                    const fotoBlob = await fetch(foto).then(r => r.blob());
-
-                    folder.file(`foto${i + 1}.jpg`, fotoBlob);
+                    try {
+                        const fotoBlob = await fetch(foto).then(r => r.blob());
+                        folder.file(`foto${i + 1}.jpg`, fotoBlob);
+                    } catch (e) {
+                        console.warn("Erro ao baixar:", foto);
+                        continue;
+                    }
                 }
             }
         }
 
-        // Gera ZIP
+        // ===============================
+        // GERA ZIP
+        // ===============================
         const content = await zip.generateAsync({ type: "blob" });
         saveAs(content, `backup_CI_${month}-${year}.zip`);
 
-        // Apagar do servidor
+        // ===============================
+        // APAGA DO SERVIDOR
+        // ===============================
         if (confirm("Backup concluído! Deseja apagar essas CIs do servidor?")) {
 
             const ids = data.map(c => c.id);
