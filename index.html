@@ -542,7 +542,7 @@ function atualizarListaItens() {
 
     let itensFiltrados = itensRegistrados;
     if(filtroSetor) {
-        itensFiltrados = itensRegistrados.filter(item => item.setor === filtroSetor);
+        itensFiltrados = itensRegistrados.filter(item => normalizar(item.setor) === normalizar(filtroSetor));
     }
 
     if (itensFiltrados.length === 0) {
@@ -552,22 +552,22 @@ function atualizarListaItens() {
         return;
     }
 
-    // Mapa de cores por setor
+    // Mapa de cores por setor (todas em lowercase e sem acento)
     const corSetor = {
-        "Pintura": "#ef4444",     // vermelho
-        "Elétrica": "#facc15",    // amarelo
-        "Hidráulica": "#0d6efd",  // azul
-        "Civil": "#a855f7"        // roxo
+        pintura: "#ef4444",     // vermelho
+        eletrica: "#facc15",    // amarelo
+        hidraulica: "#0d6efd",  // azul
+        civil: "#a855f7"        // roxo
     };
 
     itensFiltrados.forEach(item => {
         const tr = document.createElement('tr');
 
-        // Adiciona a cor do setor como borda esquerda
-       const setorKey = item.setor?.trim().toLowerCase();
+        // Normaliza o setor para pegar a cor correta
+        const setorKey = normalizar(item.setor);
 
-tr.style.borderLeft = `5px solid ${corSetor[setorKey] || '#0d6efd'}`;
-        tr.style.background = "#252a33"; // mantém fundo escuro padrão
+        tr.style.borderLeft = `5px solid ${corSetor[setorKey] || '#0d6efd'}`;
+        tr.style.background = "#252a33"; // fundo escuro padrão
         tr.style.color = "#fff";
 
         tr.innerHTML = `
@@ -582,7 +582,17 @@ tr.style.borderLeft = `5px solid ${corSetor[setorKey] || '#0d6efd'}`;
 
         tbody.appendChild(tr);
     });
-}// Substitui confirm antigo
+}
+
+// Função auxiliar para normalizar texto
+function normalizar(texto) {
+    return texto
+        ?.normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim()
+        .toLowerCase();
+}
+// Substitui confirm antigo
 function excluirItem(id) {
     const item = itensRegistrados.find(i => i.id === id);
     if (!item) return;
