@@ -665,7 +665,18 @@ function editarItem(id) {
 
 
 // ======================= EQUIPES =======================
-function toggleFuncs(e){ e.stopPropagation(); document.getElementById('fOptions').classList.toggle('hidden'); }
+function toggleFuncs(e){
+    e.stopPropagation();
+    const fOptions = document.getElementById('fOptions');
+    fOptions.classList.toggle('hidden');
+}
+
+// Fecha o dropdown se clicar fora
+document.addEventListener('click', function(){
+    const fOptions = document.getElementById('fOptions');
+    if(fOptions) fOptions.classList.add('hidden');
+});
+
 function selectFunc(el,nome,e){
     e.stopPropagation();
     el.classList.toggle('active');
@@ -858,7 +869,14 @@ function salvarEdicaoAtividade() {
 }
 
 // MODAL EQUIPE
-function abrirEquipe(){ abrirModal('modalEquipe'); atualizarEquipeCampo(); }
+function abrirEquipe(){
+    abrirModal('modalEquipe'); 
+    atualizarEquipeCampo();
+
+    // Garante que o dropdown esteja fechado
+   document.getElementById('fOptions').addEventListener('click', e => e.stopPropagation());
+}
+
 function atualizarEquipeCampo(){
     const lista = document.getElementById('listaAndamento');
     lista.innerHTML = atividadesAtivas.length ? "" : "Nenhuma atividade em andamento.";
