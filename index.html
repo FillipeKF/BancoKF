@@ -704,29 +704,39 @@ function iniciarAtividade() {
         fim: ""
     };
 
-    fetch(`${API_BASE}/atividades/inicio`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(atividade)
-    })
-    .then(res => {
-        if (!res.ok) throw new Error("Erro na requisição: " + res.status);
-        return res.json();
-    })
-    .then(data => {
-        if (!data.id) throw new Error("ID não retornado pelo backend");
-        atividade.id = data.id;
+   app.post("/atividades/inicio", async (req, res) => {
+  try {
 
-        atividadesAtivas.push(atividade);
-        limparForm();
-        atualizarEquipeCampo();
-        mostrarToast("Atividade registrada!");
-    })
-    .catch(err => {
-        console.error("Erro ao registrar atividade:", err);
-        alert("Erro ao registrar atividade. Veja o console para detalhes.");
+    const { ci, servico, local, equipe, inicio } = req.body;
+
+    const equipeStr = Array.isArray(equipe)
+      ? equipe.join(",")
+      : equipe;
+
+    const r = await pool.query(`
+      INSERT INTO atividades_ativas(ci,servico,local,equipe,inicio)
+      VALUES($1,$2,$3,$4,$5)
+      RETURNING id
+    `, [
+      ci,
+      servico,
+      local,
+      equipeStr,
+      inicio
+    ]);
+
+    res.json({ ok: true, id: r.rows[0].id });
+
+  } catch (err) {
+
+    console.error("INICIO ERRO:", err);
+
+    res.status(500).json({
+      error: "Erro ao registrar atividade"
     });
-}
+
+  }
+});
 
 function dataAgoraBR(){
     return new Date().toLocaleString("pt-BR", {
@@ -833,8 +843,10 @@ function finalizarAtividade() {
 
     
 fetch(`${API_BASE}/atividades/finalizar`, { method: "POST", body: formData })
-    .then(res => res.json())
-    .then(data => {
+   .then(res => res.json())
+.then(data => {
+
+    if (!data.ok) throw new Error(data.error || "Erro backend");
         // Atualiza frontend
         atividadeAtual.fim = fim;
         atividadeAtual.relato = relato;
