@@ -179,7 +179,7 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
   font-size: 14px;
 }
 .modal {
-    display: flex;
+    display: none; /* inicialmente invisível */
     justify-content: center;
     align-items: center;
     position: fixed;
@@ -187,14 +187,16 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
     background: rgba(0,0,0,0); /* começa transparente */
     opacity: 0;
     transition: background 0.5s ease, opacity 0.5s ease;
+    pointer-events: none; /* bloqueia cliques quando não está visível */
 }
 
 .modal.show {
-    background: rgba(0,0,0,0.85); /* fundo escuro */
+    display: flex;
+    background: rgba(0,0,0,0.85);
     opacity: 1;
+    pointer-events: auto; /* ativa cliques quando visível */
 }
 
-/* animação do container interno */
 .modal .container-modal {
     transform: scale(0.2);
     transition: transform 0.5s ease;
@@ -203,8 +205,6 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
 .modal.show .container-modal {
     transform: scale(1);
 }
-/* Conteúdo principal (inicialmente acessível, overlay bloqueia visual) */
-#mainContent { display: block; }
 
 
 </style>
@@ -262,6 +262,14 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
 <div id="modalCadastro" class="modal">
     <div class="container-modal">
        <span class="btn-fechar" onclick="fecharModalComAnimacao('#modalCadastro', '.card-acao')">&times;</span>
+       <div id="modalCadastro" class="modal">
+    <div class="container-modal">
+        <span class="btn-fechar" 
+              onclick="fecharModalComAnimacao('#modalCadastro', '.card-acao')">&times;</span>
+        <h2 style="color:var(--primary)">Nova Atividade</h2>
+        <!-- resto do conteúdo -->
+    </div>
+</div>
         <h2 style="color:var(--primary)">Nova Atividade</h2>
 
         <label>Equipe</label>
@@ -671,17 +679,12 @@ function abrirModalComAnimacao(cardId, modalId) {
     const startX = rect.left + rect.width/2 - window.innerWidth/2;
     const startY = rect.top + rect.height/2 - window.innerHeight/2;
 
-    modal.style.display = "flex";
-    modal.style.opacity = 0;
+    modal.style.display = "flex"; // necessário para calcular offsets
+    modal.getBoundingClientRect(); // força reflow
+
     container.style.transform = `translate(${startX}px, ${startY}px) scale(0.2)`;
-
-    // força reflow
-    modal.getBoundingClientRect();
-
-    // adicionar classe de show
     modal.classList.add("show");
 
-    // anima container para centro
     setTimeout(() => {
         container.style.transform = "translate(0px, 0px) scale(1)";
     }, 10);
@@ -696,10 +699,7 @@ function fecharModalComAnimacao(modalId, cardId) {
     const endX = rect.left + rect.width/2 - window.innerWidth/2;
     const endY = rect.top + rect.height/2 - window.innerHeight/2;
 
-    // anima container de volta pro card
     container.style.transform = `translate(${endX}px, ${endY}px) scale(0.2)`;
-
-    // anima fade do fundo
     modal.style.opacity = 0;
 
     setTimeout(() => {
