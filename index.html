@@ -589,7 +589,7 @@ loginBtn.addEventListener("click", async () => {
 
   try {
     // Chama a rota do seu backend que valida no PostgreSQL/Supabase
-    const res = await fetch("https://csujcbotccgylynbxdhu.supabase.co", {
+    const res = await fetch("https://bancokf.onrender.com", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ usuario, senha })
