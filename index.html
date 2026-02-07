@@ -1023,12 +1023,13 @@ function atualizarHistorico() {
         if (filtroMes) dataOk = dataOk && (dataFim.getMonth() + 1 == parseInt(filtroMes));
         if (filtroAno) dataOk = dataOk && (dataFim.getFullYear() == parseInt(filtroAno));
 
-        let servicoOk = true;
-        if (filtroServico) {
-            // Tratamento do Pedreiro -> Civil
-            const serv = a.servico === "Civil" ? "Pedreiro" : a.servico;
-            servicoOk = serv === filtroServico;
-        }
+      const filtroServicoNormalizado = normalizar(filtroServico);
+
+let servicoOk = true;
+if (filtroServico) {
+    const servNormalizado = normalizar(a.servico);
+    servicoOk = servNormalizado === filtroServicoNormalizado;
+}
 
         return dataOk && servicoOk;
     });
