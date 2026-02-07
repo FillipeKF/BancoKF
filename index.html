@@ -1040,7 +1040,7 @@ function atualizarHistorico() {
     const filtroServico = document.getElementById('filtroServicoHistorico').value;
 
     // Filtra atividades concluídas
-    const filtradas = atividadesConcluidas.filter(a => {
+    let filtradas = atividadesConcluidas.filter(a => {
         let dataOk = true;
         const dataFim = new Date(a.fim);
 
@@ -1048,37 +1048,37 @@ function atualizarHistorico() {
         if (filtroMes) dataOk = dataOk && (dataFim.getMonth() + 1 == parseInt(filtroMes));
         if (filtroAno) dataOk = dataOk && (dataFim.getFullYear() == parseInt(filtroAno));
 
-      const filtroServicoNormalizado = normalizar(filtroServico);
-
-let servicoOk = true;
-if (filtroServico) {
-    const servNormalizado = normalizar(a.servico);
-    servicoOk = servNormalizado === filtroServicoNormalizado;
-}
+        const filtroServicoNormalizado = normalizar(filtroServico);
+        let servicoOk = true;
+        if (filtroServico) {
+            servicoOk = normalizar(a.servico) === filtroServicoNormalizado;
+        }
 
         return dataOk && servicoOk;
     });
+
+    // ✅ Ordena do mais recente para o mais antigo
+    filtradas.sort((a, b) => new Date(b.fim) - new Date(a.fim));
 
     if (filtradas.length === 0) {
         lista.innerHTML = "Nenhuma CI finalizada.";
         return;
     }
 
-   filtradas.forEach(a => {
+    filtradas.forEach(a => {
+        const serv = normalizar(a.servico);
 
-    const serv = normalizar(a.servico);
+        const mapa = {
+            pintura: "card-pintura",
+            eletrica: "card-eletrica",
+            hidraulica: "card-hidraulica",
+            civil: "card-civil"
+        };
 
-    const mapa = {
-        pintura: "card-pintura",
-        eletrica: "card-eletrica",
-        hidraulica: "card-hidraulica",
-        civil: "card-civil"
-    };
+        const classeServico = mapa[serv] || "";
 
-    const classeServico = mapa[serv] || "";
-
-    const card = document.createElement('div');
-    card.className = `card-lista card-concluido ${classeServico}`;
+        const card = document.createElement('div');
+        card.className = `card-lista card-concluido ${classeServico}`;
 
         // Adiciona fotos
         let fotosHTML = '';
@@ -1093,15 +1093,16 @@ if (filtroServico) {
             Serviço: ${a.servico}<br>
             Local: ${a.local}<br>
             Equipe: ${a.equipe.join(", ")}<br>
-         Início: ${formatarBR(a.inicio)}<br>
-       Fim: ${formatarBR(a.fim)}<br>
+            Início: ${formatarBR(a.inicio)}<br>
+            Fim: ${formatarBR(a.fim)}<br>
             Descrição: ${a.relato}<br>
             ${fotosHTML}
         `;
 
         lista.appendChild(card);
     });
-}// PREVIEW DE IMAGENS
+}
+// PREVIEW DE IMAGENS
 function previewImages(input){
     const preview=document.getElementById('previewFotos'); preview.innerHTML="";
     Array.from(input.files).forEach(file=>{
