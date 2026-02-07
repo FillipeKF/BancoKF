@@ -830,6 +830,9 @@ function limparForm(){
 function abrirModalEdicao() {
     if (!atividadeAtual) return;
 
+    // Fecha modal de finalizar
+    fecharModal('modalFinalizar');
+
     document.getElementById('editCi').value = atividadeAtual.ci;
     document.getElementById('editServico').value = atividadeAtual.servico;
     document.getElementById('editLocal').value = atividadeAtual.local;
@@ -859,15 +862,19 @@ function salvarEdicaoAtividade() {
     atividadeAtual.local = novoLocal;
     atividadeAtual.equipe = novaEquipe;
 
-    // Fecha modal de edição e volta para modal finalizar
     fecharModal('modalEditarAtividade');
 
+    // Atualiza modal de finalizar com os novos dados
     document.getElementById('detalhesServico').innerHTML =
         `CI: ${atividadeAtual.ci} | Serviço: ${atividadeAtual.servico} | Local: ${atividadeAtual.local}<br>
          Equipe: ${atividadeAtual.equipe.join(", ")}`;
 
+    // Reabre modal de finalizar
+    abrirModal('modalFinalizar');
+
     mostrarToast("Atividade atualizada! Agora finalize o trabalho.");
 }
+
 // MODAL EQUIPE
 function abrirEquipe(){ abrirModal('modalEquipe'); atualizarEquipeCampo(); }
 function atualizarEquipeCampo(){
