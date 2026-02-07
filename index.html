@@ -666,9 +666,13 @@ function editarItem(id) {
 
 // ======================= EQUIPES =======================
 function toggleFuncs(e){
-    e.stopPropagation();
+    e.stopPropagation(); 
     const fOptions = document.getElementById('fOptions');
-    fOptions.classList.toggle('hidden');
+    if(fOptions.style.display === 'block'){
+        fOptions.style.display = 'none';
+    } else {
+        fOptions.style.display = 'block';
+    }
 }
 
 // Fecha o dropdown se clicar fora
@@ -873,17 +877,18 @@ function abrirEquipe() {
     abrirModal('modalEquipe'); // abre o modal
     atualizarEquipeCampo();    // atualiza a lista de atividades em andamento
 
-    // Garante que o dropdown de selecionar equipe esteja fechado
+    // FORÇA o dropdown fechado
     const fOptions = document.getElementById('fOptions');
-    fOptions.classList.add('hidden'); // fecha a lista
+    fOptions.style.display = 'none'; // garante que está fechado
+    fOptions.classList.remove('hidden'); // remove a classe hidden caso CSS antigo cause conflito
 
-    // Remove qualquer destaque nos itens (classe active)
+    // Remove destaque de itens
     document.querySelectorAll('#fOptions .func-item').forEach(el => el.classList.remove('active'));
 
-    // Reseta o texto do botão para padrão
+    // Reseta o texto do botão
     document.getElementById('fDisplay').textContent = "Selecionar Equipe";
 
-    // Limpa o array de selecionados, caso esteja cheio
+    // Limpa array selecionados
     selecionados = [];
 }
 
