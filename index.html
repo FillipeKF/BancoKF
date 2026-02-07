@@ -589,11 +589,14 @@ loginBtn.addEventListener("click", async () => {
 
   try {
     // Chama a rota do seu backend que valida no PostgreSQL/Supabase
-    const res = await fetch("https://bancokfweb.onrender.com", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ usuario, senha })
-    });
+   // 🔹 URL do backend Render (onde seu app Node.js está hospedado)
+const BACKEND_URL = "https://bancokf.onrender.com"; // <- não é SUPABASE_URL
+
+const res = await fetch(`${BACKEND_URL}/login`, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ usuario, senha })
+});
 
     const data = await res.json();
 
