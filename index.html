@@ -761,7 +761,7 @@ function editarItem(id) {
     document.getElementById('editItemSetor').value = item.setor;
 
     abrirModal('modalEditarItem');
-}function confirmarEdicaoItem() {
+}async function confirmarEdicaoItem() {
     if (!itemAtualEditar) return;
 
     const novoNome = document.getElementById('editItemNome').value.trim();
@@ -773,16 +773,34 @@ function editarItem(id) {
         return;
     }
 
-    itemAtualEditar.nome = novoNome;
-    itemAtualEditar.quantidade = novaQuantidade;
-    itemAtualEditar.setor = novoSetor;
+    try {
+        // Atualiza no Supabase
+        const { error } = await supabase
+            .from('itens') // nome da tabela
+            .update({
+                nome: novoNome,
+                quantidade: novaQuantidade,
+                setor: novoSetor
+            })
+            .eq('id', itemAtualEditar.id); // assume que cada item tem um id único
 
-    mostrarToast("Item editado!");
-    atualizarListaItens();
-    fecharModal('modalEditarItem');
-    itemAtualEditar = null;
+        if (error) throw error;
+
+        // Atualiza localmente também
+        itemAtualEditar.nome = novoNome;
+        itemAtualEditar.quantidade = novaQuantidade;
+        itemAtualEditar.setor = novoSetor;
+
+        mostrarToast("Item editado!");
+        atualizarListaItens();
+        fecharModal('modalEditarItem');
+        itemAtualEditar = null;
+
+    } catch (err) {
+        console.error(err);
+        alert("Erro ao editar item!");
+    }
 }
-
 
 
 
