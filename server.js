@@ -296,28 +296,18 @@ app.get("/itens", async (_, res) => {
     });
 
   }
-});app.delete("/itens/:id", async (req,res)=>{
+})// DELETE
+app.delete("/itens/:id", async (req,res)=>{
   try {
-
-    await pool.query(
-      "DELETE FROM itens WHERE id=$1",
-      [req.params.id]
-    );
-
+    await pool.query("DELETE FROM itens WHERE id=$1",[req.params.id]);
     res.json({ok:true});
-
   } catch(err){
-
     console.error("DELETE ITEM:", err);
-
-    res.status(500).json({
-      error:"Erro ao excluir",
-      detalhe:String(err)
-    });
-
+    res.status(500).json({ error:"Erro ao excluir", detalhe:String(err) });
   }
+});
 
-// Editar item
+// PUT (editar item)
 app.put("/itens/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -341,7 +331,8 @@ app.put("/itens/:id", async (req, res) => {
 
 
 
-});
+
+
 // =======================
 // INICIAR SERVIDOR
 // =======================
