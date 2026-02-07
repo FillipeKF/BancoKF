@@ -126,31 +126,39 @@ app.post("/atividades/inicio", async (req, res) => {
   }
 });
 
-// Finalizar atividade com upload no Supabase
 app.post("/atividades/finalizar", upload.array("fotos"), async (req, res) => {
-  const { idAtiva, ci, servico, local, equipe, inicio, relato, fim } = req.body;
 
   try {
-    const fotosURLs = [];
 
-    for (let file of req.files) {
-      const fileName = `${Date.now()}-${file.originalname}`;
-      const { error } = await supabase.storage
-        .from("uploads")
-        .upload(fileName, file.buffer, {
-          contentType: file.mimetype,
-          upsert: true
-        });
+    const idAtiva = Number(req.body.idAtiva);
+const { ci, servico, local, equipe, inicio, relato, fim } = req.body;
 
-      if (error) {
-        console.error("Erro no upload Supabase:", error);
-        return res.status(500).json({ error: "Erro ao enviar foto." });
+    let fotosURLs = [];
+
+    if (req.files && req.files.length > 0) {
+
+      for (const file of req.files) {
+
+        const fileName = `${Date.now()}-${file.originalname}`;
+
+        const { error } = await supabase.storage
+          .from("uploads")
+          .upload(fileName, file.buffer, {
+            contentType: file.mimetype
+          });
+
+        if (error) throw error;
+
+        const { data } = supabase
+          .storage
+          .from("uploads")
+          .getPublicUrl(fileName);
+
+        fotosURLs.push(data.publicUrl);
       }
-
-      const { publicUrl } = supabase.storage.from("uploads").getPublicUrl(fileName);
-      fotosURLs.push(publicUrl);
     }
 
+    // INSERT CONCLUÍDA
     await pool.query(`
       INSERT INTO atividades(ci,servico,local,equipe,inicio,relato,fotos,fim)
       VALUES($1,$2,$3,$4,$5,$6,$7,$8)
@@ -158,20 +166,36 @@ app.post("/atividades/finalizar", upload.array("fotos"), async (req, res) => {
       ci,
       servico,
       local,
-      equipe.join(","),
+      equipe,
       inicio,
       relato || "-",
       JSON.stringify(fotosURLs),
       fim
     ]);
 
-    await pool.query("DELETE FROM atividades_ativas WHERE id=$1", [idAtiva]);
 
-    res.json({ ok: true, fotos: fotosURLs });
+console.log("DELETANDO ATIVA ID:", idAtiva);
+    // REMOVE DAS ATIVAS
+  await pool.query(
+  "DELETE FROM atividades_ativas WHERE id = $1",
+  [idAtiva]
+);
+
+    res.json({
+      ok: true,
+      fotos: fotosURLs
+    });
+
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Erro ao finalizar atividade." });
+
+    console.error("FINALIZAR ERRO:", err);
+
+    res.status(500).json({
+      error: "Falha ao finalizar atividade"
+    });
+
   }
+
 });
 
 // =======================
