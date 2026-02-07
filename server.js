@@ -146,6 +146,10 @@ app.get("/atividades/ativas", async (_, res) => {
   }
 });
 
+
+
+
+
 // Listar atividades concluídas
 app.get("/atividades", async (_, res) => {
   try {
@@ -312,6 +316,31 @@ app.get("/itens", async (_, res) => {
     });
 
   }
+
+// Editar item
+app.put("/itens/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { nome, quantidade, setor } = req.body;
+
+    if (!nome || !quantidade || !setor) {
+      return res.status(400).json({ ok: false, error: "Todos os campos são obrigatórios" });
+    }
+
+    await pool.query(
+      "UPDATE itens SET nome=$1, quantidade=$2, setor=$3 WHERE id=$4",
+      [nome, quantidade, setor, id]
+    );
+
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("EDIT ITEM:", err);
+    res.status(500).json({ error: "Erro ao editar item", detalhe: String(err) });
+  }
+});
+
+
+
 });
 // =======================
 // INICIAR SERVIDOR
