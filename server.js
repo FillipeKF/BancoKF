@@ -141,9 +141,13 @@ app.post("/atividades/finalizar", upload.array("fotos"), async (req, res) => {
 
   try {
 
-const idAtiva = Number(req.body.idAtiva);
-if (!idAtiva) throw "ID ATIVA NÃO RECEBIDO";
-const { ci, servico, local, equipe, inicio, relato, fim } = req.body;
+    console.log("BODY:", req.body);
+    console.log("FILES:", req.files?.length);
+
+    const idAtiva = Number(req.body.idAtiva);
+    if (!idAtiva) throw "ID ATIVA NÃO RECEBIDO";
+
+    const { ci, servico, local, equipe, inicio, relato, fim } = req.body;
 
     let fotosURLs = [];
 
@@ -170,7 +174,6 @@ const { ci, servico, local, equipe, inicio, relato, fim } = req.body;
       }
     }
 
-    // INSERT CONCLUÍDA
     await pool.query(`
       INSERT INTO atividades(ci,servico,local,equipe,inicio,relato,fotos,fim)
       VALUES($1,$2,$3,$4,$5,$6,$7,$8)
@@ -185,13 +188,10 @@ const { ci, servico, local, equipe, inicio, relato, fim } = req.body;
       fim
     ]);
 
-
-console.log("DELETANDO ATIVA ID:", idAtiva);
-    // REMOVE DAS ATIVAS
-  await pool.query(
-  "DELETE FROM atividades_ativas WHERE id = $1",
-  [idAtiva]
-);
+    await pool.query(
+      "DELETE FROM atividades_ativas WHERE id = $1",
+      [idAtiva]
+    );
 
     res.json({
       ok: true,
@@ -200,10 +200,11 @@ console.log("DELETANDO ATIVA ID:", idAtiva);
 
   } catch (err) {
 
-    console.error("FINALIZAR ERRO:", err);
+    console.error("FINALIZAR ERRO REAL:", err);
 
     res.status(500).json({
-      error: "Falha ao finalizar atividade"
+      error: "Falha ao finalizar atividade",
+      detalhe: String(err)
     });
 
   }
