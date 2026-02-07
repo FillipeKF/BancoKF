@@ -330,7 +330,45 @@ app.put("/itens/:id", async (req, res) => {
 });
 
 
+// Retorna CIs filtradas por mês/ano
+app.get("/atividades/backup", async (req,res)=>{
+    try{
+        const { mes, ano } = req.query;
+        const r = await pool.query("SELECT * FROM atividades");
+        // Filtrar por mês/ano do campo inicio
+        const filtered = r.rows.filter(a => {
+            const d = new Date(a.inicio);
+            return (d.getMonth()+1 == Number(mes)) && (d.getFullYear() == Number(ano));
+        });
+        res.json(filtered);
+    } catch(err){
+        console.error(err);
+        res.status(500).json({ error:"Erro ao buscar CIs" });
+    }
+});
 
+// Apagar CIs (POST com array de ids)
+app.post("/atividades/apagar", async (req,res)=>{
+    try{
+        const { ids } = req.body;
+        for(const id of ids){
+            // Deletar fotos do Supabase
+            const r = await pool.query("SELECT fotos FROM atividades WHERE id=$1",[id]);
+            if(r.rows[0]?.fotos){
+                const fotos = JSON.parse(r.rows[0].fotos);
+                for(const url of fotos){
+                    const fileName = url.split("/").pop();
+                    await supabase.storage.from("uploads").remove([fileName]);
+                }
+            }
+            await pool.query("DELETE FROM atividades WHERE id=$1",[id]);
+        }
+        res.json({ ok:true });
+    } catch(err){
+        console.error(err);
+        res.status(500).json({ error:"Erro ao apagar CIs" });
+    }
+});
 
 
 // =======================
