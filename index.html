@@ -178,7 +178,31 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
   display: none;
   font-size: 14px;
 }
+.modal {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0); /* começa transparente */
+    opacity: 0;
+    transition: background 0.5s ease, opacity 0.5s ease;
+}
 
+.modal.show {
+    background: rgba(0,0,0,0.85); /* fundo escuro */
+    opacity: 1;
+}
+
+/* animação do container interno */
+.modal .container-modal {
+    transform: scale(0.2);
+    transition: transform 0.5s ease;
+}
+
+.modal.show .container-modal {
+    transform: scale(1);
+}
 /* Conteúdo principal (inicialmente acessível, overlay bloqueia visual) */
 #mainContent { display: block; }
 
@@ -212,7 +236,7 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
 <div class="header-main">KF ENGENHARIA - CAMPO</div>
 <div class="desenvolvido">Desenvolvido por Fillipe Leal</div>
 <div class="dashboard-grid">
-    <div class="card-acao" onclick="abrirModal('modalCadastro')">
+<div class="card-acao" onclick="abrirModalComAnimacao('.card-acao', '#modalCadastro')">
         <div style="font-size:40px">📝</div>
         <h3>Registrar Início</h3>
     </div>
@@ -237,7 +261,7 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
 <!-- MODAL CADASTRO -->
 <div id="modalCadastro" class="modal">
     <div class="container-modal">
-        <span class="btn-fechar" onclick="fecharModal('modalCadastro')">&times;</span>
+       <span class="btn-fechar" onclick="fecharModalComAnimacao('#modalCadastro', '.card-acao')">&times;</span>
         <h2 style="color:var(--primary)">Nova Atividade</h2>
 
         <label>Equipe</label>
@@ -641,34 +665,49 @@ function normalizar(texto) {
 function abrirModalComAnimacao(cardId, modalId) {
     const card = document.querySelector(cardId);
     const modal = document.querySelector(modalId);
+    const container = modal.querySelector(".container-modal");
 
-    // posição do card
     const rect = card.getBoundingClientRect();
-    const startX = rect.left + rect.width / 2;
-    const startY = rect.top + rect.height / 2;
-
-    // posição final do modal (centralizado)
-    const centerX = window.innerWidth / 2;
-    const centerY = window.innerHeight / 2;
-
-    // calcular deslocamento inicial
-    const offsetX = startX - centerX;
-    const offsetY = startY - centerY;
+    const startX = rect.left + rect.width/2 - window.innerWidth/2;
+    const startY = rect.top + rect.height/2 - window.innerHeight/2;
 
     modal.style.display = "flex";
     modal.style.opacity = 0;
-    modal.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(0.2)`;
+    container.style.transform = `translate(${startX}px, ${startY}px) scale(0.2)`;
 
-    // forçar reflow
+    // força reflow
     modal.getBoundingClientRect();
 
-    // ativar animação
-    modal.classList.add("animar-modal");
+    // adicionar classe de show
+    modal.classList.add("show");
+
+    // anima container para centro
     setTimeout(() => {
-        modal.style.transform = "translate(0px, 0px) scale(1)";
-        modal.style.opacity = 1;
+        container.style.transform = "translate(0px, 0px) scale(1)";
     }, 10);
 }
+
+function fecharModalComAnimacao(modalId, cardId) {
+    const modal = document.querySelector(modalId);
+    const container = modal.querySelector(".container-modal");
+    const card = document.querySelector(cardId);
+
+    const rect = card.getBoundingClientRect();
+    const endX = rect.left + rect.width/2 - window.innerWidth/2;
+    const endY = rect.top + rect.height/2 - window.innerHeight/2;
+
+    // anima container de volta pro card
+    container.style.transform = `translate(${endX}px, ${endY}px) scale(0.2)`;
+
+    // anima fade do fundo
+    modal.style.opacity = 0;
+
+    setTimeout(() => {
+        modal.style.display = "none";
+        modal.classList.remove("show");
+    }, 500); // mesmo tempo do transition
+}
+
 
 
 
@@ -677,23 +716,6 @@ function abrirModalComAnimacao(cardId, modalId) {
 document.querySelector(".card-acao").addEventListener("click", () => {
     abrirModalComAnimacao(".card-acao", "#modalCadastro");
 });
-
-function fecharModalComAnimacao(modalId, cardId) {
-    const modal = document.querySelector(modalId);
-    const card = document.querySelector(cardId);
-
-    const rect = card.getBoundingClientRect();
-    const endX = rect.left + rect.width / 2 - window.innerWidth / 2;
-    const endY = rect.top + rect.height / 2 - window.innerHeight / 2;
-
-    modal.style.transform = `translate(${endX}px, ${endY}px) scale(0.2)`;
-    modal.style.opacity = 0;
-
-    setTimeout(() => {
-        modal.style.display = "none";
-        modal.classList.remove("animar-modal");
-    }, 500); // mesmo tempo do transition
-}
 
 
 
