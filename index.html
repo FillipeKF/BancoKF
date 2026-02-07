@@ -761,45 +761,42 @@ function editarItem(id) {
     document.getElementById('editItemSetor').value = item.setor;
 
     abrirModal('modalEditarItem');
-}async function confirmarEdicaoItem() {
-    if (!itemAtualEditar) return;
+}
+async function confirmarEdicaoItem() {
+  if (!itemAtualEditar) return;
 
-    const novoNome = document.getElementById('editItemNome').value.trim();
-    const novaQuantidade = parseInt(document.getElementById('editItemQuantidade').value);
-    const novoSetor = document.getElementById('editItemSetor').value;
+  const novoNome = document.getElementById('editItemNome').value.trim();
+  const novaQuantidade = parseInt(document.getElementById('editItemQuantidade').value);
+  const novoSetor = document.getElementById('editItemSetor').value;
 
-    if (!novoNome || !novaQuantidade || !novoSetor) {
-        alert("Preencha todos os campos!");
-        return;
-    }
+  if (!novoNome || !novaQuantidade || !novoSetor) {
+      alert("Preencha todos os campos!");
+      return;
+  }
 
-    try {
-        // Atualiza no Supabase
-        const { error } = await supabase
-            .from('itens') // nome da tabela
-            .update({
-                nome: novoNome,
-                quantidade: novaQuantidade,
-                setor: novoSetor
-            })
-            .eq('id', itemAtualEditar.id); // assume que cada item tem um id único
+  try {
+    const res = await fetch(`${API_BASE}/itens/${itemAtualEditar.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        nome: novoNome,
+        quantidade: novaQuantidade,
+        setor: novoSetor
+      })
+    });
 
-        if (error) throw error;
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || "Erro desconhecido");
 
-        // Atualiza localmente também
-        itemAtualEditar.nome = novoNome;
-        itemAtualEditar.quantidade = novaQuantidade;
-        itemAtualEditar.setor = novoSetor;
+    mostrarToast("Item editado!");
+    atualizarListaItens();
+    fecharModal('modalEditarItem');
+    itemAtualEditar = null;
 
-        mostrarToast("Item editado!");
-        atualizarListaItens();
-        fecharModal('modalEditarItem');
-        itemAtualEditar = null;
-
-    } catch (err) {
-        console.error(err);
-        alert("Erro ao editar item!");
-    }
+  } catch (err) {
+    console.error("Erro ao editar item:", err);
+    alert("Erro ao editar item! Veja o console.");
+  }
 }
 
 
