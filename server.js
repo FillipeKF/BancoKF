@@ -16,33 +16,6 @@ const app = express();
 // =======================
 const PORT = process.env.PORT || 3000;
 
-
-app.put("/itens/:id", async (req, res) => {
-  try {
-    const id = req.params.id;
-    const { nome, quantidade, setor } = req.body;
-
-    const r = await pool.query(
-      `UPDATE itens
-       SET nome = $1, quantidade = $2, setor = $3
-       WHERE id = $4
-       RETURNING *`,
-      [nome, quantidade, setor, id]
-    );
-
-    if (r.rows.length === 0) {
-      return res.status(404).json({ ok: false, error: "Item não encontrado" });
-    }
-
-    res.json({ ok: true, item: r.rows[0] });
-
-  } catch (err) {
-    console.error("PUT ITEM ERRO:", err);
-    res.status(500).json({ ok: false, error: "Erro ao atualizar item", detalhe: String(err) });
-  }
-});
-
-
 // =======================
 // CORS
 // =======================
