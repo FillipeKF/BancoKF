@@ -476,9 +476,19 @@ let itemAtualExcluir = null;
 const API_BASE = "https://bancokf.onrender.com";
 // MODAIS
 // ======================= MODAIS =======================
+
+
+
 function abrirModal(id){ document.getElementById(id).style.display='block'; }
 function fecharModal(id){ document.getElementById(id).style.display='none'; }
 
+function normalizar(texto) {
+    return texto
+        ?.normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim()
+        .toLowerCase();
+}
 
 
 function agoraISO(){
@@ -554,7 +564,9 @@ function atualizarListaItens() {
         const tr = document.createElement('tr');
 
         // Adiciona a cor do setor como borda esquerda
-        tr.style.borderLeft = `5px solid ${corSetor[item.setor] || '#fff'}`;
+       const setorKey = item.setor?.trim().toLowerCase();
+
+tr.style.borderLeft = `5px solid ${corSetor[setorKey] || '#0d6efd'}`;
         tr.style.background = "#252a33"; // mantém fundo escuro padrão
         tr.style.color = "#fff";
 
@@ -783,14 +795,19 @@ function atualizarEquipeCampo(){
         a.equipe.forEach(nome => funcionariosUnicos.add(nome));
 
         // COR POR SERVIÇO
-        let classeServico = "", iconeServico = "";
-        switch(a.servico){
-            case "Pintura": classeServico="card-pintura"; iconeServico="🎨"; break;
-            case "Elétrica": classeServico="card-eletrica"; iconeServico="💡"; break;
-            case "Hidráulica": classeServico="card-hidraulica"; iconeServico="🚰"; break;
-            case "Civil": classeServico="card-civil"; iconeServico="🔨"; break;
-        }
+       const serv = normalizar(a.servico);
 
+const mapa = {
+    pintura: { classe: "card-pintura", icone: "🎨" },
+    eletrica: { classe: "card-eletrica", icone: "💡" },
+    hidraulica: { classe: "card-hidraulica", icone: "🚰" },
+    civil: { classe: "card-civil", icone: "🔨" }
+};
+
+const cfg = mapa[serv] || { classe: "", icone: "🛠️" };
+
+let classeServico = cfg.classe;
+let iconeServico = cfg.icone;
         // Cria card da atividade
         const card = document.createElement('div');
         card.className = `card-lista ${classeServico}`;
@@ -927,9 +944,21 @@ function atualizarHistorico() {
         return;
     }
 
-    filtradas.forEach(a => {
-        const card = document.createElement('div');
-        card.className = "card-lista card-concluido";
+   filtradas.forEach(a => {
+
+    const serv = normalizar(a.servico);
+
+    const mapa = {
+        pintura: "card-pintura",
+        eletrica: "card-eletrica",
+        hidraulica: "card-hidraulica",
+        civil: "card-civil"
+    };
+
+    const classeServico = mapa[serv] || "";
+
+    const card = document.createElement('div');
+    card.className = `card-lista card-concluido ${classeServico}`;
 
         // Adiciona fotos
         let fotosHTML = '';
