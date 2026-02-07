@@ -1,3 +1,6 @@
+
+
+
 process.env.NODE_OPTIONS = "--dns-result-order=ipv4first";
 
 const express = require("express");
@@ -73,6 +76,23 @@ async function initDB() {
     );
   `);
 
+
+ await pool.query(`
+  CREATE TABLE IF NOT EXISTS usuarios(
+    id SERIAL PRIMARY KEY,
+    usuario TEXT UNIQUE NOT NULL,
+    senha TEXT NOT NULL,
+    ativo BOOLEAN DEFAULT TRUE
+  );
+`);
+
+// Usuário inicial de teste (admin / 1234)
+await pool.query(`
+  INSERT INTO usuarios(usuario, senha, ativo)
+  VALUES('admin', '1234', true)
+  ON CONFLICT(usuario) DO NOTHING;
+`);
+
 await pool.query(`
   CREATE TABLE IF NOT EXISTS itens(
     id SERIAL PRIMARY KEY,
@@ -90,6 +110,28 @@ initDB();
 // =======================
 // ROTAS
 // =======================
+
+app.post("/login", async (req, res) => {
+  try {
+    const { usuario, senha } = req.body;
+    if (!usuario || !senha) return res.status(400).json({ ok:false, error:"Usuário e senha obrigatórios" });
+
+    const r = await pool.query(
+      "SELECT * FROM usuarios WHERE usuario=$1 AND senha=$2 AND ativo=true",
+      [usuario, senha]
+    );
+
+    if (r.rows.length === 0) {
+      return res.status(401).json({ ok:false, error:"Usuário ou senha inválidos" });
+    }
+
+    res.json({ ok:true, usuario: r.rows[0].usuario });
+  } catch(err) {
+    console.error("LOGIN ERRO:", err);
+    res.status(500).json({ ok:false, error:"Erro no servidor" });
+  }
+});
+
 
 // Listar atividades ativas
 app.get("/atividades/ativas", async (_, res) => {
