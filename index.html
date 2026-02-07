@@ -684,60 +684,65 @@ function carregarAtividades() {
 
 }
 function iniciarAtividade() {
-    const ci = document.getElementById('fCI').value;
+
+    const ci = document.getElementById('fCI').value.trim();
     const servico = document.getElementById('fAtividade').value;
     const local = document.getElementById('fSubLocal').value;
 
-    if (!selecionados.length || !ci || !servico || !local) { 
-        alert("Preencha tudo!"); 
-        return; 
+    if (!selecionados.length || !ci || !servico || !local) {
+        alert("Preencha todos os campos!");
+        return;
     }
 
-    const atividade = { 
-        ci, 
-        servico, 
-        local, 
-        equipe: selecionados, 
-        inicio: agoraISO(),
-        relato: "",
-        fotos: [],
-        fim: ""
+    const atividade = {
+        ci,
+        servico,
+        local,
+        equipe: selecionados.join(","), // backend espera string
+        inicio: agoraISO()
     };
 
-   app.post("/atividades/inicio", async (req, res) => {
-  try {
+    fetch(`${API_BASE}/atividades/inicio`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(atividade)
+    })
+    .then(async res => {
 
-    const { ci, servico, local, equipe, inicio } = req.body;
+        if (!res.ok) {
+            const t = await res.text();
+            throw new Error(t);
+        }
 
-    const equipeStr = Array.isArray(equipe)
-      ? equipe.join(",")
-      : equipe;
+        return res.json();
+    })
+    .then(data => {
 
-    const r = await pool.query(`
-      INSERT INTO atividades_ativas(ci,servico,local,equipe,inicio)
-      VALUES($1,$2,$3,$4,$5)
-      RETURNING id
-    `, [
-      ci,
-      servico,
-      local,
-      equipeStr,
-      inicio
-    ]);
+        if (!data.id) throw new Error("Backend não retornou ID");
 
-    res.json({ ok: true, id: r.rows[0].id });
+        atividade.id = data.id;
+        atividade.relato = "";
+        atividade.fotos = [];
+        atividade.fim = "";
 
-  } catch (err) {
+        atividadesAtivas.push({
+            ...atividade,
+            equipe: selecionados // volta array no frontend
+        });
 
-    console.error("INICIO ERRO:", err);
+        limparForm();
+        atualizarEquipeCampo();
+        mostrarToast("Atividade iniciada!");
 
-    res.status(500).json({
-      error: "Erro ao registrar atividade"
+    })
+    .catch(err => {
+        console.error("INICIAR ERRO:", err);
+        alert("Falha ao iniciar atividade (veja console)");
     });
 
-  }
-});
-
+}
 function dataAgoraBR(){
     return new Date().toLocaleString("pt-BR", {
         day: "2-digit",
