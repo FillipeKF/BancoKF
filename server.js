@@ -89,7 +89,7 @@ async function initDB() {
 // Usuário inicial de teste (admin / 1234)
 await pool.query(`
   INSERT INTO usuarios(usuario, senha, ativo)
-  VALUES('admin', '1234', true)
+  VALUES('Fabio', 'KF123', true)
   ON CONFLICT(usuario) DO NOTHING;
 `);
 
@@ -110,6 +110,8 @@ initDB();
 // =======================
 // ROTAS
 // =======================
+
+
 
 app.post("/login", async (req, res) => {
   try {
