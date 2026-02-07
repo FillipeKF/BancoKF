@@ -73,6 +73,15 @@ async function initDB() {
     );
   `);
 
+await pool.query(`
+  CREATE TABLE IF NOT EXISTS itens(
+    id SERIAL PRIMARY KEY,
+    nome TEXT,
+    quantidade INTEGER,
+    setor TEXT
+  );
+`);
+
   console.log("Postgres conectado e tabelas ok");
 }
 
@@ -209,7 +218,57 @@ app.post("/atividades/finalizar", upload.array("fotos"), async (req, res) => {
   }
 
 });
+app.get("/itens", async (_, res) => {
+  try {
+    const r = await pool.query("SELECT * FROM itens ORDER BY id DESC");
+    res.json(r.rows);
+  } catch (err) {
+    console.error("GET ITENS:", err);
+    res.status(500).json({ error: "Erro ao buscar itens" });
+  }
+});app.post("/itens", async (req, res) => {
+  try {
 
+    const { nome, quantidade, setor } = req.body;
+
+    await pool.query(`
+      INSERT INTO itens(nome, quantidade, setor)
+      VALUES($1,$2,$3)
+    `,[nome, quantidade, setor]);
+
+    res.json({ ok:true });
+
+  } catch(err) {
+
+    console.error("POST ITEM:", err);
+
+    res.status(500).json({
+      error:"Erro ao salvar item",
+      detalhe:String(err)
+    });
+
+  }
+});app.delete("/itens/:id", async (req,res)=>{
+  try {
+
+    await pool.query(
+      "DELETE FROM itens WHERE id=$1",
+      [req.params.id]
+    );
+
+    res.json({ok:true});
+
+  } catch(err){
+
+    console.error("DELETE ITEM:", err);
+
+    res.status(500).json({
+      error:"Erro ao excluir",
+      detalhe:String(err)
+    });
+
+  }
+});
 // =======================
 // INICIAR SERVIDOR
 // =======================
