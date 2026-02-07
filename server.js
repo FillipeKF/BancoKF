@@ -111,26 +111,38 @@ app.get("/atividades", async (_, res) => {
 
 // Iniciar atividade
 app.post("/atividades/inicio", async (req, res) => {
-  const { ci, servico, local, equipe, inicio } = req.body;
 
   try {
+
+    const { ci, servico, local, equipe, inicio } = req.body;
+
     const r = await pool.query(`
       INSERT INTO atividades_ativas(ci,servico,local,equipe,inicio)
-      VALUES($1,$2,$3,$4,$5) RETURNING id
-    `, [ci, servico, local, equipe.join(","), inicio]);
+      VALUES($1,$2,$3,$4,$5)
+      RETURNING id
+    `, [ci, servico, local, equipe, inicio]);
 
     res.json({ ok: true, id: r.rows[0].id });
+
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Erro ao registrar atividade." });
+
+    console.error("INICIO ERRO REAL:", err);
+
+    res.status(500).json({
+      error: "Erro ao registrar atividade",
+      detalhe: String(err)
+    });
+
   }
+
 });
 
 app.post("/atividades/finalizar", upload.array("fotos"), async (req, res) => {
 
   try {
 
-    const idAtiva = Number(req.body.idAtiva);
+const idAtiva = Number(req.body.idAtiva);
+if (!idAtiva) throw "ID ATIVA NÃO RECEBIDO";
 const { ci, servico, local, equipe, inicio, relato, fim } = req.body;
 
     let fotosURLs = [];
