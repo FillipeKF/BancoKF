@@ -869,19 +869,22 @@ function salvarEdicaoAtividade() {
 }
 
 // MODAL EQUIPE
-function abrirEquipe(){
-    abrirModal('modalEquipe');
-    atualizarEquipeCampo();
+function abrirEquipe() {
+    abrirModal('modalEquipe'); // abre o modal
+    atualizarEquipeCampo();    // atualiza a lista de atividades em andamento
 
-    // Fecha o dropdown
+    // Garante que o dropdown de selecionar equipe esteja fechado
     const fOptions = document.getElementById('fOptions');
-    fOptions.classList.add('hidden');
+    fOptions.classList.add('hidden'); // fecha a lista
 
-    // Remove a classe active de todos os itens
+    // Remove qualquer destaque nos itens (classe active)
     document.querySelectorAll('#fOptions .func-item').forEach(el => el.classList.remove('active'));
 
-    // Reseta o display do botão
-    document.getElementById('fDisplay').textContent = selecionados.length ? selecionados.join(", ") : "Selecionar Equipe";
+    // Reseta o texto do botão para padrão
+    document.getElementById('fDisplay').textContent = "Selecionar Equipe";
+
+    // Limpa o array de selecionados, caso esteja cheio
+    selecionados = [];
 }
 
 function atualizarEquipeCampo(){
