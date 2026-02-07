@@ -117,6 +117,18 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
 }
 
 
+.modal.animar-modal {
+    display: flex; /* modal precisa ser visível */
+    opacity: 0;
+    transform: translate(0px, 0px) scale(0.2);
+    transition: transform 0.5s ease, opacity 0.5s ease;
+}
+.modal.animar-modal.show {
+    opacity: 1;
+    transform: translate(0px, 0px) scale(1);
+}
+
+
 /* ------------------- CAMADA DE LOGIN ------------------- */
 #loginOverlay {
   position: fixed;
@@ -624,6 +636,65 @@ function normalizar(texto) {
         .trim()
         .toLowerCase();
 }
+
+
+function abrirModalComAnimacao(cardId, modalId) {
+    const card = document.querySelector(cardId);
+    const modal = document.querySelector(modalId);
+
+    // posição do card
+    const rect = card.getBoundingClientRect();
+    const startX = rect.left + rect.width / 2;
+    const startY = rect.top + rect.height / 2;
+
+    // posição final do modal (centralizado)
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 2;
+
+    // calcular deslocamento inicial
+    const offsetX = startX - centerX;
+    const offsetY = startY - centerY;
+
+    modal.style.display = "flex";
+    modal.style.opacity = 0;
+    modal.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(0.2)`;
+
+    // forçar reflow
+    modal.getBoundingClientRect();
+
+    // ativar animação
+    modal.classList.add("animar-modal");
+    setTimeout(() => {
+        modal.style.transform = "translate(0px, 0px) scale(1)";
+        modal.style.opacity = 1;
+    }, 10);
+}
+
+
+
+
+// exemplo de uso
+document.querySelector(".card-acao").addEventListener("click", () => {
+    abrirModalComAnimacao(".card-acao", "#modalCadastro");
+});
+
+function fecharModalComAnimacao(modalId, cardId) {
+    const modal = document.querySelector(modalId);
+    const card = document.querySelector(cardId);
+
+    const rect = card.getBoundingClientRect();
+    const endX = rect.left + rect.width / 2 - window.innerWidth / 2;
+    const endY = rect.top + rect.height / 2 - window.innerHeight / 2;
+
+    modal.style.transform = `translate(${endX}px, ${endY}px) scale(0.2)`;
+    modal.style.opacity = 0;
+
+    setTimeout(() => {
+        modal.style.display = "none";
+        modal.classList.remove("animar-modal");
+    }, 500); // mesmo tempo do transition
+}
+
 
 
 function agoraISO(){
