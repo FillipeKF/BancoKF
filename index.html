@@ -14,6 +14,14 @@
     --danger: #ef4444;
     --border: #333;
 }
+
+/* Remover efeito azul ao tocar no mobile */
+* {
+    -webkit-tap-highlight-color: transparent; /* Safari e Chrome mobile */
+    -webkit-touch-callout: none; /* desabilita menu ao segurar */
+}
+
+
 body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin:0; padding:20px; color:#fff; }
 .header-main { background: linear-gradient(90deg,#0b2b6f,#0f4cb8); text-align:center; padding:20px; font-size:24px; font-weight:bold; border-radius:12px; margin-bottom:30px; border-bottom: 4px solid var(--primary); }
 
@@ -117,7 +125,15 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
 }
 
 
-
+.modal *:focus {
+    outline: none;  /* remove contorno azul ao focar */
+    box-shadow: none; /* remove sombra de foco */
+}
+@media (hover:none) {
+    .card-acao:hover {
+        transform: none; /* remove hover no touch */
+    }
+}
 
 /* ------------------- CAMADA DE LOGIN ------------------- */
 #loginOverlay {
@@ -784,7 +800,6 @@ async function excluirItem(id) {
         console.error(err);
     }
 }
-
 function confirmarExclusaoItem() {
     if (!itemAtualExcluir) return;
 
@@ -1310,4 +1325,3 @@ carregarAtividades();
 </script>
 </body>
 </html>
-
