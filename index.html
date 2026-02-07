@@ -640,7 +640,7 @@ function abrirAlmoxarifado() {
     abrirModal('modalAlmoxarifado');
 carregarItens();
 }// Registrar novo item
-function registrarItem() {
+async function registrarItem() {
     const nome = document.getElementById('itemNome').value.trim();
     const quantidade = parseInt(document.getElementById('itemQuantidade').value);
     const setor = document.getElementById('itemSetor').value;
@@ -650,34 +650,54 @@ function registrarItem() {
         return;
     }
 
-fetch(`${API_BASE}/itens`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ nome, quantidade, setor })
-})
-    .then(() => {
+    try {
+        const res = await fetch(`${API_BASE}/itens`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ nome, quantidade, setor })
+        });
+
+        const contentType = res.headers.get("content-type") || "";
+        if (!contentType.includes("application/json")) {
+            const text = await res.text();
+            console.error("Resposta inesperada do backend:", text);
+            throw "Resposta do servidor não é JSON. Verifique a URL/API_BASE.";
+        }
+
+        await res.json();
+
+        // Limpa inputs
         document.getElementById('itemNome').value = "";
         document.getElementById('itemQuantidade').value = "";
         document.getElementById('itemSetor').value = "";
 
         mostrarToast("Item salvo no banco!");
-        carregarItens();   // recarrega direto do SQLite
-    });
-}function carregarItens() {
-    fetch(`${API_BASE}/itens`)
-    .then(res => res.json())
-        .then(data => {
-            itensRegistrados = data;
-            atualizarListaItens();
-        });
+        carregarItens();
+
+    } catch (err) {
+        alert("Falha ao salvar item: " + err);
+        console.error(err);
+    }
 }
+// 2️⃣ Carregar itens do backend
+async function carregarItens() {
+    try {
+        const res = await fetch(`${API_BASE}/itens`);
+        const data = await res.json();
+        itensRegistrados = data;
+        atualizarListaItens();
+    } catch (err) {
+        console.error("Erro ao carregar itens:", err);
+    }
+}
+// 3️⃣ Atualizar lista HTML
 function atualizarListaItens() {
     const tbody = document.getElementById('listaItens');
     tbody.innerHTML = "";
 
     const filtroSetor = document.getElementById('filtroSetorItens').value;
-
     let itensFiltrados = itensRegistrados;
+
     if(filtroSetor) {
         itensFiltrados = itensRegistrados.filter(item => normalizar(item.setor) === normalizar(filtroSetor));
     }
@@ -689,22 +709,19 @@ function atualizarListaItens() {
         return;
     }
 
-    // Mapa de cores por setor (todas em lowercase e sem acento)
     const corSetor = {
-        pintura: "#ef4444",     // vermelho
-        eletrica: "#facc15",    // amarelo
-        hidraulica: "#0d6efd",  // azul
-        civil: "#a855f7"        // roxo
+        pintura: "#ef4444",
+        eletrica: "#facc15",
+        hidraulica: "#0d6efd",
+        civil: "#a855f7"
     };
 
     itensFiltrados.forEach(item => {
         const tr = document.createElement('tr');
-
-        // Normaliza o setor para pegar a cor correta
         const setorKey = normalizar(item.setor);
 
         tr.style.borderLeft = `5px solid ${corSetor[setorKey] || '#0d6efd'}`;
-        tr.style.background = "#252a33"; // fundo escuro padrão
+        tr.style.background = "#252a33";
         tr.style.color = "#fff";
 
         tr.innerHTML = `
@@ -716,9 +733,20 @@ function atualizarListaItens() {
                 <span style="cursor:pointer; color:#ef4444; font-weight:bold;" onclick="excluirItem(${item.id})">🗑️</span>
             </td>
         `;
-
         tbody.appendChild(tr);
     });
+}
+// 4️⃣ Editar Item
+function editarItem(id) {
+    const item = itensRegistrados.find(i => i.id === id);
+    if (!item) return;
+
+    itemAtualEditar = item;
+    document.getElementById('editItemNome').value = item.nome;
+    document.getElementById('editItemQuantidade').value = item.quantidade;
+    document.getElementById('editItemSetor').value = item.setor;
+
+    abrirModal('modalEditarItem');
 }
 
 // Função auxiliar para normalizar texto
@@ -730,13 +758,34 @@ function normalizar(texto) {
         .toLowerCase();
 }
 // Substitui confirm antigo
-function excluirItem(id) {
-    const item = itensRegistrados.find(i => i.id === id);
-    if (!item) return;
+// 6️⃣ Excluir Item
+async function excluirItem(id) {
+    if (!confirm("Deseja realmente excluir este item?")) return;
 
-    itemAtualExcluir = item;
-    abrirModal('modalExcluirItem');
-}function confirmarExclusaoItem() {
+    try {
+        const res = await fetch(`${API_BASE}/itens/${id}`, { method: "DELETE" });
+
+        const contentType = res.headers.get("content-type") || "";
+        if (!contentType.includes("application/json")) {
+            const text = await res.text();
+            console.error("Resposta inesperada do backend:", text);
+            throw "Resposta do servidor não é JSON. Verifique a URL/API_BASE.";
+        }
+
+        const data = await res.json();
+        if (!data.ok) throw data.error || "Erro ao excluir item";
+
+        itensRegistrados = itensRegistrados.filter(i => i.id !== id);
+        atualizarListaItens();
+        mostrarToast("Item excluído!");
+
+    } catch (err) {
+        alert("Falha ao excluir item: " + err);
+        console.error(err);
+    }
+}
+
+function confirmarExclusaoItem() {
     if (!itemAtualExcluir) return;
 
     fetch(`${API_BASE}/itens/${itemAtualExcluir.id}`, { method: "DELETE" })
@@ -749,19 +798,9 @@ function excluirItem(id) {
     .catch(err => console.error(err));
 }
 
-// Substitui prompt antigo
-function editarItem(id) {
-    const item = itensRegistrados.find(i => i.id === id);
-    if (!item) return;
 
-    itemAtualEditar = item;
-
-    document.getElementById('editItemNome').value = item.nome;
-    document.getElementById('editItemQuantidade').value = item.quantidade;
-    document.getElementById('editItemSetor').value = item.setor;
-
-    abrirModal('modalEditarItem');
-}async function confirmarEdicaoItem() {
+// 5️⃣ Confirmar edição (versão final)
+async function confirmarEdicaoItem() {
     if (!itemAtualEditar) return;
 
     const novoNome = document.getElementById('editItemNome').value.trim();
@@ -774,22 +813,23 @@ function editarItem(id) {
     }
 
     try {
-        // Aqui usamos 'await' e guardamos a resposta
         const res = await fetch(`${API_BASE}/itens/${itemAtualEditar.id}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                nome: novoNome,
-                quantidade: novaQuantidade,
-                setor: novoSetor
-            })
+            body: JSON.stringify({ nome: novoNome, quantidade: novaQuantidade, setor: novoSetor })
         });
 
-        const data = await res.json();
+        const contentType = res.headers.get("content-type") || "";
+        if (!contentType.includes("application/json")) {
+            const text = await res.text();
+            console.error("Resposta inesperada do backend:", text);
+            throw "Resposta do servidor não é JSON. Verifique a URL/API_BASE.";
+        }
 
+        const data = await res.json();
         if (!data.ok) throw data.error || "Erro ao atualizar item";
 
-        // Atualiza localmente e no HTML
+        // Atualiza local e HTML
         itemAtualEditar.nome = novoNome;
         itemAtualEditar.quantidade = novaQuantidade;
         itemAtualEditar.setor = novoSetor;
@@ -804,6 +844,7 @@ function editarItem(id) {
         console.error(err);
     }
 }
+
 
 
 
