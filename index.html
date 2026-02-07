@@ -25,6 +25,16 @@ body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin:0; pad
     margin: 0 auto;
     padding: 20px;
 }
+
+/* Dropdown de Selecionar Equipe começa fechado */
+#fOptions {
+    display: none; /* começa fechado */
+    position: absolute;
+    background: #1b1e24;
+    border: 1px solid #444;
+    padding: 5px;
+    z-index: 10;
+}
 .card-acao { background: var(--card); padding: 20px; border-radius: 16px; text-align: center; cursor: pointer; transition: 0.3s; border: 1px solid var(--border); position: relative; font-size:14px; }
 .card-acao:hover { border-color: var(--primary); transform: translateY(-3px); }
 .badge-funcionarios { position:absolute; top:10px; left:10px; background:var(--success); color:white; font-weight:bold; padding:5px 10px; border-radius:12px; font-size:12px; display:none; }
@@ -669,16 +679,17 @@ function toggleFuncs(e){
     e.stopPropagation(); 
     const fOptions = document.getElementById('fOptions');
     if(fOptions.style.display === 'block'){
-        fOptions.style.display = 'none';
+        fOptions.style.display = 'none'; // fecha
     } else {
-        fOptions.style.display = 'block';
+        fOptions.style.display = 'block'; // abre
     }
 }
 
 // Fecha o dropdown se clicar fora
-document.addEventListener('click', function(){
+// Fecha o dropdown se clicar fora
+document.addEventListener('click', () => {
     const fOptions = document.getElementById('fOptions');
-    if(fOptions) fOptions.classList.add('hidden');
+    fOptions.style.display = 'none';
 });
 
 function selectFunc(el,nome,e){
@@ -879,8 +890,7 @@ function abrirEquipe() {
 
     // FORÇA o dropdown fechado
     const fOptions = document.getElementById('fOptions');
-    fOptions.style.display = 'none'; // garante que está fechado
-    fOptions.classList.remove('hidden'); // remove a classe hidden caso CSS antigo cause conflito
+    fOptions.style.display = 'none';
 
     // Remove destaque de itens
     document.querySelectorAll('#fOptions .func-item').forEach(el => el.classList.remove('active'));
