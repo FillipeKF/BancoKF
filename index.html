@@ -776,13 +776,15 @@ async function restaurarCIs() {
 
         for (const path in zip.files) {
 
-            if (path.endsWith("dados.txt")) {
+            if (path.endsWith(".txt")) {
 
-                const pasta = path.split("/")[0]; // CI_100_05_02_2026
+                const pasta = path.replace(".txt", "");
+
                 const text = await zip.file(path).async("string");
                 const ci = JSON.parse(text);
 
-                ci.__pasta = pasta; // guarda nome da pasta
+                ci.__pasta = pasta;
+
                 cis.push(ci);
             }
         }
@@ -861,16 +863,14 @@ if (Array.isArray(ci.fotos)) {
 }
 
 if (fotos.length > 0) {
-  const fotosDiv = document.createElement("div");
+const fotosDiv = document.createElement("div");
 fotosDiv.style.display = "flex";
 fotosDiv.style.flexWrap = "wrap";
 fotosDiv.style.gap = "10px";
 
-const pasta = ci.__pasta;
-
 Object.keys(zip.files).forEach(async filePath => {
 
-    if (filePath.startsWith(`${pasta}/fotos/`)) {
+    if (filePath.startsWith(ci.__pasta + "/fotos/")) {
 
         const blob = await zip.file(filePath).async("blob");
 
