@@ -2,6 +2,9 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
+
+
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KF Engenharia - Gestor de Campo</title>
 <style>
@@ -329,11 +332,12 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
 📥 Backup do mês
 </button>
 
-<button class="btn-acao" style="background:#16a34a" onclick="document.getElementById('restoreZip').click()">
+<button class="btn-acao" style="background:#16a34a"
+onclick="document.getElementById('restoreZip').click()">
 📤 Restaurar CI
 </button>
 
-<input type="file" id="restoreZip" accept=".zip" hidden onchange="restaurarCI()">
+<input type="file" id="restoreZip" hidden accept=".zip" onchange="restaurarCI()">
 
 </div>
 
@@ -465,7 +469,19 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
 
 
 
+<div id="modalRestore" class="modal">
+<div class="container-modal" style="max-width:1200px">
 
+<span class="btn-fechar" onclick="fecharRestore()">&times;</span>
+
+<h2 style="color:#16a34a">Backup Restaurado</h2>
+
+<div id="restoreResultado"
+style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px">
+</div>
+
+</div>
+</div>
 
 <!-- MODAL IMAGEM -->
 <div id="modalImagem" class="img-modal">
@@ -475,24 +491,8 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
         <button class="btn-fechar-img" onclick="fecharModal('modalImagem')">✖ Fechar</button>
     </div>
 </div>
-
-
-
-<!-- MODAL backup -->
-<div id="modalRestore" class="modal">
-<div class="container-modal" style="max-width:1100px">
-
-<span class="btn-fechar" onclick="fecharRestore()">&times;</span>
-
-<h2 style="color:#16a34a">CIs Restauradas (somente consulta)</h2>
-
-<div id="restoreResultado"
-style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px">
-</div>
-
-</div>
-</div>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 <script>
 let selecionados = [];
 let atividadesAtivas = [];
@@ -992,6 +992,52 @@ function previewImages(input){
     });
 }
 
+
+async function restaurarCI() {
+
+    const input = document.getElementById("restoreZip");
+    const file = input.files[0];
+
+    if (!file) return;
+
+    try {
+
+        const zip = await JSZip.loadAsync(file);
+
+        let restauradas = 0;
+
+        for (const nomeArquivo in zip.files) {
+
+            // só TXT das CIs
+            if (!nomeArquivo.endsWith(".txt")) continue;
+
+            const texto = await zip.files[nomeArquivo].async("string");
+            const ci = JSON.parse(texto);
+
+            // recria CI no backend
+            await fetch(`${API_BASE}/atividades/restaurar`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(ci)
+            });
+
+            restauradas++;
+        }
+
+        alert(`✅ ${restauradas} CIs restauradas com sucesso!`);
+
+        input.value = "";
+        atualizarHistorico();
+
+    } catch (err) {
+
+        console.error(err);
+        alert("Erro ao restaurar ZIP!");
+
+    }
+}
+
+
 // TOAST
 function mostrarToast(msg){ const t=document.getElementById('toastSucesso'); document.getElementById('toastTexto').textContent=msg; t.style.display='block'; t.classList.add('animar-entrada'); setTimeout(()=>t.style.display='none',2000); }
 
@@ -1008,64 +1054,6 @@ function baixarImagem(){
     link.download = imagemAtual || 'imagem.jpg';
     link.click();
 }
-
-async function restaurarCI() {
-
-    const file = document.getElementById("restoreZip").files[0];
-    if (!file) return;
-
-    const zip = await JSZip.loadAsync(file);
-    const resultado = document.getElementById("restoreResultado");
-
-    resultado.innerHTML = "";
-
-    for (const nome in zip.files) {
-
-        if (!nome.endsWith(".txt")) continue;
-
-        const txt = await zip.files[nome].async("string");
-        const ci = JSON.parse(txt);
-
-        const card = document.createElement("div");
-        card.className = "card-lista";
-
-        card.innerHTML = `
-            <b>CI:</b> ${ci.id}<br>
-            <b>Equipe:</b> ${ci.equipe}<br>
-            <b>Serviço:</b> ${ci.servico}<br>
-            <b>Início:</b> ${ci.inicio}<br>
-        `;
-
-        const pasta = `${ci.id}-${ci.inicio}/fotos`;
-
-        for (const f in zip.files) {
-
-            if (!f.startsWith(pasta)) continue;
-
-            const blob = await zip.files[f].async("blob");
-            const url = URL.createObjectURL(blob);
-
-            const img = document.createElement("img");
-            img.src = url;
-            img.style.width = "90px";
-            img.style.borderRadius = "8px";
-            img.style.marginTop = "5px";
-
-            card.appendChild(img);
-        }
-
-        resultado.appendChild(card);
-    }
-
-    document.getElementById("modalRestore").style.display = "block";
-}
-
-function fecharRestore() {
-    document.getElementById("modalRestore").style.display = "none";
-    document.getElementById("restoreResultado").innerHTML = "";
-    document.getElementById("restoreZip").value = "";
-}
-
 carregarAtividades();
 </script>
 </body>
