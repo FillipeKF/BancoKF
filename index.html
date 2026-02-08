@@ -722,6 +722,7 @@ async function backupCIsDoMes() {
         if (!res.ok) throw "Erro ao buscar CIs";
 
         const data = await res.json();
+
         if (!Array.isArray(data) || data.length === 0) {
             alert("Não há CIs nesse período");
             return;
@@ -736,17 +737,21 @@ async function backupCIsDoMes() {
             let fotos = [];
             try {
                 fotos = Array.isArray(ci.fotos) ? ci.fotos : JSON.parse(ci.fotos || "[]");
-            } catch { fotos = []; }
+            } catch {
+                fotos = [];
+            }
 
             if (fotos.length > 0) {
                 for (let i = 0; i < fotos.length; i++) {
-                    let foto = String(fotos[i]).replace("[","").replace("]","").replace(/"/g,"").trim();
+                    let foto = String(fotos[i]).replace("[", "").replace("]", "").replace(/"/g, "").trim();
                     if (!foto.startsWith("http")) continue;
 
                     try {
                         const fotoBlob = await fetch(foto).then(r => r.blob());
-                        pastaCI.file(`foto${i+1}.jpg`, fotoBlob);
-                    } catch (e) { console.warn("Erro ao baixar:", foto); continue; }
+                        pastaCI.file(`foto${i + 1}.jpg`, fotoBlob);
+                    } catch {
+                        continue;
+                    }
                 }
             }
         }
@@ -754,56 +759,40 @@ async function backupCIsDoMes() {
         const content = await zip.generateAsync({ type: "blob" });
         saveAs(content, `backup_CI_${month}-${year}.zip`);
 
-        // ===============================
-        // Modal de confirmação para apagar
-        // ===============================
-        const modalConfirm = document.getElementById("modalConfirmarBackup");
-        modalConfirm.style.display = "flex";
+        // =======================
+        // MODAL DE CONFIRMAÇÃO
+        // =======================
+        showConfirmModal(
+            "Backup concluído! Deseja apagar essas CIs do servidor?",
+            async () => {
+                // SIM
+                const ids = data.map(c => c.id);
+                await fetch(`${API_BASE}/atividades/apagar`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ ids })
+                });
 
-        const btnSim = document.getElementById("btnSimBackup");
-        const btnNao = document.getElementById("btnNaoBackup");
+                // Remove CIs apagadas do modal
+              ids.forEach(id => {
+    const bloco = document.querySelector(`#listaCIs [data-ci-id='${id}']`);
+    if (bloco) bloco.remove();
+});
 
-        btnNao.onclick = () => { modalConfirm.style.display = "none"; };
-
-        btnSim.onclick = async () => {
-    modalConfirm.style.display = "none";
-    const ids = data.map(c => c.id);
-
-    try {
-        await fetch(`${API_BASE}/atividades/apagar`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ ids })
-        });
-
-        // Remove as CIs apagadas do modal
-        const listaCIs = document.getElementById("listaCIs");
-        if (listaCIs) {
-            data.forEach(ci => {
-                const bloco = listaCIs.querySelector(`div[data-ci-id='${ci.id}']`);
-                if (bloco) listaCIs.removeChild(bloco);
-            });
-        }
-
-        // Notificação verde
-        const notif = document.getElementById("notificacaoBackup");
-        notif.style.display = "block";
-
-        atualizarHistorico();
-
-        setTimeout(() => { notif.style.display = "none"; }, 3000);
-
-    } catch (err) {
-        console.error("Erro ao apagar CIs:", err);
-        alert("Falha ao apagar CIs do servidor!");
-    }
-};
+                showNotification("CIs apagadas do servidor!", "success");
+            },
+            () => {
+                // NÃO
+                console.log("CIs mantidas");
+            }
+        );
 
     } catch (err) {
         console.error(err);
         alert("Erro no backup: " + err);
     }
 }
+
 
 // ------------------- RESTORE CIs -------------------
 async function restaurarCIs() {
@@ -841,13 +830,16 @@ function abrirModalRestore(cis, zip) {
     listaCIs.innerHTML = "";
 
     cis.forEach(ci => {
-       const bloco = document.createElement("div");
-bloco.dataset.ciId = ci.id; // ✅ adiciona atributo para identificação
-bloco.style.background = "#252a33";
-bloco.style.borderRadius = "10px";
-bloco.style.padding = "12px";
-bloco.style.marginBottom = "15px";
-bloco.style.cursor = "pointer";
+        const bloco = document.createElement("div");
+
+        // ✅ aqui adicionamos o id da CI para identificar depois
+        bloco.dataset.ciId = ci.id;
+
+        bloco.style.background = "#252a33";
+        bloco.style.borderRadius = "10px";
+        bloco.style.padding = "12px";
+        bloco.style.marginBottom = "15px";
+        bloco.style.cursor = "pointer";
 
         const h = document.createElement("h3");
         h.style.color = "var(--success)";
@@ -876,7 +868,7 @@ bloco.style.cursor = "pointer";
     });
 
     const modal = document.getElementById("modalRestore");
-    if (modal) modal.style.display = "flex";
+    if(modal) modal.style.display = "flex";
 }
 
 // ------------------- MODAL FOTOS -------------------
