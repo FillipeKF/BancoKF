@@ -745,7 +745,7 @@ for (let i = 0; i < fotos.length; i++) {
 
     try {
         const fotoBlob = await fetch(foto).then(r => r.blob());
-        folder.file(`foto${i + 1}.jpg`, fotoBlob); // ❌ AQUI ESTÁ O ERRO
+        folderFotos.file(`foto${i + 1}.jpg`, fotoBlob); // ✅ corrigido
     } catch (e) {
         console.warn("Erro ao baixar:", foto);
         continue;
