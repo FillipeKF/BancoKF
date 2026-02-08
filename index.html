@@ -646,7 +646,7 @@ let imagemAtual = "";
 let itensRegistrados = [];
 let itemAtualEditar = null;
 let itemAtualExcluir = null;
-
+let backupDataAtual = []; // mantém os dados do backup corrente
 
 
 // URL base da API
@@ -708,6 +708,7 @@ function fecharModal(id){ document.getElementById(id).style.display='none'; }
 
 // ------------------- BACKUP CIs -------------------
 // ------------------- BACKUP CIs -------------------
+// ------------------- FUNÇÃO DE BACKUP -------------------
 async function backupCIsDoMes() {
     try {
         const month = document.getElementById('filtroMesHistorico').value;
@@ -726,6 +727,8 @@ async function backupCIsDoMes() {
             alert("Não há CIs nesse período");
             return;
         }
+
+        backupDataAtual = data; // salva globalmente para o botão SIM
 
         const zip = new JSZip();
 
@@ -754,63 +757,53 @@ async function backupCIsDoMes() {
         const content = await zip.generateAsync({ type: "blob" });
         saveAs(content, `backup_CI_${month}-${year}.zip`);
 
-        // ===============================
-        // Modal de confirmação para apagar
-        // ===============================
+        // abre modal de confirmação
         const modalConfirm = document.getElementById("modalConfirmarBackup");
         modalConfirm.style.display = "flex";
-
-        const btnSim = document.getElementById("btnSimBackup");
-        const btnNao = document.getElementById("btnNaoBackup");
-
-        btnNao.onclick = () => { modalConfirm.style.display = "none"; };
-
-btnSim.onclick = async () => {
-    // ✅ Fecha imediatamente o modal de restore
-    const modalRestore = document.getElementById("modalRestore");
-    if (modalRestore) modalRestore.style.display = "none";
-
-    // Fecha o modal de confirmação
-    modalConfirm.style.display = "none";
-
-    const ids = data.map(c => c.id);
-
-    try {
-        await fetch(`${API_BASE}/atividades/apagar`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ ids })
-        });
-
-        // Remove os blocos das CIs apagadas do modal (opcional, pois o modal já fechou)
-        const listaCIs = document.getElementById("listaCIs");
-        if (listaCIs) {
-            ids.forEach(id => {
-                const bloco = listaCIs.querySelector(`div[data-ci-id='${id}']`);
-                if (bloco) bloco.remove();
-            });
-        }
-
-        // Notificação verde
-        const notif = document.getElementById("notificacaoBackup");
-        if (notif) {
-            notif.style.display = "block";
-            setTimeout(() => { notif.style.display = "none"; }, 3000);
-        }
-
-        atualizarHistorico();
-
-    } catch (err) {
-        console.error("Erro ao apagar CIs:", err);
-        alert("Falha ao apagar CIs do servidor!");
-    }
-};
 
     } catch (err) {
         console.error(err);
         alert("Erro no backup: " + err);
     }
 }
+
+// ------------------- EVENTOS DOS BOTÕES SIM / NÃO -------------------
+document.addEventListener("DOMContentLoaded", () => {
+    const btnSim = document.getElementById("btnSimBackup");
+    const btnNao = document.getElementById("btnNaoBackup");
+    const modalConfirm = document.getElementById("modalConfirmarBackup");
+
+    btnNao.onclick = () => {
+        modalConfirm.style.display = "none";
+    };
+
+    btnSim.onclick = async () => {
+        modalConfirm.style.display = "none"; // fecha modal de confirmação
+
+        // 🔹 Fecha modal de CIs registradas
+        const modalRestore = document.getElementById("modalRestore");
+        if (modalRestore) modalRestore.style.display = "none";
+
+        // 🔹 Notificação verde
+        const notif = document.getElementById("notificacaoBackup");
+        notif.style.display = "block";
+        setTimeout(() => { notif.style.display = "none"; }, 3000);
+
+        // 🔹 Opcional: apagar do servidor
+        try {
+            const ids = backupDataAtual.map(c => c.id);
+            await fetch(`${API_BASE}/atividades/apagar`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ ids })
+            });
+        } catch (err) {
+            console.error("Erro ao apagar CIs:", err);
+        }
+
+        backupDataAtual = []; // limpa dados do backup corrente
+    };
+});
 
 // ------------------- RESTORE CIs -------------------
 async function restaurarCIs() {
