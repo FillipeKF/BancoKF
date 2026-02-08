@@ -621,17 +621,17 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
     </div>
 </div>
 
-<!-- MODAL DE CONFIRMAÇÃO -->
-<div id="modalConfirm" class="modal">
-  <div class="container-modal">
-    <span class="btn-fechar" onclick="fecharModal('modalConfirm')">&times;</span>
-    <h2 id="confirmTitulo"></h2>
-    <div style="margin-top:15px; text-align:center;">
-      <button id="confirmSim" style="background:#16a34a; color:white; padding:8px 16px; border:none; border-radius:6px; margin-right:10px; cursor:pointer;">Sim</button>
-      <button id="confirmNao" style="background:#dc2626; color:white; padding:8px 16px; border:none; border-radius:6px; cursor:pointer;">Não</button>
+<!-- Modal de confirmação de apagar CIs -->
+<div id="modalConfirmarBackup" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); justify-content:center; align-items:center; z-index:9999;">
+    <div style="background:#1b1e24; border-radius:15px; padding:20px; max-width:400px; width:90%; text-align:center; color:white;">
+        <h3 style="margin-bottom:15px;">Backup concluído!<br>Deseja apagar essas CIs do servidor?</h3>
+        <div style="display:flex; justify-content:center; gap:15px;">
+            <button id="btnSimBackup" style="padding:8px 16px; background:#16a34a; color:white; border:none; border-radius:6px; cursor:pointer;">Sim</button>
+            <button id="btnNaoBackup" style="padding:8px 16px; background:#dc2626; color:white; border:none; border-radius:6px; cursor:pointer;">Não</button>
+        </div>
     </div>
-  </div>
 </div>
+
 <!-- Notificação verde -->
 <div id="notificacaoBackup" style="display:none; position:fixed; top:20px; left:50%; transform:translateX(-50%); background:#16a34a; color:white; padding:10px 20px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.5); z-index:9999;">
     CIs apagadas do servidor!
@@ -765,7 +765,7 @@ async function backupCIsDoMes() {
         showConfirmModal(
             "Backup concluído! Deseja apagar essas CIs do servidor?",
             async () => {
-                // SIM: apaga CIs do servidor
+                // SIM
                 const ids = data.map(c => c.id);
                 await fetch(`${API_BASE}/atividades/apagar`, {
                     method: "POST",
@@ -773,17 +773,16 @@ async function backupCIsDoMes() {
                     body: JSON.stringify({ ids })
                 });
 
-                // Remove CIs abertas no modal
+                // Remove CIs apagadas do modal
                 ids.forEach(id => {
                     const bloco = document.querySelector(`#listaCIs [data-ci-id='${id}']`);
                     if (bloco) bloco.remove();
                 });
 
-                // Notificação verde de sucesso
                 showNotification("CIs apagadas do servidor!", "success");
             },
             () => {
-                // NÃO: não faz nada
+                // NÃO
                 console.log("CIs mantidas");
             }
         );
@@ -792,37 +791,6 @@ async function backupCIsDoMes() {
         console.error(err);
         alert("Erro no backup: " + err);
     }
-}
-function showConfirmModal(titulo, onSim, onNao) {
-    const modal = document.getElementById("modalConfirm");
-    const tituloElem = document.getElementById("confirmTitulo");
-    const btnSim = document.getElementById("confirmSim");
-    const btnNao = document.getElementById("confirmNao");
-
-    if (!modal || !tituloElem || !btnSim || !btnNao) {
-        console.error("Elementos do modalConfirm não encontrados");
-        return;
-    }
-
-    tituloElem.textContent = titulo;
-
-    // Remove listeners antigos
-    btnSim.onclick = null;
-    btnNao.onclick = null;
-
-    // Define novos callbacks
-    btnSim.onclick = () => {
-        if (onSim) onSim();
-        modal.style.display = "none";
-    };
-
-    btnNao.onclick = () => {
-        if (onNao) onNao();
-        modal.style.display = "none";
-    };
-
-    // Exibe o modal
-    modal.style.display = "flex";
 }
 
 
@@ -862,16 +830,13 @@ function abrirModalRestore(cis, zip) {
     listaCIs.innerHTML = "";
 
     cis.forEach(ci => {
-        const bloco = document.createElement("div");
-
-        // ✅ aqui adicionamos o id da CI para identificar depois
-        bloco.dataset.ciId = ci.id;
-
-        bloco.style.background = "#252a33";
-        bloco.style.borderRadius = "10px";
-        bloco.style.padding = "12px";
-        bloco.style.marginBottom = "15px";
-        bloco.style.cursor = "pointer";
+       const bloco = document.createElement("div");
+bloco.dataset.ciId = ci.id; // ✅ adiciona atributo para identificação
+bloco.style.background = "#252a33";
+bloco.style.borderRadius = "10px";
+bloco.style.padding = "12px";
+bloco.style.marginBottom = "15px";
+bloco.style.cursor = "pointer";
 
         const h = document.createElement("h3");
         h.style.color = "var(--success)";
@@ -900,7 +865,7 @@ function abrirModalRestore(cis, zip) {
     });
 
     const modal = document.getElementById("modalRestore");
-    if(modal) modal.style.display = "flex";
+    if (modal) modal.style.display = "flex";
 }
 
 // ------------------- MODAL FOTOS -------------------
