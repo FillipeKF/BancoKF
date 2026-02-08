@@ -765,8 +765,8 @@ async function backupCIsDoMes() {
 
         btnNao.onclick = () => { modalConfirm.style.display = "none"; };
 
-        btnSim.onclick = async () => {
-    modalConfirm.style.display = "none";
+       btnSim.onclick = async () => {
+    modalConfirm.style.display = "none"; // fecha modal de confirmação
     const ids = data.map(c => c.id);
 
     try {
@@ -785,6 +785,10 @@ async function backupCIsDoMes() {
             });
         }
 
+        // FECHA MODAL DE RESTORE AUTOMATICAMENTE
+        const modalRestore = document.getElementById("modalRestore");
+        if (modalRestore) modalRestore.style.display = "none";
+
         // Notificação verde
         const notif = document.getElementById("notificacaoBackup");
         notif.style.display = "block";
@@ -797,6 +801,7 @@ async function backupCIsDoMes() {
         console.error("Erro ao apagar CIs:", err);
         alert("Falha ao apagar CIs do servidor!");
     }
+
 };
 
     } catch (err) {
