@@ -728,8 +728,6 @@ async function backupCIsDoMes() {
             return;
         }
 
-        backupDataAtual = data; // salva dados atuais
-
         const zip = new JSZip();
 
         for (const ci of data) {
@@ -756,7 +754,9 @@ async function backupCIsDoMes() {
         const content = await zip.generateAsync({ type: "blob" });
         saveAs(content, `backup_CI_${month}-${year}.zip`);
 
-        // abre modal de confirmação
+        // ===============================
+        // Abrir modal de confirmação
+        // ===============================
         const modalConfirm = document.getElementById("modalConfirmarBackup");
         modalConfirm.style.display = "flex";
 
@@ -776,7 +776,7 @@ document.addEventListener("DOMContentLoaded", () => {
         modalConfirm.style.display = "none";
     };
 
-    btnSim.onclick = async () => {
+    btnSim.onclick = () => {
         // Fecha modal de confirmação
         modalConfirm.style.display = "none";
 
@@ -784,25 +784,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const modalRestore = document.getElementById("modalRestore");
         if (modalRestore) modalRestore.style.display = "none";
 
-        // Notificação verde
+        // Mostra notificação verde
         const notif = document.getElementById("notificacaoBackup");
         notif.style.display = "block";
         setTimeout(() => { notif.style.display = "none"; }, 3000);
-
-        // Opcional: apagar do servidor
-        try {
-            const ids = backupDataAtual.map(c => c.id);
-            await fetch(`${API_BASE}/atividades/apagar`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ ids })
-            });
-        } catch (err) {
-            console.error("Erro ao apagar CIs:", err);
-        }
-
-        // Limpa dados atuais
-        backupDataAtual = [];
     };
 });
 
