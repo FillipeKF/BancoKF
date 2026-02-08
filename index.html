@@ -665,10 +665,10 @@ async function backupCIsDoMes() {
         return;
     }
 
-    window.location.href = `${API_BASE}/backup/mes?mes=${mes}&ano=${ano}`;
+   window.location.href = `${API_BASE}/atividades/backup?mes=${mes}&ano=${ano}`;
 }
 
-function restaurarCIs() {
+async function restaurarCIs() {
 
     const input = document.createElement("input");
     input.type = "file";
@@ -676,19 +676,29 @@ function restaurarCIs() {
 
     input.onchange = async () => {
 
-        const files = input.files;
+        const files = [...input.files];
 
         if (!files.length) return;
 
-        const form = new FormData();
+        const cis = [];
 
         for (const file of files) {
-            form.append("files", file);
+
+            if (!file.name.endsWith(".txt")) continue;
+
+            const text = await file.text();
+            cis.push(JSON.parse(text));
         }
 
-        const res = await fetch(`${API_BASE}/restore/pasta`, {
+        if (!cis.length) {
+            alert("Nenhuma CI encontrada");
+            return;
+        }
+
+        const res = await fetch(`${API_BASE}/atividades/restaurar`, {
             method: "POST",
-            body: form
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ cis })
         });
 
         if (res.ok) {
