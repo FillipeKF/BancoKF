@@ -889,7 +889,7 @@ function abrirModalFotos(ci, zip) {
     fotosDiv.style.display = "flex";
     fotosDiv.style.flexWrap = "wrap";
     fotosDiv.style.gap = "10px";
-    fotosDiv.style.justifyContent = "center"; // centraliza fotos no mobile
+    fotosDiv.style.justifyContent = "center";
 
     Object.keys(zip.files).forEach(async filePath => {
         if (filePath.startsWith(ci.__pasta + "/fotos/")) {
@@ -901,10 +901,11 @@ function abrirModalFotos(ci, zip) {
 
             const img = document.createElement("img");
             img.src = URL.createObjectURL(blob);
-            img.style.width = "100%";       // responsivo
-            img.style.maxWidth = "90px";    // não ultrapassa 90px
-            img.style.height = "auto";      // mantém proporção
-            img.style.objectFit = "cover";
+
+            // 🚨 Alteração importante: tamanho responsivo
+            img.style.width = "80px";       // largura fixa menor
+            img.style.height = "80px";      // altura fixa menor
+            img.style.objectFit = "cover";  // mantém proporção dentro do box
             img.style.borderRadius = "8px";
 
             fotosDiv.appendChild(img);
@@ -915,6 +916,7 @@ function abrirModalFotos(ci, zip) {
 
     document.getElementById("modalFotos").style.display = "flex";
 }
+
 
 function fecharModal(id) {
     document.getElementById(id).style.display = "none";
