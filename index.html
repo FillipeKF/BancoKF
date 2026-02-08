@@ -835,7 +835,8 @@ function abrirModalRestore(cis, zip) {
 
 async function abrirModalFotos(ci, zip) {
     const listaFotos = document.getElementById("listaFotos");
-    if(!listaFotos) return console.error("Elemento listaFotos não encontrado");
+    if (!listaFotos) return console.error("Elemento listaFotos não encontrado");
+
     listaFotos.innerHTML = "";
 
     const fotosDiv = document.createElement("div");
@@ -844,26 +845,33 @@ async function abrirModalFotos(ci, zip) {
     fotosDiv.style.alignItems = "center";
     fotosDiv.style.gap = "10px";
 
+    // ✅ usar for..of para esperar o async
     for (const filePath of Object.keys(zip.files)) {
-        if(filePath.startsWith(ci.__pasta + "/") && filePath.endsWith(".jpg")) {
+        // pegar apenas JPGs da pasta do CI
+        if (filePath.startsWith(ci.__pasta + "/") && filePath.endsWith(".jpg")) {
             const file = zip.file(filePath);
-            if(!file) continue;
+            if (!file) continue;
 
-            const blob = await file.async("blob");
-            const img = document.createElement("img");
-            img.src = URL.createObjectURL(blob);
-            img.style.width = "200px";
-            img.style.height = "auto";
-            img.style.objectFit = "cover";
-            img.style.borderRadius = "8px";
+            try {
+                const blob = await file.async("blob");
+                const img = document.createElement("img");
+                img.src = URL.createObjectURL(blob);
+                img.style.width = "200px"; // largura fixa para modal
+                img.style.height = "auto"; // mantém proporção
+                img.style.objectFit = "cover";
+                img.style.borderRadius = "8px";
 
-            fotosDiv.appendChild(img);
+                fotosDiv.appendChild(img);
+            } catch (err) {
+                console.error("Erro ao ler a foto do zip:", filePath, err);
+            }
         }
     }
 
     listaFotos.appendChild(fotosDiv);
+
     const modal = document.getElementById("modalFotos");
-    if(modal) modal.style.display = "flex";
+    if (modal) modal.style.display = "flex";
 }
 
 function fecharModal(id) {
