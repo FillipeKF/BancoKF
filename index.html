@@ -1476,12 +1476,28 @@ function atualizarHistorico() {
         card.className = `card-lista card-concluido ${classeServico}`;
 
         // Adiciona fotos
-        let fotosHTML = '';
-        if (a.fotos.length) {
-            fotosHTML = `<div class="img-container">` + 
-                a.fotos.map((f,i) => `<img src="${f}" class="img-preview" onclick="abrirImagemModal('${f}','CI-${a.ci}-foto${i+1}.jpg')">`).join('') + 
-                `</div>`;
-        }
+       // NORMALIZA FOTOS (array ou string)
+// ===============================
+let fotos = [];
+
+try {
+    fotos = Array.isArray(a.fotos) ? a.fotos : JSON.parse(a.fotos || "[]");
+} catch {
+    fotos = [];
+}
+
+// Render fotos
+let fotosHTML = '';
+
+if (fotos.length > 0) {
+    fotosHTML =
+        `<div class="img-container">` +
+        fotos.map((f,i) =>
+            `<img src="${f}" class="img-preview"
+             onclick="abrirImagemModal('${f}','CI-${a.ci}-foto${i+1}.jpg')">`
+        ).join("") +
+        `</div>`;
+}
 
         card.innerHTML = `
             <strong>CI ${a.ci}</strong><br>
