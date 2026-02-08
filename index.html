@@ -1,11 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-
 <meta charset="UTF-8">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KF Engenharia - Gestor de Campo</title>
 <style>
@@ -18,60 +14,35 @@
     --danger: #ef4444;
     --border: #333;
 }
-
-/* Remover efeito azul ao tocar no mobile */
-* {
-    -webkit-tap-highlight-color: transparent; /* Safari e Chrome mobile */
-    -webkit-touch-callout: none; /* desabilita menu ao segurar */
-}
-
-
 body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin:0; padding:20px; color:#fff; }
 .header-main { background: linear-gradient(90deg,#0b2b6f,#0f4cb8); text-align:center; padding:20px; font-size:24px; font-weight:bold; border-radius:12px; margin-bottom:30px; border-bottom: 4px solid var(--primary); }
-
 .dashboard-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 20px;
+    display: flex;              /* Flex para centralizar melhor */
+    flex-wrap: wrap;            /* Permite que os cards quebrem linha se necessário */
+    justify-content: center;    /* Centraliza horizontalmente */
+    align-items: center;        /* Centraliza verticalmente */
+    gap: 20px;                  /* Espaçamento entre cards */
     max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
+    margin: 200px auto;          /* centraliza horizontal e adiciona distância do topo */
 }
-
-/* Dropdown de Selecionar Equipe começa fechado */
-#fOptions {
-    display: none; /* começa fechado */
-    position: absolute;
-    background: #1b1e24;
-    border: 1px solid #444;
-    padding: 5px;
-    z-index: 10;
-}
-
-
-.card-acao { background: var(--card); padding: 20px; border-radius: 16px; text-align: center; cursor: pointer; transition: 0.3s; border: 1px solid var(--border); position: relative; font-size:14px; }
+.card-acao { background: var(--card); padding: 30px; border-radius: 16px; text-align: center; cursor: pointer; transition: 0.3s; border: 1px solid var(--border); position: relative; font-size:14px; }
 .card-acao:hover { border-color: var(--primary); transform: translateY(-3px); }
 .badge-funcionarios { position:absolute; top:10px; left:10px; background:var(--success); color:white; font-weight:bold; padding:5px 10px; border-radius:12px; font-size:12px; display:none; }
-
 .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 1000; overflow-y: auto; padding: 20px; backdrop-filter: blur(5px); }
 .container-modal { max-width: 500px; background: var(--card); padding: 25px; border-radius: 18px; margin: 20px auto; position: relative; border: 1px solid #444; }
 .btn-fechar { position: absolute; top: 15px; right: 20px; font-size: 25px; color: #ef4444; cursor: pointer; }
-
 label { display:block; margin-top:15px; font-weight:bold; color: var(--text); font-size: 14px; }
 input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; margin-top:8px; border-radius:10px; background:#2a2e36; color:#fff; border:1px solid #444; box-sizing: border-box; }
-
 .multi-display { cursor: pointer; user-select: none; }
 .func-item { padding:12px; cursor:pointer; display:flex; align-items:center; gap:10px; user-select: none; }
 .func-item:hover { background: #333a45; }
 .func-item.active { background: #0d6efd33; color: #0d6efd; font-weight: bold; }
-
 .btn-acao { background: var(--primary); border:none; font-weight:bold; color: white; cursor:pointer; margin-top:20px; }
 .btn-finalizar { background: var(--success); }
-
 #previewFotos { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
 .img-preview { width: 80px; height: 80px; border-radius: 8px; object-fit: cover; border: 2px solid var(--primary); cursor:pointer; transition: transform 0.2s; }
 .img-preview:hover { transform: scale(1.1); }
-
+.hidden { display: none; }
 .toast-container { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--success); color: white; padding: 25px 40px; border-radius: 20px; z-index: 10001; text-align: center; border: 2px solid #22c55e; }
 @keyframes zoomIn { from { transform: translate(-50%, -50%) scale(0.7); opacity: 0; } to { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
 .animar-entrada { animation: zoomIn 0.3s ease-out forwards; }
@@ -83,130 +54,77 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
 .btn-download { background:#0d6efd; }
 .btn-fechar-img { background:#ef4444; }
 
-.card-lista { background: #252a33; padding: 15px; border-radius: 12px; margin-bottom: 12px; border-left: 5px solid var(--primary); position: relative; cursor:pointer; font-size:13px; display:flex; flex-direction:column; justify-content:center; min-width:200px; max-width:240px; }
-
+.card-lista { background: #252a33; padding: 15px; border-radius: 12px; margin-bottom: 12px; border-left: 4px solid var(--primary); position: relative; cursor:pointer; font-size:13px; }
 .card-concluido { border-left-color: var(--success); opacity: 0.9; }
 
-#listaAndamento, #listaHistorico { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; max-height: 600px; overflow-y: auto; padding: 10px; }
+/* CORES POR SERVIÇO */
+.card-pintura { border-left: 5px solid #ef4444; background:#331b1b; }   /* Vermelho */
+.card-eletrica { border-left: 5px solid #facc15; background:#332b1b; } /* Amarelo */
+.card-hidraulica { border-left: 5px solid #0d6efd; background:#1b2233; } /* Azul */
+.card-civil { border-left: 5px solid #a855f7; background:#2a1b33; }      /* Roxo */
+/* MODAL EQUPE MAIS LARGA */
+/* MODAL EQUIPE - tamanho normal */
+/* MODAL CIs REGISTRADAS com mesmo tamanho de Equipe em Campo */
+/* MODAL EQUIPE E CI REGISTRADA - MESMO TAMANHO */
+#modalEquipe .container-modal,
+#modalHistorico .container-modal {
+    max-width: 1200px;  /* largura grande, mesma para ambos */
+    width: 95%;          /* ocupa quase toda a tela */
+}
+/* GRID DE CARDS */
+#listaAndamento, #listaHistorico {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr); /* 5 colunas */
+    gap: 15px;
+    max-height: 600px;       /* altura do modal */
+    overflow-y: auto;        /* scroll vertical */
+    overflow-x: hidden;      /* sem scroll horizontal */
+    padding: 10px;
+}
 
+/* CARDS */
+.card-lista {
+    padding: 15px;
+    border-radius: 12px;
+    border-left: 5px solid var(--primary);
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 200px;  /* largura mínima maior */
+    max-width: 240px;  /* largura máxima maior */
+}
+
+#listaHistorico {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(180px, 1fr)); /* 5 colunas, cards largos */
+    gap: 10px;
+    max-height: 600px;  /* altura do modal */
+    overflow-y: auto;   /* scroll vertical */
+    overflow-x: hidden; /* sem scroll horizontal */
+    padding: 10px;
+}
+
+/* Cards de histórico */
+#listaHistorico .card-lista {
+    font-size: 13px;
+    padding: 15px;
+    min-width: auto;
+    height: auto;
+}
+
+/* Reaproveitando cores por serviço */
 .card-pintura { border-left: 5px solid #ef4444; background:#331b1b; }
 .card-eletrica { border-left: 5px solid #facc15; background:#332b1b; }
 .card-hidraulica { border-left: 5px solid #0d6efd; background:#1b2233; }
 .card-civil { border-left: 5px solid #a855f7; background:#2a1b33; }
 
-.desenvolvido { text-align: right; font-size: 14px; color: var(--text); margin-top: 5px; font-weight: normal; }
-
-/* MEDIA QUERIES */
-@media (max-width: 1024px) {
-    .dashboard-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); margin: 20px; }
-    .card-lista { min-width: 160px; max-width: 200px; }
-    .header-main { font-size: 22px; padding: 15px; }
-}
-
-@media (max-width: 768px) {
-    body { padding:10px; }
-    .dashboard-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin: 10px; }
-    .card-lista { min-width: 140px; max-width: 180px; font-size: 12px; padding: 10px; }
-    #listaAndamento, #listaHistorico { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
-    .header-main { font-size: 20px; padding: 12px; }
-    input, select, textarea, .btn-acao { padding: 10px; font-size: 13px; }
-    .img-preview { width: 60px; height: 60px; }
-}
-
-@media (max-width: 480px) {
-    .dashboard-grid { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin: 5px; }
-    .card-lista { min-width: 120px; max-width: 160px; font-size: 11px; padding: 8px; }
-    .header-main { font-size: 18px; padding: 10px; }
-    .img-preview { width: 50px; height: 50px; }
-}
-
-.desenvolvido {
-    text-align: right;
-    font-size: 14px;
-    color: var(--text);
-    margin-top: 5px;  /* Pequeno espaçamento em relação ao título */
-    font-weight: normal;
-}
-
-
-.modal *:focus {
-    outline: none;  /* remove contorno azul ao focar */
-    box-shadow: none; /* remove sombra de foco */
-}
-@media (hover:none) {
-    .card-acao:hover {
-        transform: none; /* remove hover no touch */
-    }
-}
-
-/* ------------------- CAMADA DE LOGIN ------------------- */
-#loginOverlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(15,17,21,0.95);
-  z-index: 9999;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.loginBox {
-  background: var(--card);
-  padding: 30px;
-  border-radius: 16px;
-  width: 300px;
-  text-align: center;
-  border: 1px solid var(--border);
-  box-shadow: 0 0 25px rgba(0,0,0,0.5);
-}
-
-.loginBox input {
-  margin-top: 10px;
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #444;
-  width: 100%;
-  background: #2a2e36;
-  color: #fff;
-}
-
-.loginBox button {
-  margin-top: 15px;
-  padding: 10px;
-  width: 100%;
-  background: var(--primary);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-#loginError {
-  color: var(--danger);
-  margin-top: 10px;
-  display: none;
-  font-size: 14px;
-}
-
-/* Conteúdo principal (inicialmente acessível, overlay bloqueia visual) */
-#mainContent { display: block; }
 
 
 </style>
 </head>
 <body>
-
-    <!-- ------------------- LOGIN OVERLAY ------------------- -->
-<div id="loginOverlay">
-  <div class="loginBox">
-    <h2>Login</h2>
-    <input type="text" id="username" placeholder="Usuário">
-    <input type="password" id="password" placeholder="Senha">
-    <button id="loginBtn">Entrar</button>
-    <p id="loginError"></p>
-  </div>
-</div>
 
 <div id="toastSucesso" class="toast-container">
     <span style="font-size:50px">✅</span>
@@ -220,11 +138,10 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
 </div>
 
 <div class="header-main">KF ENGENHARIA - CAMPO</div>
-<div class="desenvolvido">Desenvolvido por Fillipe Leal</div>
 <div class="dashboard-grid">
     <div class="card-acao" onclick="abrirModal('modalCadastro')">
         <div style="font-size:40px">📝</div>
-        <h3>Registrar Atividade</h3>
+        <h3>Registrar Início</h3>
     </div>
     
     <div class="card-acao" onclick="abrirEquipe()">
@@ -310,7 +227,6 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
         <div id="listaAndamento"></div>
     </div>
 </div>
-
 <!-- MODAL ALMOXARIFADO -->
 <div id="modalAlmoxarifado" class="modal">
     <div class="container-modal">
@@ -407,6 +323,19 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
     <div class="container-modal">
         <span class="btn-fechar" onclick="fecharModal('modalHistorico')">&times;</span>
         <h2 style="color:var(--success)">CIs Registradas</h2>
+<div style="display:flex;gap:10px;margin-bottom:15px">
+
+<button class="btn-acao" onclick="backupCIsDoMes()">
+📥 Backup do mês
+</button>
+
+<button class="btn-acao" style="background:#16a34a" onclick="document.getElementById('restoreZip').click()">
+📤 Restaurar CI
+</button>
+
+<input type="file" id="restoreZip" accept=".zip" hidden onchange="restaurarCI()">
+
+</div>
 
       <!-- FILTROS CIs REGISTRADAS -->
 <div id="filtrosHistorico" style="display:flex; gap:15px; margin-bottom:15px; align-items:center; flex-wrap:wrap;">
@@ -511,65 +440,29 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
         </select>
     </div>
 </div>
- <!-- BOTÕES DE BACKUP E RESTORE -->
-        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:15px;">
-            <button class="btn-acao" style="background:#0d6efd;" onclick="backupCIsDoMes()">💾 Backup CIs</button>
-            <button class="btn-acao" style="background:#16a34a;" onclick="restaurarCIs()">📂 Restaurar CIs</button>
-        </div>
+
 
         <div id="listaHistorico"></div>
     </div>
 </div>
-<!-- MODAL EDITAR ATIVIDADE -->
-<div id="modalEditarAtividade" class="modal">
-    <div class="container-modal">
-        <span class="btn-fechar" onclick="fecharModal('modalEditarAtividade')">&times;</span>
-        <h2 style="color:#f59e0b">Editar Atividade</h2>
-
-        <label>CI:</label>
-        <input type="text" id="editCi">
-
-        <label>Serviço:</label>
-        <input type="text" id="editServico">
-
-        <label>Local:</label>
-        <input type="text" id="editLocal">
-
-        <label>Equipe (separado por vírgula):</label>
-        <input type="text" id="editEquipe">
-
-        <button onclick="salvarEdicaoAtividade()" 
-                style="background:#0d6efd; color:white; border:none; padding:6px 12px; border-radius:6px; margin-top:10px; cursor:pointer;">
-            Salvar Edição
-        </button>
-    </div>
-</div>
-
-
-<!-- MODAL FINALIZAR -->
 <!-- MODAL FINALIZAR -->
 <div id="modalFinalizar" class="modal">
     <div class="container-modal">
         <span class="btn-fechar" onclick="fecharModal('modalFinalizar')">&times;</span>
         <h2 style="color:var(--success)">Concluir Trabalho</h2>
-
         <div id="detalhesServico" style="padding:10px; background:#16191f; border-radius:10px; margin-bottom:15px; font-size:13px;"></div>
-
-        <!-- BOTÃO EDITAR CI -->
-        <button id="btnEditarCi" 
-                style="background:#f59e0b; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; margin-bottom:10px;"
-                onclick="abrirModalEdicao()">✏️ Editar CI</button>
-
+        
         <label>Fotos da Conclusão</label>
         <input type="file" id="fFotos" multiple accept="image/*" onchange="previewImages(this)">
         <div id="previewFotos"></div>
-
+        
         <label>Descrição / Observações</label>
         <textarea id="fRelato" rows="3" placeholder="Relate o que foi feito..."></textarea>
 
         <button class="btn-acao btn-finalizar" onclick="finalizarAtividade()">Finalizar e Sincronizar</button>
     </div>
 </div>
+
 
 
 
@@ -585,6 +478,21 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
 
 
 
+<!-- MODAL backup -->
+<div id="modalRestore" class="modal">
+<div class="container-modal" style="max-width:1100px">
+
+<span class="btn-fechar" onclick="fecharRestore()">&times;</span>
+
+<h2 style="color:#16a34a">CIs Restauradas (somente consulta)</h2>
+
+<div id="restoreResultado"
+style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px">
+</div>
+
+</div>
+</div>
+
 <script>
 let selecionados = [];
 let atividadesAtivas = [];
@@ -594,260 +502,13 @@ let imagemAtual = "";
 let itensRegistrados = [];
 let itemAtualEditar = null;
 let itemAtualExcluir = null;
-
-
-
 // URL base da API
 const API_BASE = "https://bancokf.onrender.com";
 // MODAIS
 // ======================= MODAIS =======================
-
-
-
-const loginOverlay = document.getElementById("loginOverlay");
-const loginBtn = document.getElementById("loginBtn");
-const loginError = document.getElementById("loginError");
-
-
-
-
-
-loginBtn.addEventListener("click", async () => {
-  const usuario = document.getElementById("username").value;
-  const senha = document.getElementById("password").value;
-
-  if(!usuario || !senha){
-    loginError.style.display = "block";
-    loginError.innerText = "Preencha usuário e senha";
-    return;
-  }
-
-  try {
-    // Chama a rota do seu backend que valida no PostgreSQL/Supabase
-   // 🔹 URL do backend Render (onde seu app Node.js está hospedado)
-const BACKEND_URL = "https://bancokf.onrender.com"; // <- não é SUPABASE_URL
-
-const res = await fetch(`${BACKEND_URL}/login`, {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ usuario, senha })
-});
-
-    const data = await res.json();
-
-    if (data.ok) {
-      loginOverlay.style.display = "none"; // remove overlay
-    } else {
-      loginError.style.display = "block";
-      loginError.innerText = data.error || "Usuário ou senha incorretos";
-    }
-
-  } catch(err) {
-    console.error(err);
-    loginError.style.display = "block";
-    loginError.innerText = "Erro de conexão com o servidor";
-  }
-});
-
 function abrirModal(id){ document.getElementById(id).style.display='block'; }
 function fecharModal(id){ document.getElementById(id).style.display='none'; }
 
-
-
-// ------------------- BACKUP CIs -------------------
-// ------------------- BACKUP CIs -------------------
-async function backupCIsDoMes() {
-    try {
-        const month = document.getElementById('filtroMesHistorico').value;
-        const year = document.getElementById('filtroAnoHistorico').value;
-
-        if (!month || !year) {
-            alert("Selecione mês e ano para o backup");
-            return;
-        }
-
-        const res = await fetch(`${API_BASE}/atividades/backup?mes=${month}&ano=${year}`);
-        if (!res.ok) throw "Erro ao buscar CIs";
-
-        const data = await res.json();
-
-        if (!Array.isArray(data) || data.length === 0) {
-            alert("Não há CIs nesse período");
-            return;
-        }
-
-        const zip = new JSZip();
-
-        for (const ci of data) {
-
-            // TXT da CI
-            zip.file(`${ci.id}-${ci.inicio}.txt`, JSON.stringify(ci, null, 2));
-
-            // ===============================
-            // GARANTE ARRAY REAL DE FOTOS
-            // ===============================
-            let fotos = [];
-
-            try {
-                fotos = Array.isArray(ci.fotos) ? ci.fotos : JSON.parse(ci.fotos || "[]");
-            } catch {
-                fotos = [];
-            }
-
-            // ===============================
-            // BAIXA FOTOS COM BLINDAGEM
-            // ===============================
-            if (fotos.length > 0) {
-
-                const folder = zip.folder(`${ci.id}-${ci.inicio}/fotos`);
-
-                for (let i = 0; i < fotos.length; i++) {
-
-                    let foto = String(fotos[i])
-                        .replace("[", "")
-                        .replace("]", "")
-                        .replace(/"/g, "")
-                        .trim();
-
-                    if (!foto.startsWith("http")) {
-                        console.warn("Foto ignorada:", foto);
-                        continue;
-                    }
-
-                    try {
-                        const fotoBlob = await fetch(foto).then(r => r.blob());
-                        folder.file(`foto${i + 1}.jpg`, fotoBlob);
-                    } catch (e) {
-                        console.warn("Erro ao baixar:", foto);
-                        continue;
-                    }
-                }
-            }
-        }
-
-        // ===============================
-        // GERA ZIP
-        // ===============================
-        const content = await zip.generateAsync({ type: "blob" });
-        saveAs(content, `backup_CI_${month}-${year}.zip`);
-
-        // ===============================
-        // APAGA DO SERVIDOR
-        // ===============================
-        if (confirm("Backup concluído! Deseja apagar essas CIs do servidor?")) {
-
-            const ids = data.map(c => c.id);
-
-            await fetch(`${API_BASE}/atividades/apagar`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ ids })
-            });
-
-            alert("CIs apagadas do servidor!");
-            atualizarHistorico();
-        }
-
-    } catch (err) {
-        console.error(err);
-        alert("Erro no backup: " + err);
-    }
-}
-
-// ------------------- RESTORE CIs TEMPORÁRIO -------------------
-async function restaurarCIs() {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = ".zip";
-    input.onchange = async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        const zip = await JSZip.loadAsync(file);
-        const restoredData = [];
-
-        for (const filename of Object.keys(zip.files)) {
-            if (filename.endsWith(".txt")) {
-                const text = await zip.file(filename).async("string");
-                restoredData.push(JSON.parse(text));
-            }
-        }
-
-        abrirModalRestore(restoredData, zip);
-    };
-    input.click();
-}
-
-// ------------------- MODAL TEMPORÁRIO DE RESTORE -------------------
-function abrirModalRestore(cis, zip) {
-    const modal = document.createElement("div");
-    modal.className = "modal animar-entrada";
-    modal.style.display = "flex";
-    modal.style.flexDirection = "column";
-    modal.style.padding = "20px";
-    modal.style.maxHeight = "80vh";
-    modal.style.overflowY = "auto";
-    modal.style.background = "#1b1e24";
-    modal.style.zIndex = 2000;
-
-    const btnFechar = document.createElement("span");
-    btnFechar.innerHTML = "&times;";
-    btnFechar.style.alignSelf = "flex-end";
-    btnFechar.style.cursor = "pointer";
-    btnFechar.style.fontSize = "25px";
-    btnFechar.onclick = () => document.body.removeChild(modal);
-
-    modal.appendChild(btnFechar);
-
-    cis.forEach(ci => {
-        const div = document.createElement("div");
-        div.style.background = "#252a33";
-        div.style.margin = "10px 0";
-        div.style.padding = "10px";
-        div.style.borderRadius = "10px";
-
-        const h = document.createElement("h3");
-        h.textContent = `CI: ${ci.id} - ${ci.inicio}`;
-        div.appendChild(h);
-
-        const pre = document.createElement("pre");
-        pre.textContent = JSON.stringify(ci, null, 2);
-        pre.style.fontSize = "12px";
-        div.appendChild(pre);
-
-        if (ci.fotos && ci.fotos.length > 0) {
-            const fotosDiv = document.createElement("div");
-            fotosDiv.style.display = "flex";
-            fotosDiv.style.flexWrap = "wrap";
-            fotosDiv.style.gap = "10px";
-            ci.fotos.forEach(async (url, idx) => {
-                const blob = await zip.file(`${ci.id}-${ci.inicio}/fotos/foto${idx+1}.jpg`).async("blob");
-                const img = document.createElement("img");
-                img.src = URL.createObjectURL(blob);
-                img.style.width = "80px";
-                img.style.height = "80px";
-                img.style.objectFit = "cover";
-                img.style.borderRadius = "8px";
-                fotosDiv.appendChild(img);
-            });
-            div.appendChild(fotosDiv);
-        }
-
-        modal.appendChild(div);
-    });
-
-    document.body.appendChild(modal);
-}
-
-
-
-function normalizar(texto) {
-    return texto
-        ?.normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .trim()
-        .toLowerCase();
-}
 
 
 function agoraISO(){
@@ -862,7 +523,7 @@ function abrirAlmoxarifado() {
     abrirModal('modalAlmoxarifado');
 carregarItens();
 }// Registrar novo item
-async function registrarItem() {
+function registrarItem() {
     const nome = document.getElementById('itemNome').value.trim();
     const quantidade = parseInt(document.getElementById('itemQuantidade').value);
     const setor = document.getElementById('itemSetor').value;
@@ -872,56 +533,36 @@ async function registrarItem() {
         return;
     }
 
-    try {
-        const res = await fetch(`${API_BASE}/itens`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ nome, quantidade, setor })
-        });
-
-        const contentType = res.headers.get("content-type") || "";
-        if (!contentType.includes("application/json")) {
-            const text = await res.text();
-            console.error("Resposta inesperada do backend:", text);
-            throw "Resposta do servidor não é JSON. Verifique a URL/API_BASE.";
-        }
-
-        await res.json();
-
-        // Limpa inputs
+fetch(`${API_BASE}/itens`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ nome, quantidade, setor })
+})
+    .then(() => {
         document.getElementById('itemNome').value = "";
         document.getElementById('itemQuantidade').value = "";
         document.getElementById('itemSetor').value = "";
 
         mostrarToast("Item salvo no banco!");
-        carregarItens();
-
-    } catch (err) {
-        alert("Falha ao salvar item: " + err);
-        console.error(err);
-    }
+        carregarItens();   // recarrega direto do SQLite
+    });
+}function carregarItens() {
+    fetch(`${API_BASE}/itens`)
+    .then(res => res.json())
+        .then(data => {
+            itensRegistrados = data;
+            atualizarListaItens();
+        });
 }
-// 2️⃣ Carregar itens do backend
-async function carregarItens() {
-    try {
-        const res = await fetch(`${API_BASE}/itens`);
-        const data = await res.json();
-        itensRegistrados = data;
-        atualizarListaItens();
-    } catch (err) {
-        console.error("Erro ao carregar itens:", err);
-    }
-}
-// 3️⃣ Atualizar lista HTML
 function atualizarListaItens() {
     const tbody = document.getElementById('listaItens');
     tbody.innerHTML = "";
 
     const filtroSetor = document.getElementById('filtroSetorItens').value;
-    let itensFiltrados = itensRegistrados;
 
+    let itensFiltrados = itensRegistrados;
     if(filtroSetor) {
-        itensFiltrados = itensRegistrados.filter(item => normalizar(item.setor) === normalizar(filtroSetor));
+        itensFiltrados = itensRegistrados.filter(item => item.setor === filtroSetor);
     }
 
     if (itensFiltrados.length === 0) {
@@ -931,19 +572,20 @@ function atualizarListaItens() {
         return;
     }
 
+    // Mapa de cores por setor
     const corSetor = {
-        pintura: "#ef4444",
-        eletrica: "#facc15",
-        hidraulica: "#0d6efd",
-        civil: "#a855f7"
+        "Pintura": "#ef4444",     // vermelho
+        "Elétrica": "#facc15",    // amarelo
+        "Hidráulica": "#0d6efd",  // azul
+        "Civil": "#a855f7"        // roxo
     };
 
     itensFiltrados.forEach(item => {
         const tr = document.createElement('tr');
-        const setorKey = normalizar(item.setor);
 
-        tr.style.borderLeft = `5px solid ${corSetor[setorKey] || '#0d6efd'}`;
-        tr.style.background = "#252a33";
+        // Adiciona a cor do setor como borda esquerda
+        tr.style.borderLeft = `5px solid ${corSetor[item.setor] || '#fff'}`;
+        tr.style.background = "#252a33"; // mantém fundo escuro padrão
         tr.style.color = "#fff";
 
         tr.innerHTML = `
@@ -955,58 +597,17 @@ function atualizarListaItens() {
                 <span style="cursor:pointer; color:#ef4444; font-weight:bold;" onclick="excluirItem(${item.id})">🗑️</span>
             </td>
         `;
+
         tbody.appendChild(tr);
     });
-}
-// 4️⃣ Editar Item
-function editarItem(id) {
+}// Substitui confirm antigo
+function excluirItem(id) {
     const item = itensRegistrados.find(i => i.id === id);
     if (!item) return;
 
-    itemAtualEditar = item;
-    document.getElementById('editItemNome').value = item.nome;
-    document.getElementById('editItemQuantidade').value = item.quantidade;
-    document.getElementById('editItemSetor').value = item.setor;
-
-    abrirModal('modalEditarItem');
-}
-
-// Função auxiliar para normalizar texto
-function normalizar(texto) {
-    return texto
-        ?.normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .trim()
-        .toLowerCase();
-}
-// Substitui confirm antigo
-// 6️⃣ Excluir Item
-async function excluirItem(id) {
-    if (!confirm("Deseja realmente excluir este item?")) return;
-
-    try {
-        const res = await fetch(`${API_BASE}/itens/${id}`, { method: "DELETE" });
-
-        const contentType = res.headers.get("content-type") || "";
-        if (!contentType.includes("application/json")) {
-            const text = await res.text();
-            console.error("Resposta inesperada do backend:", text);
-            throw "Resposta do servidor não é JSON. Verifique a URL/API_BASE.";
-        }
-
-        const data = await res.json();
-        if (!data.ok) throw data.error || "Erro ao excluir item";
-
-        itensRegistrados = itensRegistrados.filter(i => i.id !== id);
-        atualizarListaItens();
-        mostrarToast("Item excluído!");
-
-    } catch (err) {
-        alert("Falha ao excluir item: " + err);
-        console.error(err);
-    }
-}
-function confirmarExclusaoItem() {
+    itemAtualExcluir = item;
+    abrirModal('modalExcluirItem');
+}function confirmarExclusaoItem() {
     if (!itemAtualExcluir) return;
 
     fetch(`${API_BASE}/itens/${itemAtualExcluir.id}`, { method: "DELETE" })
@@ -1019,9 +620,19 @@ function confirmarExclusaoItem() {
     .catch(err => console.error(err));
 }
 
+// Substitui prompt antigo
+function editarItem(id) {
+    const item = itensRegistrados.find(i => i.id === id);
+    if (!item) return;
 
-// 5️⃣ Confirmar edição (versão final)
-async function confirmarEdicaoItem() {
+    itemAtualEditar = item;
+
+    document.getElementById('editItemNome').value = item.nome;
+    document.getElementById('editItemQuantidade').value = item.quantidade;
+    document.getElementById('editItemSetor').value = item.setor;
+
+    abrirModal('modalEditarItem');
+}function confirmarEdicaoItem() {
     if (!itemAtualEditar) return;
 
     const novoNome = document.getElementById('editItemNome').value.trim();
@@ -1033,60 +644,21 @@ async function confirmarEdicaoItem() {
         return;
     }
 
-    try {
-        const res = await fetch(`${API_BASE}/itens/${itemAtualEditar.id}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ nome: novoNome, quantidade: novaQuantidade, setor: novoSetor })
-        });
+    itemAtualEditar.nome = novoNome;
+    itemAtualEditar.quantidade = novaQuantidade;
+    itemAtualEditar.setor = novoSetor;
 
-        const contentType = res.headers.get("content-type") || "";
-        if (!contentType.includes("application/json")) {
-            const text = await res.text();
-            console.error("Resposta inesperada do backend:", text);
-            throw "Resposta do servidor não é JSON. Verifique a URL/API_BASE.";
-        }
-
-        const data = await res.json();
-        if (!data.ok) throw data.error || "Erro ao atualizar item";
-
-        // Atualiza local e HTML
-        itemAtualEditar.nome = novoNome;
-        itemAtualEditar.quantidade = novaQuantidade;
-        itemAtualEditar.setor = novoSetor;
-
-        mostrarToast("Item editado!");
-        atualizarListaItens();
-        fecharModal('modalEditarItem');
-        itemAtualEditar = null;
-
-    } catch (err) {
-        alert("Falha ao editar item: " + err);
-        console.error(err);
-    }
+    mostrarToast("Item editado!");
+    atualizarListaItens();
+    fecharModal('modalEditarItem');
+    itemAtualEditar = null;
 }
 
 
 
 
 // ======================= EQUIPES =======================
-function toggleFuncs(e){
-    e.stopPropagation(); 
-    const fOptions = document.getElementById('fOptions');
-    if(fOptions.style.display === 'block'){
-        fOptions.style.display = 'none'; // fecha
-    } else {
-        fOptions.style.display = 'block'; // abre
-    }
-}
-
-// Fecha o dropdown se clicar fora
-// Fecha o dropdown se clicar fora
-document.addEventListener('click', () => {
-    const fOptions = document.getElementById('fOptions');
-    fOptions.style.display = 'none';
-});
-
+function toggleFuncs(e){ e.stopPropagation(); document.getElementById('fOptions').classList.toggle('hidden'); }
 function selectFunc(el,nome,e){
     e.stopPropagation();
     el.classList.toggle('active');
@@ -1142,65 +714,50 @@ function carregarAtividades() {
 
 }
 function iniciarAtividade() {
-
-    const ci = document.getElementById('fCI').value.trim();
+    const ci = document.getElementById('fCI').value;
     const servico = document.getElementById('fAtividade').value;
     const local = document.getElementById('fSubLocal').value;
 
-    if (!selecionados.length || !ci || !servico || !local) {
-        alert("Preencha todos os campos!");
-        return;
+    if (!selecionados.length || !ci || !servico || !local) { 
+        alert("Preencha tudo!"); 
+        return; 
     }
 
-    const atividade = {
-        ci,
-        servico,
-        local,
-        equipe: selecionados.join(","), // backend espera string
-        inicio: agoraISO()
+    const atividade = { 
+        ci, 
+        servico, 
+        local, 
+        equipe: selecionados, 
+        inicio: agoraISO(),
+        relato: "",
+        fotos: [],
+        fim: ""
     };
 
     fetch(`${API_BASE}/atividades/inicio`, {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(atividade)
     })
-    .then(async res => {
-
-        if (!res.ok) {
-            const t = await res.text();
-            throw new Error(t);
-        }
-
+    .then(res => {
+        if (!res.ok) throw new Error("Erro na requisição: " + res.status);
         return res.json();
     })
     .then(data => {
-
-        if (!data.id) throw new Error("Backend não retornou ID");
-
+        if (!data.id) throw new Error("ID não retornado pelo backend");
         atividade.id = data.id;
-        atividade.relato = "";
-        atividade.fotos = [];
-        atividade.fim = "";
 
-        atividadesAtivas.push({
-            ...atividade,
-            equipe: selecionados // volta array no frontend
-        });
-
+        atividadesAtivas.push(atividade);
         limparForm();
         atualizarEquipeCampo();
-        mostrarToast("Atividade iniciada!");
-
+        mostrarToast("Atividade registrada!");
     })
     .catch(err => {
-        console.error("INICIAR ERRO:", err);
-        alert("Falha ao iniciar atividade (veja console)");
+        console.error("Erro ao registrar atividade:", err);
+        alert("Erro ao registrar atividade. Veja o console para detalhes.");
     });
-
 }
+
 function dataAgoraBR(){
     return new Date().toLocaleString("pt-BR", {
         day: "2-digit",
@@ -1227,76 +784,8 @@ function limparForm(){
     document.getElementById('fAtividade').selectedIndex = 0;
     document.getElementById('fTipoLocal').selectedIndex = 0;
 }
-
-// MODAL EQUIPEEDICAO
-
-function abrirModalEdicao() {
-    if (!atividadeAtual) return;
-
-    // Fecha modal de finalizar
-    fecharModal('modalFinalizar');
-
-    document.getElementById('editCi').value = atividadeAtual.ci;
-    document.getElementById('editServico').value = atividadeAtual.servico;
-    document.getElementById('editLocal').value = atividadeAtual.local;
-    document.getElementById('editEquipe').value = atividadeAtual.equipe.join(", ");
-
-    abrirModal('modalEditarAtividade');
-}
-function salvarEdicaoAtividade() {
-    if (!atividadeAtual) return;
-
-    const novaCi = document.getElementById('editCi').value.trim();
-    const novoServico = document.getElementById('editServico').value.trim();
-    const novoLocal = document.getElementById('editLocal').value.trim();
-    const novaEquipe = document.getElementById('editEquipe').value
-                        .split(",")
-                        .map(e => e.trim())
-                        .filter(e => e);
-
-    if (!novaCi || !novoServico || !novoLocal || !novaEquipe.length) {
-        alert("Preencha todos os campos!");
-        return;
-    }
-
-    // Atualiza atividadeAtual
-    atividadeAtual.ci = novaCi;
-    atividadeAtual.servico = novoServico;
-    atividadeAtual.local = novoLocal;
-    atividadeAtual.equipe = novaEquipe;
-
-    fecharModal('modalEditarAtividade');
-
-    // Atualiza modal de finalizar com os novos dados
-    document.getElementById('detalhesServico').innerHTML =
-        `CI: ${atividadeAtual.ci} | Serviço: ${atividadeAtual.servico} | Local: ${atividadeAtual.local}<br>
-         Equipe: ${atividadeAtual.equipe.join(", ")}`;
-
-    // Reabre modal de finalizar
-    abrirModal('modalFinalizar');
-
-    mostrarToast("Atividade atualizada! Agora finalize o trabalho.");
-}
-
 // MODAL EQUIPE
-function abrirEquipe() {
-    abrirModal('modalEquipe'); // abre o modal
-    atualizarEquipeCampo();    // atualiza a lista de atividades em andamento
-
-    // FORÇA o dropdown fechado
-    const fOptions = document.getElementById('fOptions');
-    fOptions.style.display = 'none';
-
-    // Remove destaque de itens
-    document.querySelectorAll('#fOptions .func-item').forEach(el => el.classList.remove('active'));
-
-    // Reseta o texto do botão
-    document.getElementById('fDisplay').textContent = "Selecionar Equipe";
-
-    // Limpa array selecionados
-    selecionados = [];
-}
-
+function abrirEquipe(){ abrirModal('modalEquipe'); atualizarEquipeCampo(); }
 function atualizarEquipeCampo(){
     const lista = document.getElementById('listaAndamento');
     lista.innerHTML = atividadesAtivas.length ? "" : "Nenhuma atividade em andamento.";
@@ -1309,19 +798,14 @@ function atualizarEquipeCampo(){
         a.equipe.forEach(nome => funcionariosUnicos.add(nome));
 
         // COR POR SERVIÇO
-       const serv = normalizar(a.servico);
+        let classeServico = "", iconeServico = "";
+        switch(a.servico){
+            case "Pintura": classeServico="card-pintura"; iconeServico="🎨"; break;
+            case "Elétrica": classeServico="card-eletrica"; iconeServico="💡"; break;
+            case "Hidráulica": classeServico="card-hidraulica"; iconeServico="🚰"; break;
+            case "Civil": classeServico="card-civil"; iconeServico="🔨"; break;
+        }
 
-const mapa = {
-    pintura: { classe: "card-pintura", icone: "🎨" },
-    eletrica: { classe: "card-eletrica", icone: "💡" },
-    hidraulica: { classe: "card-hidraulica", icone: "🚰" },
-    civil: { classe: "card-civil", icone: "🔨" }
-};
-
-const cfg = mapa[serv] || { classe: "", icone: "🛠️" };
-
-let classeServico = cfg.classe;
-let iconeServico = cfg.icone;
         // Cria card da atividade
         const card = document.createElement('div');
         card.className = `card-lista ${classeServico}`;
@@ -1352,7 +836,7 @@ function prepararFinalizacao(idx){
          Equipe: ${atividadeAtual.equipe.join(", ")}`;
 }
 // FINALIZAR ATIVIDADE
-function finalizarAtividade() {
+async function finalizarAtividade() {
     if (!atividadeAtual) return;
 
     const fotosInput = document.getElementById('fFotos');
@@ -1369,7 +853,7 @@ function finalizarAtividade() {
     formData.append("ci", atividadeAtual.ci);
     formData.append("servico", atividadeAtual.servico);
     formData.append("local", atividadeAtual.local);
-    formData.append("equipe", atividadeAtual.equipe.join(",")); // string
+    formData.append("equipe", atividadeAtual.equipe.join(",")); // envia como string
     formData.append("inicio", atividadeAtual.inicio);
     formData.append("relato", relato);
     formData.append("fim", fim);
@@ -1377,26 +861,36 @@ function finalizarAtividade() {
     // Adiciona arquivos
     Array.from(fotosInput.files).forEach(file => formData.append("fotos", file));
 
-    
-fetch(`${API_BASE}/atividades/finalizar`, { method: "POST", body: formData })
-   .then(res => res.json())
-.then(data => {
+    try {
+        const res = await fetch(`${API_BASE}/atividades/finalizar`, {
+            method: "POST",
+            body: formData
+        });
 
-    if (!data.ok) throw new Error(data.error || "Erro backend");
+        const data = await res.json();
+
+        if (!data.ok) {
+            throw new Error(data.error || "Erro ao salvar atividade!");
+        }
+
         // Atualiza frontend
         atividadeAtual.fim = fim;
         atividadeAtual.relato = relato;
-        atividadeAtual.fotos = data.fotos;
+        atividadeAtual.fotos = data.fotos; // URLs públicas do Supabase
 
+        // Move atividade para concluídas
         atividadesConcluidas.push(atividadeAtual);
         atividadesAtivas = atividadesAtivas.filter(a => a !== atividadeAtual);
 
         fecharModal('modalFinalizar');
         mostrarToast("CI salva no banco!");
 
+        // Limpa inputs e previews
         document.getElementById('fRelato').value = "";
+        fotosInput.value = "";
         document.getElementById('previewFotos').innerHTML = "";
 
+        // Atualiza a UI
         atualizarEquipeCampo();
         atualizarHistorico();
 
@@ -1405,12 +899,13 @@ fetch(`${API_BASE}/atividades/finalizar`, { method: "POST", body: formData })
         }
 
         atividadeAtual = null;
-    })
-    .catch(err => {
+
+    } catch (err) {
         console.error(err);
         alert("Erro ao salvar atividade!");
-    });
+    }
 }
+
 //Historico
 function abrirHistorico(){
 
@@ -1435,7 +930,7 @@ function atualizarHistorico() {
     const filtroServico = document.getElementById('filtroServicoHistorico').value;
 
     // Filtra atividades concluídas
-    let filtradas = atividadesConcluidas.filter(a => {
+    const filtradas = atividadesConcluidas.filter(a => {
         let dataOk = true;
         const dataFim = new Date(a.fim);
 
@@ -1443,61 +938,47 @@ function atualizarHistorico() {
         if (filtroMes) dataOk = dataOk && (dataFim.getMonth() + 1 == parseInt(filtroMes));
         if (filtroAno) dataOk = dataOk && (dataFim.getFullYear() == parseInt(filtroAno));
 
-        const filtroServicoNormalizado = normalizar(filtroServico);
         let servicoOk = true;
         if (filtroServico) {
-            servicoOk = normalizar(a.servico) === filtroServicoNormalizado;
+            // Tratamento do Pedreiro -> Civil
+            const serv = a.servico === "Civil" ? "Pedreiro" : a.servico;
+            servicoOk = serv === filtroServico;
         }
 
         return dataOk && servicoOk;
     });
 
-    // ✅ Ordena do mais recente para o mais antigo
-    filtradas.sort((a, b) => new Date(b.fim) - new Date(a.fim));
-
     if (filtradas.length === 0) {
         lista.innerHTML = "Nenhuma CI finalizada.";
         return;
     }
-
+const BACKEND_URL = "https://bancokf.onrender.com";; // Coloque aqui a URL do seu backend
     filtradas.forEach(a => {
-        const serv = normalizar(a.servico);
+    const card = document.createElement('div');
+    card.className = "card-lista card-concluido";
 
-        const mapa = {
-            pintura: "card-pintura",
-            eletrica: "card-eletrica",
-            hidraulica: "card-hidraulica",
-            civil: "card-civil"
-        };
+    // Adiciona fotos
+    let fotosHTML = '';
+    if (a.fotos.length) {
+       fotosHTML = `<div class="img-container">` + 
+    a.fotos.map((f, i) => `<img src="${BACKEND_URL}${f}" class="img-preview" onclick="abrirImagemModal('${BACKEND_URL}${f}','CI-${a.ci}-foto${i+1}.jpg')">`).join('') + 
+    `</div>`;
+    }
 
-        const classeServico = mapa[serv] || "";
+    card.innerHTML = `
+        <strong>CI ${a.ci}</strong><br>
+        Serviço: ${a.servico}<br>
+        Local: ${a.local}<br>
+        Equipe: ${a.equipe.join(", ")}<br>
+        Início: ${formatarBR(a.inicio)}<br>
+        Fim: ${formatarBR(a.fim)}<br>
+        Descrição: ${a.relato}<br>
+        ${fotosHTML}
+    `;
 
-        const card = document.createElement('div');
-        card.className = `card-lista card-concluido ${classeServico}`;
-
-        // Adiciona fotos
-        let fotosHTML = '';
-        if (a.fotos.length) {
-            fotosHTML = `<div class="img-container">` + 
-                a.fotos.map((f,i) => `<img src="${f}" class="img-preview" onclick="abrirImagemModal('${f}','CI-${a.ci}-foto${i+1}.jpg')">`).join('') + 
-                `</div>`;
-        }
-
-        card.innerHTML = `
-            <strong>CI ${a.ci}</strong><br>
-            Serviço: ${a.servico}<br>
-            Local: ${a.local}<br>
-            Equipe: ${a.equipe.join(", ")}<br>
-            Início: ${formatarBR(a.inicio)}<br>
-            Fim: ${formatarBR(a.fim)}<br>
-            Descrição: ${a.relato}<br>
-            ${fotosHTML}
-        `;
-
-        lista.appendChild(card);
-    });
-}
-// PREVIEW DE IMAGENS
+    lista.appendChild(card);
+});
+}// PREVIEW DE IMAGENS
 function previewImages(input){
     const preview=document.getElementById('previewFotos'); preview.innerHTML="";
     Array.from(input.files).forEach(file=>{
@@ -1527,6 +1008,64 @@ function baixarImagem(){
     link.download = imagemAtual || 'imagem.jpg';
     link.click();
 }
+
+async function restaurarCI() {
+
+    const file = document.getElementById("restoreZip").files[0];
+    if (!file) return;
+
+    const zip = await JSZip.loadAsync(file);
+    const resultado = document.getElementById("restoreResultado");
+
+    resultado.innerHTML = "";
+
+    for (const nome in zip.files) {
+
+        if (!nome.endsWith(".txt")) continue;
+
+        const txt = await zip.files[nome].async("string");
+        const ci = JSON.parse(txt);
+
+        const card = document.createElement("div");
+        card.className = "card-lista";
+
+        card.innerHTML = `
+            <b>CI:</b> ${ci.id}<br>
+            <b>Equipe:</b> ${ci.equipe}<br>
+            <b>Serviço:</b> ${ci.servico}<br>
+            <b>Início:</b> ${ci.inicio}<br>
+        `;
+
+        const pasta = `${ci.id}-${ci.inicio}/fotos`;
+
+        for (const f in zip.files) {
+
+            if (!f.startsWith(pasta)) continue;
+
+            const blob = await zip.files[f].async("blob");
+            const url = URL.createObjectURL(blob);
+
+            const img = document.createElement("img");
+            img.src = url;
+            img.style.width = "90px";
+            img.style.borderRadius = "8px";
+            img.style.marginTop = "5px";
+
+            card.appendChild(img);
+        }
+
+        resultado.appendChild(card);
+    }
+
+    document.getElementById("modalRestore").style.display = "block";
+}
+
+function fecharRestore() {
+    document.getElementById("modalRestore").style.display = "none";
+    document.getElementById("restoreResultado").innerHTML = "";
+    document.getElementById("restoreZip").value = "";
+}
+
 carregarAtividades();
 </script>
 </body>
