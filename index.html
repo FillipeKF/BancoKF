@@ -772,26 +772,20 @@ async function backupCIsDoMes() {
 
 // ======================= BOTÃO SIM DO BACKUP =======================
 btnSim.onclick = async () => {
-    // 1️⃣ Bloqueia reabertura do modalRestore
-    bloquearRestore = true;
-
-    // 2️⃣ Fecha modal de confirmação
+    bloquearRestore = true; // bloqueia qualquer reabertura automática
     fecharModal("modalConfirmarBackup");
-
-    // 3️⃣ Fecha modal de CIs registradas usando a função separada
-    fecharModalCIsRegistradas();
+    fecharModal("modalRestore"); // fecha o modal de CIs registradas
 
     const ids = data.map(c => c.id);
 
     try {
-        // 4️⃣ Apaga CIs no servidor
         await fetch(`${API_BASE}/atividades/apagar`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ ids })
         });
 
-        // 5️⃣ Remove blocos das CIs do DOM
+        // Remove blocos do DOM
         const listaCIs = document.getElementById("listaCIs");
         if (listaCIs) {
             ids.forEach(id => {
@@ -800,27 +794,26 @@ btnSim.onclick = async () => {
             });
         }
 
-        // 6️⃣ Notificação verde
+        // Mostra notificação
         const notif = document.getElementById("notificacaoBackup");
         if (notif) {
             notif.style.display = "block";
             setTimeout(() => { notif.style.display = "none"; }, 3000);
         }
 
-        // 7️⃣ Atualiza histórico sem reabrir modalRestore
+        // Atualiza histórico sem reabrir modal
         if (typeof atualizarHistorico === "function") {
-            atualizarHistorico(true); // envia flag para não reabrir modal
+            atualizarHistorico(); 
         }
 
     } catch (err) {
-        console.error("Erro ao apagar CIs:", err);
+        console.error(err);
         alert("Falha ao apagar CIs do servidor!");
     } finally {
-        // 8️⃣ Libera bloqueio
-        bloquearRestore = false;
+        // Libera bloqueio depois de 500ms (ou depois que modal terminar animação)
+        setTimeout(() => { bloquearRestore = false; }, 500);
     }
 };
-
 // ======================= FUNÇÃO PARA FECHAR MODAL DE CIs =======================
 function fecharModalCIsRegistradas() {
     const modals = ["modalCIsRegistradas", "modalRestore"];
