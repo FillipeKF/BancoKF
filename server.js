@@ -2,8 +2,7 @@
 
 
 process.env.NODE_OPTIONS = "--dns-result-order=ipv4first";
-const archiver = require("archiver");
-const fetch = (...args)=>import("node-fetch").then(({default:fetch})=>fetch(...args));
+
 const express = require("express");
 const cors = require("cors");
 const { Pool } = require("pg");
@@ -332,66 +331,19 @@ app.put("/itens/:id", async (req, res) => {
 
 
 // Retorna CIs filtradas por mês/ano
-const archiver = require("archiver");
-
-app.get("/atividades/backup", async (req, res) => {
-
-    const { mes, ano } = req.query;
-
-    if (!mes || !ano) return res.status(400).send("Informe mês e ano");
-
-    try {
-
+app.get("/atividades/backup", async (req,res)=>{
+    try{
+        const { mes, ano } = req.query;
         const r = await pool.query("SELECT * FROM atividades");
-
-        const cis = r.rows.filter(ci => {
-            const d = new Date(ci.inicio);
-            return d.getMonth()+1 == mes && d.getFullYear() == ano;
+        // Filtrar por mês/ano do campo inicio
+        const filtered = r.rows.filter(a => {
+            const d = new Date(a.inicio);
+            return (d.getMonth()+1 == Number(mes)) && (d.getFullYear() == Number(ano));
         });
-
-        if (!cis.length) return res.status(404).send("Nenhuma CI");
-
-        res.setHeader("Content-Type","application/zip");
-        res.setHeader("Content-Disposition",`attachment; filename=CI_${mes}_${ano}.zip`);
-
-        const archive = archiver("zip",{ zlib:{ level:9 }});
-        archive.pipe(res);
-
-        for (const ci of cis) {
-
-            const pasta = `CI_${ci.ci}_${mes}_${ano}`;
-
-            // JSON da CI
-            archive.append(JSON.stringify(ci,null,2), {
-                name:`${pasta}/dados.json`
-            });
-
-            // Fotos
-            let fotos = [];
-
-            try {
-                fotos = Array.isArray(ci.fotos) ? ci.fotos : JSON.parse(ci.fotos||"[]");
-            } catch {}
-
-            for (let i=0;i<fotos.length;i++){
-
-                try{
-                    const response = await fetch(fotos[i]);
-                    const buffer = await response.arrayBuffer();
-
-                    archive.append(Buffer.from(buffer),{
-                        name:`${pasta}/fotos/foto${i+1}.jpg`
-                    });
-
-                }catch{}
-            }
-        }
-
-        await archive.finalize();
-
+        res.json(filtered);
     } catch(err){
         console.error(err);
-        res.status(500).send("Erro backup");
+        res.status(500).json({ error:"Erro ao buscar CIs" });
     }
 });
 
@@ -418,67 +370,6 @@ app.post("/atividades/apagar", async (req,res)=>{
     }
 });
 
-
-const uploadRestore = multer({ dest: "restore_tmp/" });
-
-app.post("/restore/pasta", uploadRestore.any(), async (req,res)=>{
-
-    try {
-
-        const files = req.files;
-
-        let jsonFile = files.find(f => f.originalname === "dados.json");
-
-        if (!jsonFile) {
-            return res.status(400).json({ erro: "dados.json não encontrado" });
-        }
-
-        const ciData = JSON.parse(fs.readFileSync(jsonFile.path,"utf8"));
-
-        // Upload fotos novamente
-        let fotos = [];
-
-        for (const file of files) {
-
-            if (file.originalname.startsWith("foto")) {
-
-                const buffer = fs.readFileSync(file.path);
-
-                const nome = Date.now()+"-"+file.originalname;
-
-                await supabase.storage
-                    .from("uploads")
-                    .upload(nome, buffer, { contentType:"image/jpeg" });
-
-                const url = `${SUPABASE_URL}/storage/v1/object/public/uploads/${nome}`;
-
-                fotos.push(url);
-            }
-        }
-
-        // Insere no banco
-        await pool.query(`
-            INSERT INTO atividades
-            (ci,equipe,servico,local,inicio,fim,relato,fotos)
-            VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
-        `,[
-            ciData.ci,
-            JSON.stringify(ciData.equipe),
-            ciData.servico,
-            ciData.local,
-            ciData.inicio,
-            ciData.fim,
-            ciData.relato,
-            JSON.stringify(fotos)
-        ]);
-
-        res.json({ ok:true });
-
-    } catch(e){
-        console.error(e);
-        res.status(500).json({ erro:"Restore falhou" });
-    }
-});
 
 // =======================
 // INICIAR SERVIDOR
