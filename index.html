@@ -681,7 +681,6 @@ function fecharModal(id){ document.getElementById(id).style.display='none'; }
 
 // ------------------- BACKUP CIs -------------------
 // ------------------- BACKUP CIs -------------------
-
 async function backupCIsDoMes() {
     try {
         const month = document.getElementById('filtroMesHistorico').value;
@@ -696,6 +695,7 @@ async function backupCIsDoMes() {
         if (!res.ok) throw "Erro ao buscar CIs";
 
         const data = await res.json();
+
         if (!Array.isArray(data) || data.length === 0) {
             alert("Não há CIs nesse período");
             return;
@@ -704,13 +704,12 @@ async function backupCIsDoMes() {
         const zip = new JSZip();
 
         for (const ci of data) {
-            // pasta do CI
             const pastaCI = zip.folder(`CI_${ci.id}_${ci.inicio}`);
 
-            // arquivo de dados
+            // salva dados.txt
             pastaCI.file("dados.txt", JSON.stringify(ci, null, 2));
 
-            // garante array de fotos
+            // garante array real de fotos
             let fotos = [];
             try {
                 fotos = Array.isArray(ci.fotos) ? ci.fotos : JSON.parse(ci.fotos || "[]");
@@ -718,33 +717,31 @@ async function backupCIsDoMes() {
                 fotos = [];
             }
 
-            // salva fotos na mesma pasta que o dados.txt
-            for (let i = 0; i < fotos.length; i++) {
-                let foto = String(fotos[i])
-                    .replace("[", "")
-                    .replace("]", "")
-                    .replace(/"/g, "")
-                    .trim();
+            // baixa fotos no mesmo nível da pasta do CI
+            if (fotos.length > 0) {
+                for (let i = 0; i < fotos.length; i++) {
+                    let foto = String(fotos[i]).replace("[", "").replace("]", "").replace(/"/g, "").trim();
+                    if (!foto.startsWith("http")) {
+                        console.warn("Foto ignorada:", foto);
+                        continue;
+                    }
 
-                if (!foto.startsWith("http")) {
-                    console.warn("Foto ignorada:", foto);
-                    continue;
-                }
-
-                try {
-                    const blob = await fetch(foto).then(r => r.blob());
-                    pastaCI.file(`foto${i + 1}.jpg`, blob);
-                } catch (e) {
-                    console.warn("Erro ao baixar:", foto);
-                    continue;
+                    try {
+                        const fotoBlob = await fetch(foto).then(r => r.blob());
+                        pastaCI.file(`foto${i + 1}.jpg`, fotoBlob); // ✔ salva no mesmo nível
+                    } catch (e) {
+                        console.warn("Erro ao baixar:", foto);
+                        continue;
+                    }
                 }
             }
         }
 
-        // gera o zip
+        // gera zip
         const content = await zip.generateAsync({ type: "blob" });
         saveAs(content, `backup_CI_${month}-${year}.zip`);
 
+        // opção para apagar CIs do servidor
         if (confirm("Backup concluído! Deseja apagar essas CIs do servidor?")) {
             const ids = data.map(c => c.id);
             await fetch(`${API_BASE}/atividades/apagar`, {
@@ -762,7 +759,7 @@ async function backupCIsDoMes() {
     }
 }
 
-// ------------------- RESTORE -------------------
+// ------------------- RESTORE CIs -------------------
 async function restaurarCIs() {
     const input = document.createElement("input");
     input.type = "file";
@@ -776,11 +773,11 @@ async function restaurarCIs() {
         const cis = [];
 
         for (const path in zip.files) {
-            if (path.endsWith(".txt")) {
-                const pasta = path.replace(".txt", "");
+            if (path.endsWith("dados.txt")) {
+                const pasta = path.replace("/dados.txt", "");
                 const text = await zip.file(path).async("string");
                 const ci = JSON.parse(text);
-                ci.__pasta = pasta;
+                ci.__pasta = pasta; // pasta do CI no zip
                 cis.push(ci);
             }
         }
@@ -791,9 +788,10 @@ async function restaurarCIs() {
     input.click();
 }
 
+// ------------------- MODAL RESTORE -------------------
 function abrirModalRestore(cis, zip) {
     const listaCIs = document.getElementById("listaCIs");
-    if(!listaCIs) return console.error("Elemento listaCIs não encontrado");
+    if (!listaCIs) return console.error("Elemento listaCIs não encontrado");
     listaCIs.innerHTML = "";
 
     cis.forEach(ci => {
@@ -821,18 +819,20 @@ function abrirModalRestore(cis, zip) {
 <b>Início:</b> ${new Date(ci.inicio).toLocaleString()}<br>
 <b>Fim:</b> ${ci.fim ? new Date(ci.fim).toLocaleString() : "-"}<br>
 <b>Relato:</b> ${ci.relato || "-"}
-`;
+        `;
         bloco.appendChild(detalhes);
 
+        // ao clicar no CI, abre modal de fotos
         bloco.onclick = () => abrirModalFotos(ci, zip);
 
         listaCIs.appendChild(bloco);
     });
 
     const modal = document.getElementById("modalRestore");
-    if(modal) modal.style.display = "flex";
+    if (modal) modal.style.display = "flex";
 }
 
+// ------------------- MODAL FOTOS -------------------
 async function abrirModalFotos(ci, zip) {
     const listaFotos = document.getElementById("listaFotos");
     if (!listaFotos) return console.error("Elemento listaFotos não encontrado");
@@ -845,9 +845,7 @@ async function abrirModalFotos(ci, zip) {
     fotosDiv.style.alignItems = "center";
     fotosDiv.style.gap = "10px";
 
-    // ✅ usar for..of para esperar o async
     for (const filePath of Object.keys(zip.files)) {
-        // pegar apenas JPGs da pasta do CI
         if (filePath.startsWith(ci.__pasta + "/") && filePath.endsWith(".jpg")) {
             const file = zip.file(filePath);
             if (!file) continue;
@@ -856,11 +854,10 @@ async function abrirModalFotos(ci, zip) {
                 const blob = await file.async("blob");
                 const img = document.createElement("img");
                 img.src = URL.createObjectURL(blob);
-                img.style.width = "200px"; // largura fixa para modal
-                img.style.height = "auto"; // mantém proporção
+                img.style.width = "200px";
+                img.style.height = "auto";
                 img.style.objectFit = "cover";
                 img.style.borderRadius = "8px";
-
                 fotosDiv.appendChild(img);
             } catch (err) {
                 console.error("Erro ao ler a foto do zip:", filePath, err);
@@ -874,11 +871,11 @@ async function abrirModalFotos(ci, zip) {
     if (modal) modal.style.display = "flex";
 }
 
+// ------------------- FUNÇÃO FECHAR -------------------
 function fecharModal(id) {
     const modal = document.getElementById(id);
-    if(modal) modal.style.display = "none";
+    if (modal) modal.style.display = "none";
 }
-
 
 
 function normalizar(texto) {
