@@ -815,22 +815,44 @@ function abrirModalRestore(cis, zip) {
         pre.style.fontSize = "12px";
         div.appendChild(pre);
 
-        if (ci.fotos && ci.fotos.length > 0) {
-            const fotosDiv = document.createElement("div");
-            fotosDiv.style.display = "flex";
-            fotosDiv.style.flexWrap = "wrap";
-            fotosDiv.style.gap = "10px";
-            ci.fotos.forEach(async (url, idx) => {
-                const blob = await zip.file(`${ci.id}-${ci.inicio}/fotos/foto${idx+1}.jpg`).async("blob");
-                const img = document.createElement("img");
-                img.src = URL.createObjectURL(blob);
-                img.style.width = "80px";
-                img.style.height = "80px";
-                img.style.objectFit = "cover";
-                img.style.borderRadius = "8px";
-                fotosDiv.appendChild(img);
-            });
-            div.appendChild(fotosDiv);
+      // garante array de fotos
+let fotos = [];
+
+if (Array.isArray(ci.fotos)) {
+    fotos = ci.fotos;
+} else if (typeof ci.fotos === "string") {
+    try {
+        fotos = JSON.parse(ci.fotos);
+    } catch {
+        fotos = [];
+    }
+}
+
+if (fotos.length > 0) {
+    const fotosDiv = document.createElement("div");
+    fotosDiv.style.display = "flex";
+    fotosDiv.style.flexWrap = "wrap";
+    fotosDiv.style.gap = "10px";
+
+    fotos.forEach(async (url, idx) => {
+        const path = `${ci.id}-${ci.inicio}/fotos/foto${idx+1}.jpg`;
+
+        if (!zip.file(path)) return;
+
+        const blob = await zip.file(path).async("blob");
+
+        const img = document.createElement("img");
+        img.src = URL.createObjectURL(blob);
+        img.style.width = "80px";
+        img.style.height = "80px";
+        img.style.objectFit = "cover";
+        img.style.borderRadius = "8px";
+
+        fotosDiv.appendChild(img);
+    });
+
+    div.appendChild(fotosDiv);
+
         }
 
         modal.appendChild(div);
