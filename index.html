@@ -189,6 +189,16 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
   font-size: 14px;
 }
 
+#modalRestore .container-modal img,
+#modalFotos .container-modal img {
+    width: 100%;
+    max-width: 90px;
+    height: auto;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+
 /* Conteúdo principal (inicialmente acessível, overlay bloqueia visual) */
 #mainContent { display: block; }
 
@@ -571,16 +581,23 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
     </div>
 </div>
 
-<!-- MODAL RESTORE CIs -->
-<div id="modalRestore" class="modal">
-    <div class="container-modal">
+<!-- MODAL RESTORE -->
+<div id="modalRestore" class="modal" style="display:none;">
+    <div class="container-modal" style="width:95%; max-width:900px; max-height:85vh; overflow-y:auto;">
         <span class="btn-fechar" onclick="fecharModal('modalRestore')">&times;</span>
         <h2 style="color:var(--success)">Restaurar CIs do Backup</h2>
-
-        <div id="listaCIs" style="padding:10px; max-height:60vh; overflow-y:auto;"></div>
+        <div id="listaCIs"></div>
     </div>
 </div>
 
+<!-- MODAL PREVIEW FOTOS -->
+<div id="modalFotos" class="modal" style="display:none;">
+    <div class="container-modal" style="width:95%; max-width:900px; max-height:85vh; overflow-y:auto; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+        <span class="btn-fechar" onclick="fecharModal('modalFotos')">&times;</span>
+        <h2 style="color:var(--success)">Fotos da CI</h2>
+        <div id="listaFotos" style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center;"></div>
+    </div>
+</div>
 
 <!-- MODAL IMAGEM -->
 <div id="modalImagem" class="img-modal">
@@ -713,26 +730,27 @@ pastaCI.file("dados.txt", JSON.stringify(ci, null, 2));
 
                 const folderFotos = pastaCI.folder("fotos");
 
-                for (let i = 0; i < fotos.length; i++) {
+for (let i = 0; i < fotos.length; i++) {
 
-                    let foto = String(fotos[i])
-                        .replace("[", "")
-                        .replace("]", "")
-                        .replace(/"/g, "")
-                        .trim();
+    let foto = String(fotos[i])
+        .replace("[", "")
+        .replace("]", "")
+        .replace(/"/g, "")
+        .trim();
 
-                    if (!foto.startsWith("http")) {
-                        console.warn("Foto ignorada:", foto);
-                        continue;
-                    }
+    if (!foto.startsWith("http")) {
+        console.warn("Foto ignorada:", foto);
+        continue;
+    }
 
-                    try {
-                        const fotoBlob = await fetch(foto).then(r => r.blob());
-                        folder.file(`foto${i + 1}.jpg`, fotoBlob);
-                    } catch (e) {
-                        console.warn("Erro ao baixar:", foto);
-                        continue;
-                    }
+    try {
+        const fotoBlob = await fetch(foto).then(r => r.blob());
+        folder.file(`foto${i + 1}.jpg`, fotoBlob); // ❌ AQUI ESTÁ O ERRO
+    } catch (e) {
+        console.warn("Erro ao baixar:", foto);
+        continue;
+    }
+
                 }
             }
         }
@@ -808,32 +826,18 @@ async function restaurarCIs() {
 
 // ------------------- MODAL TEMPORÁRIO DE RESTORE -------------------
 function abrirModalRestore(cis, zip) {
+    const listaCIs = document.getElementById("listaCIs");
+    if(!listaCIs) return console.error("Elemento listaCIs não encontrado");
 
-    const modal = document.createElement("div");
-    modal.className = "modal";
-
-    const container = document.createElement("div");
-    container.className = "container-modal";
-
-    const fechar = document.createElement("span");
-    fechar.className = "btn-fechar";
-    fechar.innerHTML = "&times;";
-    fechar.onclick = () => document.body.removeChild(modal);
-
-    container.appendChild(fechar);
-
-    const titulo = document.createElement("h2");
-    titulo.style.color = "var(--success)";
-    titulo.textContent = "Restaurar CIs do Backup";
-    container.appendChild(titulo);
+    listaCIs.innerHTML = "";
 
     cis.forEach(ci => {
-
         const bloco = document.createElement("div");
         bloco.style.background = "#252a33";
         bloco.style.borderRadius = "10px";
         bloco.style.padding = "12px";
         bloco.style.marginBottom = "15px";
+        bloco.style.cursor = "pointer";
 
         const h = document.createElement("h3");
         h.style.color = "var(--success)";
@@ -845,8 +849,7 @@ function abrirModalRestore(cis, zip) {
         detalhes.style.borderRadius = "10px";
         detalhes.style.padding = "10px";
         detalhes.style.fontSize = "13px";
-        detalhes.style.marginBottom = "10px";
-
+        detalhes.style.marginTop = "5px";
         detalhes.innerHTML = `
 <b>Serviço:</b> ${ci.servico}<br>
 <b>Equipe:</b> ${ci.equipe}<br>
@@ -854,43 +857,56 @@ function abrirModalRestore(cis, zip) {
 <b>Fim:</b> ${ci.fim ? new Date(ci.fim).toLocaleString() : "-"}<br>
 <b>Relato:</b> ${ci.relato || "-"}
 `;
-
         bloco.appendChild(detalhes);
 
-        const fotosDiv = document.createElement("div");
-        fotosDiv.style.display = "flex";
-        fotosDiv.style.flexWrap = "wrap";
-        fotosDiv.style.gap = "10px";
+        bloco.onclick = () => abrirModalFotos(ci, zip);
 
-        Object.keys(zip.files).forEach(async filePath => {
-
-            if (filePath.startsWith(ci.__pasta + "/fotos/")) {
-
-                const file = zip.file(filePath);
-                if (!file) return;
-
-                const blob = await file.async("blob");
-
-                const img = document.createElement("img");
-                img.src = URL.createObjectURL(blob);
-                img.style.width = "90px";
-                img.style.height = "90px";
-                img.style.objectFit = "cover";
-                img.style.borderRadius = "8px";
-
-                fotosDiv.appendChild(img);
-            }
-        });
-
-        bloco.appendChild(fotosDiv);
-
-        container.appendChild(bloco);
+        listaCIs.appendChild(bloco);
     });
 
-    modal.appendChild(container);
-    document.body.appendChild(modal);
+    const modal = document.getElementById("modalRestore");
+    if(modal) modal.style.display = "flex";
 }
 
+function abrirModalFotos(ci, zip) {
+    const listaFotos = document.getElementById("listaFotos");
+    if(!listaFotos) return console.error("Elemento listaFotos não encontrado");
+
+    listaFotos.innerHTML = "";
+
+    const fotosDiv = document.createElement("div");
+    fotosDiv.style.display = "flex";
+    fotosDiv.style.flexWrap = "wrap";
+    fotosDiv.style.gap = "10px";
+    fotosDiv.style.justifyContent = "center";
+
+    Object.keys(zip.files).forEach(async filePath => {
+        if(filePath.startsWith(ci.__pasta + "/fotos/")) {
+            const file = zip.file(filePath);
+            if(!file) return;
+
+            const blob = await file.async("blob");
+            const img = document.createElement("img");
+            img.src = URL.createObjectURL(blob);
+            img.style.width = "80px";
+            img.style.height = "80px";
+            img.style.objectFit = "cover";
+            img.style.borderRadius = "8px";
+
+            fotosDiv.appendChild(img);
+        }
+    });
+
+    listaFotos.appendChild(fotosDiv);
+
+    const modal = document.getElementById("modalFotos");
+    if(modal) modal.style.display = "flex";
+}
+
+function fecharModal(id) {
+    const modal = document.getElementById(id);
+    if(modal) modal.style.display = "none";
+}
 
 
 function normalizar(texto) {
