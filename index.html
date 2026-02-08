@@ -646,7 +646,7 @@ let imagemAtual = "";
 let itensRegistrados = [];
 let itemAtualEditar = null;
 let itemAtualExcluir = null;
-let backupDataAtual = []; // mantém os dados do backup corrente
+
 
 
 // URL base da API
@@ -708,8 +708,6 @@ function fecharModal(id){ document.getElementById(id).style.display='none'; }
 
 // ------------------- BACKUP CIs -------------------
 // ------------------- BACKUP CIs -------------------
-// ------------------- FUNÇÃO DE BACKUP -------------------
-// ------------------- FUNÇÃO DE BACKUP -------------------
 async function backupCIsDoMes() {
     try {
         const month = document.getElementById('filtroMesHistorico').value;
@@ -736,8 +734,9 @@ async function backupCIsDoMes() {
             pastaCI.file("dados.txt", JSON.stringify(ci, null, 2));
 
             let fotos = [];
-            try { fotos = Array.isArray(ci.fotos) ? ci.fotos : JSON.parse(ci.fotos || "[]"); } 
-            catch { fotos = []; }
+            try {
+                fotos = Array.isArray(ci.fotos) ? ci.fotos : JSON.parse(ci.fotos || "[]");
+            } catch { fotos = []; }
 
             if (fotos.length > 0) {
                 for (let i = 0; i < fotos.length; i++) {
@@ -756,41 +755,62 @@ async function backupCIsDoMes() {
         saveAs(content, `backup_CI_${month}-${year}.zip`);
 
         // ===============================
-        // Abre modal de confirmação
+        // Modal de confirmação para apagar
         // ===============================
         const modalConfirm = document.getElementById("modalConfirmarBackup");
         modalConfirm.style.display = "flex";
+
+        const btnSim = document.getElementById("btnSimBackup");
+        const btnNao = document.getElementById("btnNaoBackup");
+
+        btnNao.onclick = () => { modalConfirm.style.display = "none"; };
+
+btnSim.onclick = async () => {
+    // ✅ Fecha imediatamente o modal de restore
+    const modalRestore = document.getElementById("modalRestore");
+    if (modalRestore) modalRestore.style.display = "none";
+
+    // Fecha o modal de confirmação
+    modalConfirm.style.display = "none";
+
+    const ids = data.map(c => c.id);
+
+    try {
+        await fetch(`${API_BASE}/atividades/apagar`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ids })
+        });
+
+        // Remove os blocos das CIs apagadas do modal (opcional, pois o modal já fechou)
+        const listaCIs = document.getElementById("listaCIs");
+        if (listaCIs) {
+            ids.forEach(id => {
+                const bloco = listaCIs.querySelector(`div[data-ci-id='${id}']`);
+                if (bloco) bloco.remove();
+            });
+        }
+
+        // Notificação verde
+        const notif = document.getElementById("notificacaoBackup");
+        if (notif) {
+            notif.style.display = "block";
+            setTimeout(() => { notif.style.display = "none"; }, 3000);
+        }
+
+        atualizarHistorico();
+
+    } catch (err) {
+        console.error("Erro ao apagar CIs:", err);
+        alert("Falha ao apagar CIs do servidor!");
+    }
+};
 
     } catch (err) {
         console.error(err);
         alert("Erro no backup: " + err);
     }
 }
-
-// ------------------- BOTÕES SIM / NÃO -------------------
-document.addEventListener("DOMContentLoaded", () => {
-    const btnSim = document.getElementById("btnSimBackup");
-    const btnNao = document.getElementById("btnNaoBackup");
-    const modalConfirm = document.getElementById("modalConfirmarBackup");
-
-    btnNao.onclick = () => {
-        modalConfirm.style.display = "none"; // fecha apenas o modal de confirmação
-    };
-
-    btnSim.onclick = () => {
-        // fecha modal de confirmação
-        modalConfirm.style.display = "none";
-
-        // fecha modal de CIs registradas
-        const modalRestore = document.getElementById("modalRestore");
-        if (modalRestore) modalRestore.style.display = "none";
-
-        // mostra notificação verde
-        const notif = document.getElementById("notificacaoBackup");
-        notif.style.display = "block";
-        setTimeout(() => { notif.style.display = "none"; }, 3000);
-    };
-});
 
 // ------------------- RESTORE CIs -------------------
 async function restaurarCIs() {
