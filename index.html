@@ -646,7 +646,8 @@ let imagemAtual = "";
 let itensRegistrados = [];
 let itemAtualEditar = null;
 let itemAtualExcluir = null;
-
+// ======================= BLOQUEIO DE ABERTURA =======================
+let bloquearRestore = false; // impede que modalRestore abra quando necessário
 
 
 // URL base da API
@@ -702,7 +703,11 @@ const res = await fetch(`${BACKEND_URL}/login`, {
 });
 
 function abrirModal(id){ document.getElementById(id).style.display='block'; }
-function fecharModal(id){ document.getElementById(id).style.display='none'; }
+// ======================= FUNÇÃO FECHAR MODAL =======================
+function fecharModal(id) {
+    const modal = document.getElementById(id);
+    if (modal) modal.style.display = "none";
+}
 
 
 
@@ -766,21 +771,24 @@ async function backupCIsDoMes() {
         btnNao.onclick = () => { modalConfirm.style.display = "none"; };
 
 btnSim.onclick = async () => {
-    // Fecha os dois modais imediatamente
-    modalConfirm.style.display = "none";   // modal de confirmação
-    const modalRestore = document.getElementById("modalRestore");
-    if (modalRestore) modalRestore.style.display = "none"; // modal de registro CI
+    // 1️⃣ Bloqueia reabertura do modalRestore
+    bloquearRestore = true;
+
+    // 2️⃣ Fecha ambos os modais imediatamente
+    fecharModal("modalConfirmarBackup");
+    fecharModal("modalRestore");
 
     const ids = data.map(c => c.id);
 
     try {
+        // 3️⃣ Apaga CIs no servidor
         await fetch(`${API_BASE}/atividades/apagar`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ ids })
         });
 
-        // Remove os blocos das CIs apagadas do modal (opcional, pois o modal já fechou)
+        // 4️⃣ Remove blocos das CIs do DOM
         const listaCIs = document.getElementById("listaCIs");
         if (listaCIs) {
             ids.forEach(id => {
@@ -789,20 +797,27 @@ btnSim.onclick = async () => {
             });
         }
 
-        // Notificação verde
+        // 5️⃣ Notificação verde
         const notif = document.getElementById("notificacaoBackup");
         if (notif) {
             notif.style.display = "block";
             setTimeout(() => { notif.style.display = "none"; }, 3000);
         }
 
-        atualizarHistorico();
+        // 6️⃣ Atualiza histórico sem reabrir modalRestore
+        if (typeof atualizarHistorico === "function") {
+            atualizarHistorico(true); // envia flag para não reabrir modal
+        }
 
     } catch (err) {
         console.error("Erro ao apagar CIs:", err);
         alert("Falha ao apagar CIs do servidor!");
+    } finally {
+        // 7️⃣ Libera bloqueio
+        bloquearRestore = false;
     }
 };
+
 
 
     } catch (err) {
@@ -840,8 +855,10 @@ async function restaurarCIs() {
     input.click();
 }
 
-// ------------------- MODAL RESTORE -------------------
+// ======================= FUNÇÃO ABRIR MODAL RESTORE =======================
 function abrirModalRestore(cis, zip) {
+    if (bloquearRestore) return; // evita abrir modal se bloqueado
+
     const listaCIs = document.getElementById("listaCIs");
     if (!listaCIs) return console.error("Elemento listaCIs não encontrado");
     listaCIs.innerHTML = "";
@@ -853,6 +870,8 @@ function abrirModalRestore(cis, zip) {
         bloco.style.padding = "12px";
         bloco.style.marginBottom = "15px";
         bloco.style.cursor = "pointer";
+
+        bloco.dataset.ciId = ci.id; // importante para remover depois
 
         const h = document.createElement("h3");
         h.style.color = "var(--success)";
@@ -874,7 +893,7 @@ function abrirModalRestore(cis, zip) {
         `;
         bloco.appendChild(detalhes);
 
-        // ao clicar no CI, abre modal de fotos
+        // Ao clicar no CI, abre modal de fotos
         bloco.onclick = () => abrirModalFotos(ci, zip);
 
         listaCIs.appendChild(bloco);
