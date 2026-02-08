@@ -842,9 +842,10 @@ function abrirModalRestore(cis, zip) {
         bloco.appendChild(detalhes);
 
         const fotosDiv = document.createElement("div");
-        fotosDiv.style.display = "flex";
-        fotosDiv.style.flexWrap = "wrap";
-        fotosDiv.style.gap = "10px";
+       fotosDiv.style.display = "flex";
+fotosDiv.style.flexWrap = "wrap";
+fotosDiv.style.gap = "10px";
+fotosDiv.style.justifyContent = "flex-start"; // garante que as fotos fiquem visíveis no mobile
 
         // percorre as fotos no zip
         Object.keys(zip.files).forEach(async filePath => {
@@ -857,11 +858,11 @@ function abrirModalRestore(cis, zip) {
 
                 const img = document.createElement("img");
                 img.src = URL.createObjectURL(blob);
-                img.style.width = "90px";
-                img.style.height = "90px";
-                img.style.objectFit = "cover";
-                img.style.borderRadius = "8px";
-
+          img.style.width = "100%";       // ocupa 100% da coluna flex
+img.style.maxWidth = "90px";     // mas não ultrapassa 90px
+img.style.height = "auto";       // altura proporcional
+img.style.objectFit = "cover";
+img.style.borderRadius = "8px";
                 fotosDiv.appendChild(img);
             }
         });
