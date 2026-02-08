@@ -823,7 +823,8 @@ btnSim.onclick = async () => {
 
 // ======================= FUNÇÃO PARA FECHAR MODAL DE CIs =======================
 function fecharModalCIsRegistradas() {
-    fecharModal("modalRestore"); // Fecha o modal de CIs registradas
+    const modals = ["modalCIsRegistradas", "modalRestore"];
+    modals.forEach(id => fecharModal(id));
 }
 
     } catch (err) {
