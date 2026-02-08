@@ -709,6 +709,7 @@ function fecharModal(id){ document.getElementById(id).style.display='none'; }
 // ------------------- BACKUP CIs -------------------
 // ------------------- BACKUP CIs -------------------
 // ------------------- FUNÇÃO DE BACKUP -------------------
+// ------------------- FUNÇÃO DE BACKUP -------------------
 async function backupCIsDoMes() {
     try {
         const month = document.getElementById('filtroMesHistorico').value;
@@ -755,7 +756,7 @@ async function backupCIsDoMes() {
         saveAs(content, `backup_CI_${month}-${year}.zip`);
 
         // ===============================
-        // Abrir modal de confirmação
+        // Abre modal de confirmação
         // ===============================
         const modalConfirm = document.getElementById("modalConfirmarBackup");
         modalConfirm.style.display = "flex";
@@ -773,18 +774,18 @@ document.addEventListener("DOMContentLoaded", () => {
     const modalConfirm = document.getElementById("modalConfirmarBackup");
 
     btnNao.onclick = () => {
-        modalConfirm.style.display = "none";
+        modalConfirm.style.display = "none"; // fecha apenas o modal de confirmação
     };
 
     btnSim.onclick = () => {
-        // Fecha modal de confirmação
+        // fecha modal de confirmação
         modalConfirm.style.display = "none";
 
-        // Fecha modal de CIs registradas
+        // fecha modal de CIs registradas
         const modalRestore = document.getElementById("modalRestore");
         if (modalRestore) modalRestore.style.display = "none";
 
-        // Mostra notificação verde
+        // mostra notificação verde
         const notif = document.getElementById("notificacaoBackup");
         notif.style.display = "block";
         setTimeout(() => { notif.style.display = "none"; }, 3000);
