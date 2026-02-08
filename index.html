@@ -571,7 +571,15 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
     </div>
 </div>
 
+<!-- MODAL RESTORE CIs -->
+<div id="modalRestore" class="modal">
+    <div class="container-modal">
+        <span class="btn-fechar" onclick="fecharModal('modalRestore')">&times;</span>
+        <h2 style="color:var(--success)">Restaurar CIs do Backup</h2>
 
+        <div id="listaCIs" style="padding:10px; max-height:60vh; overflow-y:auto;"></div>
+    </div>
+</div>
 
 
 <!-- MODAL IMAGEM -->
@@ -801,23 +809,8 @@ async function restaurarCIs() {
 // ------------------- MODAL TEMPORÁRIO DE RESTORE -------------------
 function abrirModalRestore(cis, zip) {
 
-    const modal = document.createElement("div");
-    modal.className = "modal";
-
-    const container = document.createElement("div");
-    container.className = "container-modal";
-
-    const fechar = document.createElement("span");
-    fechar.className = "btn-fechar";
-    fechar.innerHTML = "&times;";
-    fechar.onclick = () => document.body.removeChild(modal);
-
-    container.appendChild(fechar);
-
-    const titulo = document.createElement("h2");
-    titulo.style.color = "var(--success)";
-    titulo.textContent = "Restaurar CIs do Backup";
-    container.appendChild(titulo);
+    const listaCIs = document.getElementById("listaCIs");
+    listaCIs.innerHTML = ""; // limpa o modal antes de preencher
 
     cis.forEach(ci => {
 
@@ -846,7 +839,6 @@ function abrirModalRestore(cis, zip) {
 <b>Fim:</b> ${ci.fim ? new Date(ci.fim).toLocaleString() : "-"}<br>
 <b>Relato:</b> ${ci.relato || "-"}
 `;
-
         bloco.appendChild(detalhes);
 
         const fotosDiv = document.createElement("div");
@@ -854,8 +846,8 @@ function abrirModalRestore(cis, zip) {
         fotosDiv.style.flexWrap = "wrap";
         fotosDiv.style.gap = "10px";
 
+        // percorre as fotos no zip
         Object.keys(zip.files).forEach(async filePath => {
-
             if (filePath.startsWith(ci.__pasta + "/fotos/")) {
 
                 const file = zip.file(filePath);
@@ -876,13 +868,15 @@ function abrirModalRestore(cis, zip) {
 
         bloco.appendChild(fotosDiv);
 
-        container.appendChild(bloco);
+        listaCIs.appendChild(bloco);
     });
 
-    modal.appendChild(container);
-    document.body.appendChild(modal);
+    // abre o modal
+    document.getElementById("modalRestore").style.display = "flex";
 }
-
+function fecharModal(id) {
+    document.getElementById(id).style.display = "none";
+}
 
 
 function normalizar(texto) {
