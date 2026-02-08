@@ -2,7 +2,8 @@
 
 
 process.env.NODE_OPTIONS = "--dns-result-order=ipv4first";
-
+const archiver = require("archiver");
+const fetch = (...args)=>import("node-fetch").then(({default:fetch})=>fetch(...args));
 const express = require("express");
 const cors = require("cors");
 const { Pool } = require("pg");
