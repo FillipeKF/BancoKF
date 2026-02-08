@@ -751,57 +751,22 @@ async function backupCIsDoMes() {
             }
         }
 
+        // gera zip
         const content = await zip.generateAsync({ type: "blob" });
         saveAs(content, `backup_CI_${month}-${year}.zip`);
 
-        // ===============================
-        // Modal de confirmação para apagar
-        // ===============================
-        const modalConfirm = document.getElementById("modalConfirmarBackup");
-        modalConfirm.style.display = "flex";
-
-        const btnSim = document.getElementById("btnSimBackup");
-        const btnNao = document.getElementById("btnNaoBackup");
-
-        btnNao.onclick = () => { modalConfirm.style.display = "none"; };
-
-btnSim.onclick = async () => {
-    modalConfirm.style.display = "none"; // fecha modal de confirmação
-    const ids = data.map(c => c.id);
-
-    try {
-        await fetch(`${API_BASE}/atividades/apagar`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ ids })
-        });
-
-        // Remove os blocos das CIs apagadas
-        const listaCIs = document.getElementById("listaCIs");
-        if (listaCIs) {
-            ids.forEach(id => {
-                const bloco = listaCIs.querySelector(`div[data-ci-id='${id}']`);
-                if (bloco) bloco.remove();
-            });
-        }
-
-        // 🔹 Fecha modal de restore completamente
+        // ✅ fecha modal de restore automaticamente
         const modalRestore = document.getElementById("modalRestore");
         if (modalRestore) modalRestore.style.display = "none";
 
         // Notificação verde
         const notif = document.getElementById("notificacaoBackup");
-        notif.style.display = "block";
+        if (notif) {
+            notif.style.display = "block";
+            setTimeout(() => { notif.style.display = "none"; }, 3000);
+        }
 
-        atualizarHistorico();
-
-        setTimeout(() => { notif.style.display = "none"; }, 3000);
-
-    } catch (err) {
-        console.error("Erro ao apagar CIs:", err);
-        alert("Falha ao apagar CIs do servidor!");
-    }
-};
+        atualizarHistorico(); // atualiza histórico após backup
 
     } catch (err) {
         console.error(err);
