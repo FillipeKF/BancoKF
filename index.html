@@ -656,6 +656,7 @@ function fecharModal(id){ document.getElementById(id).style.display='none'; }
 
 // ------------------- BACKUP CIs -------------------
 // ------------------- BACKUP CIs -------------------
+
 async function backupCIsDoMes() {
     try {
         const month = document.getElementById('filtroMesHistorico').value;
@@ -681,7 +682,10 @@ async function backupCIsDoMes() {
         for (const ci of data) {
 
             // TXT da CI
-            zip.file(`${ci.id}-${ci.inicio}.txt`, JSON.stringify(ci, null, 2));
+           const pastaCI = zip.folder(`CI_${ci.id}_${ci.inicio}`);
+
+pastaCI.file("dados.txt", JSON.stringify(ci, null, 2));
+
 
             // ===============================
             // GARANTE ARRAY REAL DE FOTOS
@@ -699,7 +703,7 @@ async function backupCIsDoMes() {
             // ===============================
             if (fotos.length > 0) {
 
-                const folder = zip.folder(`${ci.id}-${ci.inicio}/fotos`);
+                const folderFotos = pastaCI.folder("fotos");
 
                 for (let i = 0; i < fotos.length; i++) {
 
@@ -756,25 +760,36 @@ async function backupCIsDoMes() {
 
 // ------------------- RESTORE CIs TEMPORÁRIO -------------------
 async function restaurarCIs() {
+
     const input = document.createElement("input");
     input.type = "file";
     input.accept = ".zip";
+
     input.onchange = async (e) => {
+
         const file = e.target.files[0];
         if (!file) return;
 
         const zip = await JSZip.loadAsync(file);
-        const restoredData = [];
 
-        for (const filename of Object.keys(zip.files)) {
-            if (filename.endsWith(".txt")) {
-                const text = await zip.file(filename).async("string");
-                restoredData.push(JSON.parse(text));
+        const cis = [];
+
+        for (const path in zip.files) {
+
+            if (path.endsWith("dados.txt")) {
+
+                const pasta = path.split("/")[0]; // CI_100_05_02_2026
+                const text = await zip.file(path).async("string");
+                const ci = JSON.parse(text);
+
+                ci.__pasta = pasta; // guarda nome da pasta
+                cis.push(ci);
             }
         }
 
-        abrirModalRestore(restoredData, zip);
+        abrirModalRestore(cis, zip);
     };
+
     input.click();
 }
 
@@ -814,6 +829,11 @@ modal.style.zIndex = 9999;
         div.style.borderRadius = "10px";
 
         const h = document.createElement("h3");
+        const data = new Date(ci.inicio);
+const mes = data.getMonth() + 1;
+const ano = data.getFullYear();
+
+h.textContent = `CI ${ci.id} — ${mes}/${ano}`;
         h.textContent = `CI: ${ci.id} - ${ci.inicio}`;
         div.appendChild(h);
 
@@ -836,17 +856,18 @@ if (Array.isArray(ci.fotos)) {
 }
 
 if (fotos.length > 0) {
-    const fotosDiv = document.createElement("div");
-    fotosDiv.style.display = "flex";
-    fotosDiv.style.flexWrap = "wrap";
-    fotosDiv.style.gap = "10px";
+  const fotosDiv = document.createElement("div");
+fotosDiv.style.display = "flex";
+fotosDiv.style.flexWrap = "wrap";
+fotosDiv.style.gap = "10px";
 
-    fotos.forEach(async (url, idx) => {
-        const path = `${ci.id}-${ci.inicio}/fotos/foto${idx+1}.jpg`;
+const pasta = ci.__pasta;
 
-        if (!zip.file(path)) return;
+Object.keys(zip.files).forEach(async filePath => {
 
-        const blob = await zip.file(path).async("blob");
+    if (filePath.startsWith(`${pasta}/fotos/`)) {
+
+        const blob = await zip.file(filePath).async("blob");
 
         const img = document.createElement("img");
         img.src = URL.createObjectURL(blob);
@@ -856,9 +877,10 @@ if (fotos.length > 0) {
         img.style.borderRadius = "8px";
 
         fotosDiv.appendChild(img);
-    });
+    }
+});
 
-    div.appendChild(fotosDiv);
+div.appendChild(fotosDiv);
 
         }
 
