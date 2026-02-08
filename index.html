@@ -1527,6 +1527,50 @@ function previewImages(input){
     });
 }
 
+// RestaurarCi
+async function restaurarCI() {
+
+    const input = document.getElementById("restoreZip");
+    const file = input.files[0];
+
+    if (!file) return;
+
+    const zip = await JSZip.loadAsync(file);
+
+    const cis = [];
+
+    for (const nome in zip.files) {
+
+        if (!nome.endsWith(".txt")) continue;
+
+        const txt = await zip.files[nome].async("string");
+
+        try {
+            const ci = JSON.parse(txt);
+            cis.push(ci);
+        } catch(e){
+            console.error("CI inválida:", nome);
+        }
+    }
+
+    if (!cis.length) {
+        alert("Nenhuma CI encontrada");
+        return;
+    }
+
+    await fetch(`${API_BASE}/atividades/restaurar`,{
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify({ cis })
+    });
+
+    alert("CIs restauradas com sucesso!");
+
+    fecharModal("modalRestore");
+    atualizarHistorico();
+}
+
+
 // TOAST
 function mostrarToast(msg){ const t=document.getElementById('toastSucesso'); document.getElementById('toastTexto').textContent=msg; t.style.display='block'; t.classList.add('animar-entrada'); setTimeout(()=>t.style.display='none',2000); }
 
