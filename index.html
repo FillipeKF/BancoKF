@@ -858,7 +858,10 @@ function abrirModalRestore(cis, zip) {
 
             if (filePath.startsWith(ci.__pasta + "/fotos/")) {
 
-                const blob = await zip.file(filePath).async("blob");
+                const file = zip.file(filePath);
+                if (!file) return;
+
+                const blob = await file.async("blob");
 
                 const img = document.createElement("img");
                 img.src = URL.createObjectURL(blob);
