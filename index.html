@@ -595,10 +595,9 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
     <div class="container-modal" style="max-width:600px; width:90%; max-height:70vh; overflow-y:auto; text-align:center;">
         <span class="btn-fechar" onclick="fecharModal('modalFotos')">&times;</span>
         <h2 style="color:var(--primary); margin-bottom:15px;">Fotos da CI</h2>
-        <div id="listaFotos"></div>
+        <div id="listaFotos" style="display:flex; flex-direction:column; align-items:center; gap:10px;"></div>
     </div>
 </div>
-
 
 <!-- MODAL IMAGEM -->
 <div id="modalImagem" class="img-modal">
@@ -785,7 +784,6 @@ for (let i = 0; i < fotos.length; i++) {
     }
 }
 
-// ------------------- RESTORE CIs TEMPORÁRIO -------------------
 // ------------------- RESTORE -------------------
 async function restaurarCIs() {
     const input = document.createElement("input");
@@ -799,6 +797,7 @@ async function restaurarCIs() {
         const zip = await JSZip.loadAsync(file);
         const cis = [];
 
+        // busca todos os arquivos .txt para identificar cada CI
         for (const path in zip.files) {
             if (path.endsWith(".txt")) {
                 const pasta = path.replace(".txt", "");
@@ -867,14 +866,13 @@ async function abrirModalFotos(ci, zip) {
 
     const fotosDiv = document.createElement("div");
     fotosDiv.style.display = "flex";
-    fotosDiv.style.flexWrap = "wrap";
-    fotosDiv.style.gap = "10px";
-    fotosDiv.style.justifyContent = "center";
+    fotosDiv.style.flexDirection = "column"; // vertical
     fotosDiv.style.alignItems = "center";
+    fotosDiv.style.gap = "10px";
 
-    const filePaths = Object.keys(zip.files);
-    for (const filePath of filePaths) {
-        if(filePath.startsWith(ci.__pasta + "/fotos/")) {
+    for (const filePath of Object.keys(zip.files)) {
+        // pega qualquer jpg dentro da pasta do CI
+        if(filePath.startsWith(ci.__pasta + "/") && filePath.endsWith(".jpg")) {
             const file = zip.file(filePath);
             if(!file) continue;
 
@@ -883,8 +881,8 @@ async function abrirModalFotos(ci, zip) {
             img.src = URL.createObjectURL(blob);
 
             // tamanho responsivo
-            img.style.width = "80px";
-            img.style.height = "80px";
+            img.style.width = "200px";  // menor que modal
+            img.style.height = "auto";
             img.style.objectFit = "cover";
             img.style.borderRadius = "8px";
 
@@ -902,6 +900,7 @@ function fecharModal(id) {
     const modal = document.getElementById(id);
     if(modal) modal.style.display = "none";
 }
+
 
 
 function normalizar(texto) {
