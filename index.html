@@ -766,28 +766,38 @@ async function backupCIsDoMes() {
         btnNao.onclick = () => { modalConfirm.style.display = "none"; };
 
         btnSim.onclick = async () => {
-            modalConfirm.style.display = "none";
-            const ids = data.map(c => c.id);
+    modalConfirm.style.display = "none";
+    const ids = data.map(c => c.id);
 
-            try {
-                await fetch(`${API_BASE}/atividades/apagar`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ ids })
-                });
+    try {
+        await fetch(`${API_BASE}/atividades/apagar`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ids })
+        });
 
-                // Notificação verde
-                const notif = document.getElementById("notificacaoBackup");
-                notif.style.display = "block";
-                atualizarHistorico();
+        // Remove as CIs apagadas do modal
+        const listaCIs = document.getElementById("listaCIs");
+        if (listaCIs) {
+            data.forEach(ci => {
+                const bloco = listaCIs.querySelector(`div[data-ci-id='${ci.id}']`);
+                if (bloco) listaCIs.removeChild(bloco);
+            });
+        }
 
-                setTimeout(() => { notif.style.display = "none"; }, 3000);
+        // Notificação verde
+        const notif = document.getElementById("notificacaoBackup");
+        notif.style.display = "block";
 
-            } catch (err) {
-                console.error("Erro ao apagar CIs:", err);
-                alert("Falha ao apagar CIs do servidor!");
-            }
-        };
+        atualizarHistorico();
+
+        setTimeout(() => { notif.style.display = "none"; }, 3000);
+
+    } catch (err) {
+        console.error("Erro ao apagar CIs:", err);
+        alert("Falha ao apagar CIs do servidor!");
+    }
+};
 
     } catch (err) {
         console.error(err);
@@ -831,12 +841,13 @@ function abrirModalRestore(cis, zip) {
     listaCIs.innerHTML = "";
 
     cis.forEach(ci => {
-        const bloco = document.createElement("div");
-        bloco.style.background = "#252a33";
-        bloco.style.borderRadius = "10px";
-        bloco.style.padding = "12px";
-        bloco.style.marginBottom = "15px";
-        bloco.style.cursor = "pointer";
+       const bloco = document.createElement("div");
+bloco.dataset.ciId = ci.id; // ✅ adiciona atributo para identificação
+bloco.style.background = "#252a33";
+bloco.style.borderRadius = "10px";
+bloco.style.padding = "12px";
+bloco.style.marginBottom = "15px";
+bloco.style.cursor = "pointer";
 
         const h = document.createElement("h3");
         h.style.color = "var(--success)";
