@@ -199,6 +199,13 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
 }
 
 
+@media (max-width: 480px) {
+    .modal .container-modal {
+        width: 98%;
+        max-width: 98%;
+        padding: 15px;
+    }
+}
 /* Conteúdo principal (inicialmente acessível, overlay bloqueia visual) */
 #mainContent { display: block; }
 
@@ -582,7 +589,7 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
 </div>
 
 <!-- MODAL RESTORE -->
-<div id="modalRestore" class="modal" style="display:none;">
+<div id="modalRestore" class="modal">
     <div class="container-modal" style="width:95%; max-width:900px; max-height:85vh; overflow-y:auto;">
         <span class="btn-fechar" onclick="fecharModal('modalRestore')">&times;</span>
         <h2 style="color:var(--success)">Restaurar CIs do Backup</h2>
@@ -591,8 +598,8 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
 </div>
 
 <!-- MODAL PREVIEW FOTOS -->
-<div id="modalFotos" class="modal" style="display:none;">
-    <div class="container-modal" style="width:95%; max-width:900px; max-height:85vh; overflow-y:auto; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+<div id="modalFotos" class="modal">
+    <div class="container-modal" style="width:95%; max-width:900px; max-height:85vh; overflow-y:auto;">
         <span class="btn-fechar" onclick="fecharModal('modalFotos')">&times;</span>
         <h2 style="color:var(--success)">Fotos da CI</h2>
         <div id="listaFotos" style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center;"></div>
@@ -825,18 +832,18 @@ async function restaurarCIs() {
 
 // ------------------- MODAL TEMPORÁRIO DE RESTORE -------------------
 function abrirModalRestore(cis, zip) {
-    const listaCIs = document.getElementById("listaCIs");
-    if(!listaCIs) return console.error("Elemento listaCIs não encontrado");
 
+    const listaCIs = document.getElementById("listaCIs");
     listaCIs.innerHTML = "";
 
     cis.forEach(ci => {
+
         const bloco = document.createElement("div");
         bloco.style.background = "#252a33";
         bloco.style.borderRadius = "10px";
         bloco.style.padding = "12px";
         bloco.style.marginBottom = "15px";
-        bloco.style.cursor = "pointer";
+        bloco.style.cursor = "pointer"; // indica que é clicável
 
         const h = document.createElement("h3");
         h.style.color = "var(--success)";
@@ -849,6 +856,7 @@ function abrirModalRestore(cis, zip) {
         detalhes.style.padding = "10px";
         detalhes.style.fontSize = "13px";
         detalhes.style.marginTop = "5px";
+
         detalhes.innerHTML = `
 <b>Serviço:</b> ${ci.servico}<br>
 <b>Equipe:</b> ${ci.equipe}<br>
@@ -856,39 +864,46 @@ function abrirModalRestore(cis, zip) {
 <b>Fim:</b> ${ci.fim ? new Date(ci.fim).toLocaleString() : "-"}<br>
 <b>Relato:</b> ${ci.relato || "-"}
 `;
+
         bloco.appendChild(detalhes);
 
-        bloco.onclick = () => abrirModalFotos(ci, zip);
+        // ao clicar no bloco, abre o modal de fotos
+        bloco.onclick = () => {
+            abrirModalFotos(ci, zip);
+        };
 
         listaCIs.appendChild(bloco);
     });
 
-    const modal = document.getElementById("modalRestore");
-    if(modal) modal.style.display = "flex";
+    // abre o modal de restore
+    document.getElementById("modalRestore").style.display = "flex";
 }
 
-function abrirModalFotos(ci, zip) {
-    const listaFotos = document.getElementById("listaFotos");
-    if(!listaFotos) return console.error("Elemento listaFotos não encontrado");
 
-    listaFotos.innerHTML = "";
+function abrirModalFotos(ci, zip) {
+
+    const listaFotos = document.getElementById("listaFotos");
+    listaFotos.innerHTML = ""; // limpa fotos anteriores
 
     const fotosDiv = document.createElement("div");
     fotosDiv.style.display = "flex";
     fotosDiv.style.flexWrap = "wrap";
     fotosDiv.style.gap = "10px";
-    fotosDiv.style.justifyContent = "center";
+    fotosDiv.style.justifyContent = "center"; // centraliza fotos no mobile
 
     Object.keys(zip.files).forEach(async filePath => {
-        if(filePath.startsWith(ci.__pasta + "/fotos/")) {
+        if (filePath.startsWith(ci.__pasta + "/fotos/")) {
+
             const file = zip.file(filePath);
-            if(!file) return;
+            if (!file) return;
 
             const blob = await file.async("blob");
+
             const img = document.createElement("img");
             img.src = URL.createObjectURL(blob);
-            img.style.width = "80px";
-            img.style.height = "80px";
+            img.style.width = "100%";       // responsivo
+            img.style.maxWidth = "90px";    // não ultrapassa 90px
+            img.style.height = "auto";      // mantém proporção
             img.style.objectFit = "cover";
             img.style.borderRadius = "8px";
 
@@ -898,13 +913,11 @@ function abrirModalFotos(ci, zip) {
 
     listaFotos.appendChild(fotosDiv);
 
-    const modal = document.getElementById("modalFotos");
-    if(modal) modal.style.display = "flex";
+    document.getElementById("modalFotos").style.display = "flex";
 }
 
 function fecharModal(id) {
-    const modal = document.getElementById(id);
-    if(modal) modal.style.display = "none";
+    document.getElementById(id).style.display = "none";
 }
 
 
