@@ -766,12 +766,10 @@ async function backupCIsDoMes() {
         btnNao.onclick = () => { modalConfirm.style.display = "none"; };
 
 btnSim.onclick = async () => {
-    // ✅ Fecha imediatamente o modal de restore
+    // Fecha os dois modais imediatamente
+    modalConfirm.style.display = "none";   // modal de confirmação
     const modalRestore = document.getElementById("modalRestore");
-    if (modalRestore) modalRestore.style.display = "none";
-
-    // Fecha o modal de confirmação
-    modalConfirm.style.display = "none";
+    if (modalRestore) modalRestore.style.display = "none"; // modal de registro CI
 
     const ids = data.map(c => c.id);
 
@@ -805,6 +803,7 @@ btnSim.onclick = async () => {
         alert("Falha ao apagar CIs do servidor!");
     }
 };
+
 
     } catch (err) {
         console.error(err);
