@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KF Engenharia - Gestor de Campo</title>
+
 <style>
 :root { 
     --bg: #0f1115; 
@@ -25,62 +25,6 @@ body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin:0; pad
     max-width: 1200px;
     margin: 200px auto;          /* centraliza horizontal e adiciona distância do topo */
 }
-
-
-
-
-
-/* ------------------- LOGIN OVERLAY ------------------- */
-#loginOverlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(15,17,21,0.95);
-  z-index: 9999;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.loginBox {
-  background: var(--card);
-  padding: 30px;
-  border-radius: 16px;
-  width: 300px;
-  text-align: center;
-  border: 1px solid var(--border);
-  box-shadow: 0 0 25px rgba(0,0,0,0.5);
-}
-
-.loginBox input {
-  margin-top: 10px;
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #444;
-  width: 100%;
-  background: #2a2e36;
-  color: #fff;
-}
-
-.loginBox button {
-  margin-top: 15px;
-  padding: 10px;
-  width: 100%;
-  background: var(--primary);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-#loginError {
-  color: var(--danger);
-  margin-top: 10px;
-  display: none;
-  font-size: 14px;
-}
-
-
 .card-acao { background: var(--card); padding: 30px; border-radius: 16px; text-align: center; cursor: pointer; transition: 0.3s; border: 1px solid var(--border); position: relative; font-size:14px; }
 .card-acao:hover { border-color: var(--primary); transform: translateY(-3px); }
 .badge-funcionarios { position:absolute; top:10px; left:10px; background:var(--success); color:white; font-weight:bold; padding:5px 10px; border-radius:12px; font-size:12px; display:none; }
@@ -181,36 +125,6 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
 </style>
 </head>
 <body>
-
-
-
-<!-- ------------------- LOGIN OVERLAY ------------------- -->
-<div id="loginOverlay">
-  <div class="loginBox">
-    <h2>Login</h2>
-    <input type="text" id="username" placeholder="Usuário">
-    <input type="password" id="password" placeholder="Senha">
-    <button id="loginBtn">Entrar</button>
-    <p id="loginError"></p>
-  </div>
-</div>
-
-<!-- ------------------- CONTEÚDO PRINCIPAL ------------------- -->
-<div id="mainContent">
-  <div class="header-main">KF Engenharia - Gestor de Campo</div>
-
-  <div class="dashboard-grid">
-    <div class="card-acao">Exemplo Card 1</div>
-    <div class="card-acao">Exemplo Card 2</div>
-    <div class="card-acao">Exemplo Card 3</div>
-  </div>
-
-  <div class="desenvolvido">Desenvolvido por KF Engenharia</div>
-</div>
-
-
-
-
 
 <div id="toastSucesso" class="toast-container">
     <span style="font-size:50px">✅</span>
@@ -566,50 +480,6 @@ function abrirModal(id){ document.getElementById(id).style.display='block'; }
 function fecharModal(id){ document.getElementById(id).style.display='none'; }
 
 
-
-const loginOverlay = document.getElementById("loginOverlay");
-const loginBtn = document.getElementById("loginBtn");
-const loginError = document.getElementById("loginError");
-
-// 🔹 Substitua pelo URL do seu backend Render
-const BACKEND_URL = "https://bancokf.onrender.com"; 
-
-
-loginBtn.addEventListener("click", async () => {
-  const usuario = document.getElementById("username").value;
-  const senha = document.getElementById("password").value;
-
-  if(!usuario || !senha){
-    loginError.style.display = "block";
-    loginError.innerText = "Preencha usuário e senha";
-    return;
-  }
-
-  try {
-    const res = await fetch(`${BACKEND_URL}/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ usuario, senha })
-    });
-
-    if (!res.ok) {
-      const errorData = await res.json();
-      loginError.style.display = "block";
-      loginError.innerText = errorData.error || "Usuário ou senha incorretos";
-      return;
-    }
-
-    const data = await res.json();
-    if (data.ok) {
-      loginOverlay.style.display = "none"; // remove overlay
-    }
-
-  } catch(err) {
-    console.error(err);
-    loginError.style.display = "block";
-    loginError.innerText = "Erro de conexão com o servidor";
-  }
-});
 
 function agoraISO(){
     return new Date().toISOString();
