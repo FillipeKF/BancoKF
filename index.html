@@ -732,8 +732,11 @@ async function backupCIsDoMes() {
 
         for (const ci of data) {
             const pastaCI = zip.folder(`CI_${ci.id}_${ci.inicio}`);
+
+            // salva dados.txt
             pastaCI.file("dados.txt", JSON.stringify(ci, null, 2));
 
+            // garante array real de fotos
             let fotos = [];
             try {
                 fotos = Array.isArray(ci.fotos) ? ci.fotos : JSON.parse(ci.fotos || "[]");
@@ -741,58 +744,47 @@ async function backupCIsDoMes() {
                 fotos = [];
             }
 
+            // baixa fotos no mesmo nível da pasta do CI
             if (fotos.length > 0) {
                 for (let i = 0; i < fotos.length; i++) {
                     let foto = String(fotos[i]).replace("[", "").replace("]", "").replace(/"/g, "").trim();
-                    if (!foto.startsWith("http")) continue;
+                    if (!foto.startsWith("http")) {
+                        console.warn("Foto ignorada:", foto);
+                        continue;
+                    }
 
                     try {
                         const fotoBlob = await fetch(foto).then(r => r.blob());
-                        pastaCI.file(`foto${i + 1}.jpg`, fotoBlob);
-                    } catch {
+                        pastaCI.file(`foto${i + 1}.jpg`, fotoBlob); // ✔ salva no mesmo nível
+                    } catch (e) {
+                        console.warn("Erro ao baixar:", foto);
                         continue;
                     }
                 }
             }
         }
 
+        // gera zip
         const content = await zip.generateAsync({ type: "blob" });
         saveAs(content, `backup_CI_${month}-${year}.zip`);
 
-        // =======================
-        // MODAL DE CONFIRMAÇÃO
-        // =======================
-        showConfirmModal(
-            "Backup concluído! Deseja apagar essas CIs do servidor?",
-            async () => {
-                // SIM
-                const ids = data.map(c => c.id);
-                await fetch(`${API_BASE}/atividades/apagar`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ ids })
-                });
-
-                // Remove CIs apagadas do modal
-                ids.forEach(id => {
-                    const bloco = document.querySelector(`#listaCIs [data-ci-id='${id}']`);
-                    if (bloco) bloco.remove();
-                });
-
-                showNotification("CIs apagadas do servidor!", "success");
-            },
-            () => {
-                // NÃO
-                console.log("CIs mantidas");
-            }
-        );
+        // opção para apagar CIs do servidor
+        if (confirm("Backup concluído! Deseja apagar essas CIs do servidor?")) {
+            const ids = data.map(c => c.id);
+            await fetch(`${API_BASE}/atividades/apagar`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ ids })
+            });
+            alert("CIs apagadas do servidor!");
+            atualizarHistorico();
+        }
 
     } catch (err) {
         console.error(err);
         alert("Erro no backup: " + err);
     }
 }
-
 
 // ------------------- RESTORE CIs -------------------
 async function restaurarCIs() {
@@ -830,13 +822,12 @@ function abrirModalRestore(cis, zip) {
     listaCIs.innerHTML = "";
 
     cis.forEach(ci => {
-       const bloco = document.createElement("div");
-bloco.dataset.ciId = ci.id; // ✅ adiciona atributo para identificação
-bloco.style.background = "#252a33";
-bloco.style.borderRadius = "10px";
-bloco.style.padding = "12px";
-bloco.style.marginBottom = "15px";
-bloco.style.cursor = "pointer";
+        const bloco = document.createElement("div");
+        bloco.style.background = "#252a33";
+        bloco.style.borderRadius = "10px";
+        bloco.style.padding = "12px";
+        bloco.style.marginBottom = "15px";
+        bloco.style.cursor = "pointer";
 
         const h = document.createElement("h3");
         h.style.color = "var(--success)";
