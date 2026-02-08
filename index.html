@@ -818,7 +818,7 @@ async function restaurarCIs() {
 function abrirModalRestore(cis, zip) {
 
     const listaCIs = document.getElementById("listaCIs");
-    listaCIs.innerHTML = "";
+    listaCIs.innerHTML = ""; // limpa o modal antes de preencher
 
     cis.forEach(ci => {
 
@@ -827,7 +827,6 @@ function abrirModalRestore(cis, zip) {
         bloco.style.borderRadius = "10px";
         bloco.style.padding = "12px";
         bloco.style.marginBottom = "15px";
-        bloco.style.cursor = "pointer"; // indica que é clicável
 
         const h = document.createElement("h3");
         h.style.color = "var(--success)";
@@ -839,7 +838,7 @@ function abrirModalRestore(cis, zip) {
         detalhes.style.borderRadius = "10px";
         detalhes.style.padding = "10px";
         detalhes.style.fontSize = "13px";
-        detalhes.style.marginTop = "5px";
+        detalhes.style.marginBottom = "10px";
 
         detalhes.innerHTML = `
 <b>Serviço:</b> ${ci.servico}<br>
@@ -848,49 +847,42 @@ function abrirModalRestore(cis, zip) {
 <b>Fim:</b> ${ci.fim ? new Date(ci.fim).toLocaleString() : "-"}<br>
 <b>Relato:</b> ${ci.relato || "-"}
 `;
-
         bloco.appendChild(detalhes);
 
-        // ao clicar no bloco, abre o modal de fotos
-        bloco.onclick = () => {
-            abrirModalFotos(ci, zip);
-        };
+        const fotosDiv = document.createElement("div");
+       fotosDiv.style.display = "flex";
+fotosDiv.style.flexWrap = "wrap";
+fotosDiv.style.gap = "10px";
+fotosDiv.style.justifyContent = "flex-start"; // garante que as fotos fiquem visíveis no mobile
+
+        // percorre as fotos no zip
+        Object.keys(zip.files).forEach(async filePath => {
+            if (filePath.startsWith(ci.__pasta + "/fotos/")) {
+
+                const file = zip.file(filePath);
+                if (!file) return;
+
+                const blob = await file.async("blob");
+
+                const img = document.createElement("img");
+                img.src = URL.createObjectURL(blob);
+          img.style.width = "100%";       // ocupa 100% da coluna flex
+img.style.maxWidth = "90px";     // mas não ultrapassa 90px
+img.style.height = "auto";       // altura proporcional
+img.style.objectFit = "cover";
+img.style.borderRadius = "8px";
+                fotosDiv.appendChild(img);
+            }
+        });
+
+        bloco.appendChild(fotosDiv);
 
         listaCIs.appendChild(bloco);
     });
 
-    // abre o modal de restore
+    // abre o modal
     document.getElementById("modalRestore").style.display = "flex";
 }
-
-function abrirModalFotos(ci, zip) {
-
-    const listaFotos = document.getElementById("listaFotos");
-    listaFotos.innerHTML = ""; // limpa fotos anteriores
-
-    Object.keys(zip.files).forEach(async filePath => {
-
-        if (filePath.startsWith(ci.__pasta + "/fotos/")) {
-
-            const file = zip.file(filePath);
-            if (!file) return;
-
-            const blob = await file.async("blob");
-
-            const img = document.createElement("img");
-            img.src = URL.createObjectURL(blob);
-            img.style.width = "90px";
-            img.style.height = "90px";
-            img.style.objectFit = "cover";
-            img.style.borderRadius = "8px";
-
-            listaFotos.appendChild(img);
-        }
-    });
-
-    document.getElementById("modalFotos").style.display = "flex";
-}
-
 function fecharModal(id) {
     document.getElementById(id).style.display = "none";
 }
