@@ -599,6 +599,13 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
     </div>
 </div>
 
+<!-- MODAL DE FOTO GRANDE -->
+<div id="modalFotoGrande" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); justify-content:center; align-items:center; z-index:9999;">
+    <span id="btnFecharFotoGrande" style="position:absolute; top:20px; right:30px; font-size:30px; color:white; cursor:pointer;">&times;</span>
+    <img id="fotoGrande" src="" style="max-width:90%; max-height:90%; border-radius:10px; object-fit:contain;">
+</div>
+
+
 <!-- MODAL IMAGEM -->
 <div id="modalImagem" class="img-modal">
     <img id="imgGrande" src="">
@@ -833,6 +840,28 @@ function abrirModalRestore(cis, zip) {
 }
 
 // ------------------- MODAL FOTOS -------------------
+// ------------------- ABRIR FOTO GRANDE -------------------
+function abrirFotoGrande(src) {
+    const modal = document.getElementById("modalFotoGrande");
+    const img = document.getElementById("fotoGrande");
+
+    img.src = src;
+    modal.style.display = "flex";
+}
+
+// ------------------- FECHAR FOTO GRANDE -------------------
+document.getElementById("btnFecharFotoGrande").onclick = () => {
+    document.getElementById("modalFotoGrande").style.display = "none";
+};
+
+// fecha ao clicar na sombra fora da imagem
+document.getElementById("modalFotoGrande").onclick = (e) => {
+    if (e.target.id === "modalFotoGrande") {
+        e.target.style.display = "none";
+    }
+};
+
+// ------------------- ALTERAÇÃO NO MODAL RESTORE -------------------
 async function abrirModalFotos(ci, zip) {
     const listaFotos = document.getElementById("listaFotos");
     if (!listaFotos) return console.error("Elemento listaFotos não encontrado");
@@ -854,10 +883,15 @@ async function abrirModalFotos(ci, zip) {
                 const blob = await file.async("blob");
                 const img = document.createElement("img");
                 img.src = URL.createObjectURL(blob);
-                img.style.width = "200px";
+                img.style.width = "200px";  // miniatura
                 img.style.height = "auto";
                 img.style.objectFit = "cover";
                 img.style.borderRadius = "8px";
+                img.style.cursor = "pointer";
+
+                // adiciona evento de clique para abrir maior
+                img.onclick = () => abrirFotoGrande(img.src);
+
                 fotosDiv.appendChild(img);
             } catch (err) {
                 console.error("Erro ao ler a foto do zip:", filePath, err);
