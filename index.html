@@ -2,9 +2,6 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-
-
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KF Engenharia - Gestor de Campo</title>
 <style>
@@ -326,20 +323,6 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
     <div class="container-modal">
         <span class="btn-fechar" onclick="fecharModal('modalHistorico')">&times;</span>
         <h2 style="color:var(--success)">CIs Registradas</h2>
-<div style="display:flex;gap:10px;margin-bottom:15px">
-
-<button class="btn-acao" onclick="backupCIsDoMes()">
-📥 Backup do mês
-</button>
-
-<button class="btn-acao" style="background:#16a34a"
-onclick="document.getElementById('restoreZip').click()">
-📤 Restaurar CI
-</button>
-
-<input type="file" id="restoreZip" hidden accept=".zip" onchange="restaurarCI()">
-
-</div>
 
       <!-- FILTROS CIs REGISTRADAS -->
 <div id="filtrosHistorico" style="display:flex; gap:15px; margin-bottom:15px; align-items:center; flex-wrap:wrap;">
@@ -469,19 +452,7 @@ onclick="document.getElementById('restoreZip').click()">
 
 
 
-<div id="modalRestore" class="modal">
-<div class="container-modal" style="max-width:1200px">
 
-<span class="btn-fechar" onclick="fecharRestore()">&times;</span>
-
-<h2 style="color:#16a34a">Backup Restaurado</h2>
-
-<div id="restoreResultado"
-style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px">
-</div>
-
-</div>
-</div>
 
 <!-- MODAL IMAGEM -->
 <div id="modalImagem" class="img-modal">
@@ -491,8 +462,7 @@ style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));ga
         <button class="btn-fechar-img" onclick="fecharModal('modalImagem')">✖ Fechar</button>
     </div>
 </div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
 <script>
 let selecionados = [];
 let atividadesAtivas = [];
@@ -991,52 +961,6 @@ function previewImages(input){
         reader.readAsDataURL(file);
     });
 }
-
-
-async function restaurarCI() {
-
-    const input = document.getElementById("restoreZip");
-    const file = input.files[0];
-
-    if (!file) return;
-
-    try {
-
-        const zip = await JSZip.loadAsync(file);
-
-        let restauradas = 0;
-
-        for (const nomeArquivo in zip.files) {
-
-            // só TXT das CIs
-            if (!nomeArquivo.endsWith(".txt")) continue;
-
-            const texto = await zip.files[nomeArquivo].async("string");
-            const ci = JSON.parse(texto);
-
-            // recria CI no backend
-            await fetch(`${API_BASE}/atividades/restaurar`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(ci)
-            });
-
-            restauradas++;
-        }
-
-        alert(`✅ ${restauradas} CIs restauradas com sucesso!`);
-
-        input.value = "";
-        atualizarHistorico();
-
-    } catch (err) {
-
-        console.error(err);
-        alert("Erro ao restaurar ZIP!");
-
-    }
-}
-
 
 // TOAST
 function mostrarToast(msg){ const t=document.getElementById('toastSucesso'); document.getElementById('toastTexto').textContent=msg; t.style.display='block'; t.classList.add('animar-entrada'); setTimeout(()=>t.style.display='none',2000); }
