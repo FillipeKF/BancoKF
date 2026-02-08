@@ -722,7 +722,6 @@ async function backupCIsDoMes() {
         if (!res.ok) throw "Erro ao buscar CIs";
 
         const data = await res.json();
-
         if (!Array.isArray(data) || data.length === 0) {
             alert("Não há CIs nesse período");
             return;
@@ -732,53 +731,73 @@ async function backupCIsDoMes() {
 
         for (const ci of data) {
             const pastaCI = zip.folder(`CI_${ci.id}_${ci.inicio}`);
-
-            // salva dados.txt
             pastaCI.file("dados.txt", JSON.stringify(ci, null, 2));
 
-            // garante array real de fotos
             let fotos = [];
             try {
                 fotos = Array.isArray(ci.fotos) ? ci.fotos : JSON.parse(ci.fotos || "[]");
-            } catch {
-                fotos = [];
-            }
+            } catch { fotos = []; }
 
-            // baixa fotos no mesmo nível da pasta do CI
             if (fotos.length > 0) {
                 for (let i = 0; i < fotos.length; i++) {
-                    let foto = String(fotos[i]).replace("[", "").replace("]", "").replace(/"/g, "").trim();
-                    if (!foto.startsWith("http")) {
-                        console.warn("Foto ignorada:", foto);
-                        continue;
-                    }
+                    let foto = String(fotos[i]).replace("[","").replace("]","").replace(/"/g,"").trim();
+                    if (!foto.startsWith("http")) continue;
 
                     try {
                         const fotoBlob = await fetch(foto).then(r => r.blob());
-                        pastaCI.file(`foto${i + 1}.jpg`, fotoBlob); // ✔ salva no mesmo nível
-                    } catch (e) {
-                        console.warn("Erro ao baixar:", foto);
-                        continue;
-                    }
+                        pastaCI.file(`foto${i+1}.jpg`, fotoBlob);
+                    } catch (e) { console.warn("Erro ao baixar:", foto); continue; }
                 }
             }
         }
 
-        // gera zip
         const content = await zip.generateAsync({ type: "blob" });
         saveAs(content, `backup_CI_${month}-${year}.zip`);
 
-        // opção para apagar CIs do servidor
-        if (confirm("Backup concluído! Deseja apagar essas CIs do servidor?")) {
-            const ids = data.map(c => c.id);
-            await fetch(`${API_BASE}/atividades/apagar`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ ids })
+        // ===============================
+        // Modal de confirmação para apagar
+        // ===============================
+        const modalConfirm = document.getElementById("modalConfirmarBackup");
+        modalConfirm.style.display = "flex";
+
+        const btnSim = document.getElementById("btnSimBackup");
+        const btnNao = document.getElementById("btnNaoBackup");
+
+        btnNao.onclick = () => { modalConfirm.style.display = "none"; };
+
+        btnSim.onclick = async () => {
+    modalConfirm.style.display = "none";
+    const ids = data.map(c => c.id);
+
+    try {
+        await fetch(`${API_BASE}/atividades/apagar`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ids })
+        });
+
+        // Remove as CIs apagadas do modal
+        const listaCIs = document.getElementById("listaCIs");
+        if (listaCIs) {
+            data.forEach(ci => {
+                const bloco = listaCIs.querySelector(`div[data-ci-id='${ci.id}']`);
+                if (bloco) listaCIs.removeChild(bloco);
             });
-            alert("CIs apagadas do servidor!");
-            atualizarHistorico();
         }
+
+        // Notificação verde
+        const notif = document.getElementById("notificacaoBackup");
+        notif.style.display = "block";
+
+        atualizarHistorico();
+
+        setTimeout(() => { notif.style.display = "none"; }, 3000);
+
+    } catch (err) {
+        console.error("Erro ao apagar CIs:", err);
+        alert("Falha ao apagar CIs do servidor!");
+    }
+};
 
     } catch (err) {
         console.error(err);
