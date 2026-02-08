@@ -684,7 +684,6 @@ async function backupCIsDoMes() {
             zip.file(`${ci.id}-${ci.inicio}.txt`, JSON.stringify(ci, null, 2));
 
             // ===============================
-            // CONVERTE FOTOS PARA ARRAY REAL
             // GARANTE ARRAY REAL DE FOTOS
             // ===============================
             let fotos = [];
@@ -696,7 +695,6 @@ async function backupCIsDoMes() {
             }
 
             // ===============================
-            // BAIXA FOTOS
             // BAIXA FOTOS COM BLINDAGEM
             // ===============================
             if (fotos.length > 0) {
@@ -705,13 +703,6 @@ async function backupCIsDoMes() {
 
                 for (let i = 0; i < fotos.length; i++) {
 
-                    const foto = fotos[i];
-
-                    if (!foto || !foto.startsWith("http")) continue;
-
-                    const fotoBlob = await fetch(foto).then(r => r.blob());
-
-                    folder.file(`foto${i + 1}.jpg`, fotoBlob);
                     let foto = String(fotos[i])
                         .replace("[", "")
                         .replace("]", "")
@@ -734,14 +725,12 @@ async function backupCIsDoMes() {
             }
         }
 
-        // Gera ZIP
         // ===============================
         // GERA ZIP
         // ===============================
         const content = await zip.generateAsync({ type: "blob" });
         saveAs(content, `backup_CI_${month}-${year}.zip`);
 
-        // Apagar do servidor
         // ===============================
         // APAGA DO SERVIDOR
         // ===============================
