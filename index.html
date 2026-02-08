@@ -770,7 +770,7 @@ pastaCI.file("dados.txt", JSON.stringify(ci, null, 2));
 
                     try {
                         const fotoBlob = await fetch(foto).then(r => r.blob());
-                        folder.file(`foto${i + 1}.jpg`, fotoBlob);
+                    folderFotos.file(`foto${i + 1}.jpg`, fotoBlob);
                     } catch (e) {
                         console.warn("Erro ao baixar:", foto);
                         continue;
