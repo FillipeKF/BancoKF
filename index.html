@@ -801,97 +801,103 @@ async function restaurarCIs() {
 // ------------------- MODAL TEMPORÁRIO DE RESTORE -------------------
 function abrirModalRestore(cis, zip) {
 
-     const modal = document.createElement("div");
+    const modal = document.createElement("div");
     modal.className = "modal animar-entrada";
-modal.style.position = "fixed";
-modal.style.top = "50%";
-modal.style.left = "50%";
-modal.style.transform = "translate(-50%, -50%)";
-modal.style.width = "90%";
-modal.style.maxWidth = "800px";
-modal.style.maxHeight = "80vh";
-modal.style.display = "flex";
-modal.style.flexDirection = "column";
-modal.style.padding = "20px";
-modal.style.overflowY = "auto";
-modal.style.background = "#1b1e24";
-modal.style.borderRadius = "15px";
-modal.style.boxShadow = "0 0 30px rgba(0,0,0,.6)";
-modal.style.zIndex = 9999;
+    modal.style.position = "fixed";
+    modal.style.top = "0";
+    modal.style.left = "0";
+    modal.style.width = "100%";
+    modal.style.height = "100%";
+    modal.style.background = "rgba(0,0 ,0 ,.6)";
+    modal.style.zIndex = 9999;
+    modal.style.display = "flex";
+    modal.style.justifyContent = "center";
+    modal.style.alignItems = "center";
 
-    const btnFechar = document.createElement("span");
-    btnFechar.innerHTML = "&times;";
-    btnFechar.style.alignSelf = "flex-end";
-    btnFechar.style.cursor = "pointer";
-    btnFechar.style.fontSize = "25px";
-    btnFechar.onclick = () => document.body.removeChild(modal);
+    const container = document.createElement("div");
+    container.className = "container-modal";
+    container.style.background = "#1b1e24";
+    container.style.borderRadius = "15px";
+    container.style.padding = "20px";
+    container.style.width = "90%";
+    container.style.maxWidth = "800px";
+    container.style.maxHeight = "85vh";
+    container.style.overflowY = "auto";
 
-    modal.appendChild(btnFechar);
+    const fechar = document.createElement("span");
+    fechar.innerHTML = "&times;";
+    fechar.className = "btn-fechar";
+    fechar.style.cursor = "pointer";
+    fechar.style.fontSize = "28px";
+    fechar.style.float = "right";
+    fechar.onclick = () => document.body.removeChild(modal);
+
+    container.appendChild(fechar);
+
+    const titulo = document.createElement("h2");
+    titulo.style.color = "var(--success)";
+    titulo.textContent = "Restaurar CIs do Backup";
+    container.appendChild(titulo);
 
     cis.forEach(ci => {
-        const div = document.createElement("div");
-        div.style.background = "#252a33";
-        div.style.margin = "10px 0";
-        div.style.padding = "10px";
-        div.style.borderRadius = "10px";
+
+        const bloco = document.createElement("div");
+        bloco.style.background = "#252a33";
+        bloco.style.borderRadius = "10px";
+        bloco.style.padding = "12px";
+        bloco.style.marginBottom = "15px";
 
         const h = document.createElement("h3");
-        const data = new Date(ci.inicio);
-const mes = data.getMonth() + 1;
-const ano = data.getFullYear();
+        h.style.color = "var(--success)";
+        h.style.marginBottom = "5px";
+        h.textContent = `CI ${ci.ci} — ${new Date(ci.inicio).toLocaleDateString()}`;
+        bloco.appendChild(h);
 
-h.textContent = `CI ${ci.id} — ${mes}/${ano}`;
-        h.textContent = `CI: ${ci.id} - ${ci.inicio}`;
-        div.appendChild(h);
+        const detalhes = document.createElement("div");
+        detalhes.style.background = "#16191f";
+        detalhes.style.borderRadius = "10px";
+        detalhes.style.padding = "10px";
+        detalhes.style.fontSize = "13px";
+        detalhes.style.marginBottom = "10px";
 
-        const pre = document.createElement("pre");
-        pre.textContent = JSON.stringify(ci, null, 2);
-        pre.style.fontSize = "12px";
-        div.appendChild(pre);
+        detalhes.innerHTML = `
+<b>Serviço:</b> ${ci.servico}<br>
+<b>Equipe:</b> ${ci.equipe}<br>
+<b>Início:</b> ${new Date(ci.inicio).toLocaleString()}<br>
+<b>Fim:</b> ${ci.fim ? new Date(ci.fim).toLocaleString() : "-"}<br>
+<b>Relato:</b> ${ci.relato || "-"}
+`;
 
-      // garante array de fotos
-let fotos = [];
+        bloco.appendChild(detalhes);
 
-if (Array.isArray(ci.fotos)) {
-    fotos = ci.fotos;
-} else if (typeof ci.fotos === "string") {
-    try {
-        fotos = JSON.parse(ci.fotos);
-    } catch {
-        fotos = [];
-    }
-}
+        const fotosDiv = document.createElement("div");
+        fotosDiv.style.display = "flex";
+        fotosDiv.style.flexWrap = "wrap";
+        fotosDiv.style.gap = "10px";
 
-if (fotos.length > 0) {
-const fotosDiv = document.createElement("div");
-fotosDiv.style.display = "flex";
-fotosDiv.style.flexWrap = "wrap";
-fotosDiv.style.gap = "10px";
+        Object.keys(zip.files).forEach(async filePath => {
 
-Object.keys(zip.files).forEach(async filePath => {
+            if (filePath.startsWith(ci.__pasta + "/fotos/")) {
 
-    if (filePath.startsWith(ci.__pasta + "/fotos/")) {
+                const blob = await zip.file(filePath).async("blob");
 
-        const blob = await zip.file(filePath).async("blob");
+                const img = document.createElement("img");
+                img.src = URL.createObjectURL(blob);
+                img.style.width = "90px";
+                img.style.height = "90px";
+                img.style.objectFit = "cover";
+                img.style.borderRadius = "8px";
 
-        const img = document.createElement("img");
-        img.src = URL.createObjectURL(blob);
-        img.style.width = "80px";
-        img.style.height = "80px";
-        img.style.objectFit = "cover";
-        img.style.borderRadius = "8px";
+                fotosDiv.appendChild(img);
+            }
+        });
 
-        fotosDiv.appendChild(img);
-    }
-});
+        bloco.appendChild(fotosDiv);
 
-div.appendChild(fotosDiv);
-
-        }
-
-        modal.appendChild(div);
+        container.appendChild(bloco);
     });
 
+    modal.appendChild(container);
     document.body.appendChild(modal);
 }
 
