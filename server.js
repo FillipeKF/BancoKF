@@ -371,6 +371,43 @@ app.post("/atividades/apagar", async (req,res)=>{
 });
 
 
+app.post("/atividades/restaurar", express.json({ limit: "50mb" }), async (req,res) => {
+
+    const cis = req.body.cis;
+
+    if (!Array.isArray(cis)) {
+        return res.status(400).json({ erro: "Formato inválido" });
+    }
+
+    try {
+
+        for (const ci of cis) {
+
+            await pool.query(`
+                INSERT INTO atividades
+                (ci, equipe, servico, local, inicio, fim, relato, fotos)
+                VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+            `,[
+                ci.ci,
+                JSON.stringify(ci.equipe),
+                ci.servico,
+                ci.local,
+                ci.inicio,
+                ci.fim,
+                ci.relato,
+                JSON.stringify(ci.fotos || [])
+            ]);
+        }
+
+        res.json({ sucesso:true });
+
+    } catch(err){
+        console.error(err);
+        res.status(500).json({ erro:"Falha ao restaurar" });
+    }
+});
+
+
 // =======================
 // INICIAR SERVIDOR
 // =======================
