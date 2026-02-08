@@ -793,8 +793,13 @@ async function restaurarCIs() {
     input.click();
 }
 
+
+
+
 // ------------------- MODAL TEMPORÁRIO DE RESTORE -------------------
 function abrirModalRestore(cis, zip) {
+
+     const modal = document.createElement("div");
     modal.className = "modal animar-entrada";
 modal.style.position = "fixed";
 modal.style.top = "50%";
