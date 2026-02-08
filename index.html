@@ -189,6 +189,15 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
   font-size: 14px;
 }
 
+#modalRestore .container-modal img,
+#modalFotos .container-modal img {
+    width: 100%;
+    max-width: 90px;
+    height: auto;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
 /* Conteúdo principal (inicialmente acessível, overlay bloqueia visual) */
 #mainContent { display: block; }
 
@@ -868,8 +877,13 @@ function abrirModalFotos(ci, zip) {
     const listaFotos = document.getElementById("listaFotos");
     listaFotos.innerHTML = ""; // limpa fotos anteriores
 
-    Object.keys(zip.files).forEach(async filePath => {
+    const fotosDiv = document.createElement("div");
+    fotosDiv.style.display = "flex";
+    fotosDiv.style.flexWrap = "wrap";
+    fotosDiv.style.gap = "10px";
+    fotosDiv.style.justifyContent = "center"; // centraliza fotos no mobile
 
+    Object.keys(zip.files).forEach(async filePath => {
         if (filePath.startsWith(ci.__pasta + "/fotos/")) {
 
             const file = zip.file(filePath);
@@ -879,14 +893,17 @@ function abrirModalFotos(ci, zip) {
 
             const img = document.createElement("img");
             img.src = URL.createObjectURL(blob);
-            img.style.width = "90px";
-            img.style.height = "90px";
+            img.style.width = "100%";       // responsivo
+            img.style.maxWidth = "90px";    // não ultrapassa 90px
+            img.style.height = "auto";      // mantém proporção
             img.style.objectFit = "cover";
             img.style.borderRadius = "8px";
 
-            listaFotos.appendChild(img);
+            fotosDiv.appendChild(img);
         }
     });
+
+    listaFotos.appendChild(fotosDiv);
 
     document.getElementById("modalFotos").style.display = "flex";
 }
