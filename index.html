@@ -810,9 +810,11 @@ function abrirModalRestore(cis, zip) {
     modal.style.height = "100%";
     modal.style.background = "rgba(0,0 ,0 ,.6)";
     modal.style.zIndex = 9999;
-    modal.style.display = "flex";
-    modal.style.justifyContent = "center";
-    modal.style.alignItems = "center";
+   modal.style.display = "flex";
+modal.style.alignItems = "center";
+modal.style.justifyContent = "center";
+modal.style.padding = "20px";
+modal.style.boxSizing = "border-box";
 
     const container = document.createElement("div");
     container.className = "container-modal";
@@ -823,7 +825,7 @@ function abrirModalRestore(cis, zip) {
     container.style.maxWidth = "800px";
     container.style.maxHeight = "85vh";
     container.style.overflowY = "auto";
-
+container.style.margin = "auto";
     const fechar = document.createElement("span");
     fechar.innerHTML = "&times;";
     fechar.className = "btn-fechar";
