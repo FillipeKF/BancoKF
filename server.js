@@ -371,42 +371,66 @@ app.post("/atividades/apagar", async (req,res)=>{
 });
 
 
-app.post("/atividades/restaurar", express.json({ limit: "50mb" }), async (req,res) => {
+const uploadRestore = multer({ dest: "restore_tmp/" });
 
-    const cis = req.body.cis;
-
-    if (!Array.isArray(cis)) {
-        return res.status(400).json({ erro: "Formato inválido" });
-    }
+app.post("/restore/pasta", uploadRestore.any(), async (req,res)=>{
 
     try {
 
-        for (const ci of cis) {
+        const files = req.files;
 
-            await pool.query(`
-                INSERT INTO atividades
-                (ci, equipe, servico, local, inicio, fim, relato, fotos)
-                VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
-            `,[
-                ci.ci,
-                JSON.stringify(ci.equipe),
-                ci.servico,
-                ci.local,
-                ci.inicio,
-                ci.fim,
-                ci.relato,
-                JSON.stringify(ci.fotos || [])
-            ]);
+        let jsonFile = files.find(f => f.originalname === "dados.json");
+
+        if (!jsonFile) {
+            return res.status(400).json({ erro: "dados.json não encontrado" });
         }
 
-        res.json({ sucesso:true });
+        const ciData = JSON.parse(fs.readFileSync(jsonFile.path,"utf8"));
 
-    } catch(err){
-        console.error(err);
-        res.status(500).json({ erro:"Falha ao restaurar" });
+        // Upload fotos novamente
+        let fotos = [];
+
+        for (const file of files) {
+
+            if (file.originalname.startsWith("foto")) {
+
+                const buffer = fs.readFileSync(file.path);
+
+                const nome = Date.now()+"-"+file.originalname;
+
+                await supabase.storage
+                    .from("uploads")
+                    .upload(nome, buffer, { contentType:"image/jpeg" });
+
+                const url = `${SUPABASE_URL}/storage/v1/object/public/uploads/${nome}`;
+
+                fotos.push(url);
+            }
+        }
+
+        // Insere no banco
+        await pool.query(`
+            INSERT INTO atividades
+            (ci,equipe,servico,local,inicio,fim,relato,fotos)
+            VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+        `,[
+            ciData.ci,
+            JSON.stringify(ciData.equipe),
+            ciData.servico,
+            ciData.local,
+            ciData.inicio,
+            ciData.fim,
+            ciData.relato,
+            JSON.stringify(fotos)
+        ]);
+
+        res.json({ ok:true });
+
+    } catch(e){
+        console.error(e);
+        res.status(500).json({ erro:"Restore falhou" });
     }
 });
-
 
 // =======================
 // INICIAR SERVIDOR
