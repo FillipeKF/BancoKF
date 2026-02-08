@@ -770,25 +770,28 @@ async function backupCIsDoMes() {
 
         btnNao.onclick = () => { modalConfirm.style.display = "none"; };
 
+// ======================= BOTÃO SIM DO BACKUP =======================
 btnSim.onclick = async () => {
     // 1️⃣ Bloqueia reabertura do modalRestore
     bloquearRestore = true;
 
-    // 2️⃣ Fecha ambos os modais imediatamente
+    // 2️⃣ Fecha modal de confirmação
     fecharModal("modalConfirmarBackup");
-    fecharModal("modalRestore");
+
+    // 3️⃣ Fecha modal de CIs registradas usando a função separada
+    fecharModalCIsRegistradas();
 
     const ids = data.map(c => c.id);
 
     try {
-        // 3️⃣ Apaga CIs no servidor
+        // 4️⃣ Apaga CIs no servidor
         await fetch(`${API_BASE}/atividades/apagar`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ ids })
         });
 
-        // 4️⃣ Remove blocos das CIs do DOM
+        // 5️⃣ Remove blocos das CIs do DOM
         const listaCIs = document.getElementById("listaCIs");
         if (listaCIs) {
             ids.forEach(id => {
@@ -797,14 +800,14 @@ btnSim.onclick = async () => {
             });
         }
 
-        // 5️⃣ Notificação verde
+        // 6️⃣ Notificação verde
         const notif = document.getElementById("notificacaoBackup");
         if (notif) {
             notif.style.display = "block";
             setTimeout(() => { notif.style.display = "none"; }, 3000);
         }
 
-        // 6️⃣ Atualiza histórico sem reabrir modalRestore
+        // 7️⃣ Atualiza histórico sem reabrir modalRestore
         if (typeof atualizarHistorico === "function") {
             atualizarHistorico(true); // envia flag para não reabrir modal
         }
@@ -813,12 +816,15 @@ btnSim.onclick = async () => {
         console.error("Erro ao apagar CIs:", err);
         alert("Falha ao apagar CIs do servidor!");
     } finally {
-        // 7️⃣ Libera bloqueio
+        // 8️⃣ Libera bloqueio
         bloquearRestore = false;
     }
 };
 
-
+// ======================= FUNÇÃO PARA FECHAR MODAL DE CIs =======================
+function fecharModalCIsRegistradas() {
+    fecharModal("modalRestore"); // Fecha o modal de CIs registradas
+}
 
     } catch (err) {
         console.error(err);
