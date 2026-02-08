@@ -599,10 +599,16 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
     </div>
 </div>
 
-<!-- MODAL DE FOTO GRANDE -->
-<div id="modalFotoGrande" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); justify-content:center; align-items:center; z-index:9999;">
-    <span id="btnFecharFotoGrande" style="position:absolute; top:20px; right:30px; font-size:30px; color:white; cursor:pointer;">&times;</span>
-    <img id="fotoGrande" src="" style="max-width:70%; max-height:70%; border-radius:10px; object-fit:contain;">
+<!-- MODAL DE FOTO GRANDE AJUSTADO -->
+<div id="modalFotoGrande" class="modal" 
+     style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); justify-content:center; align-items:center; z-index:9999;">
+    
+    <!-- Container da imagem -->
+    <div style="position:relative; background:#1b1e24; border-radius:15px; padding:10px; max-width:90%; max-height:90%; display:flex; justify-content:center; align-items:center; flex-direction:column;">
+        <span id="btnFecharFotoGrande" 
+              style="position:absolute; top:5px; right:10px; font-size:25px; color:white; cursor:pointer;">&times;</span>
+        <img id="fotoGrande" src="" style="max-width:90%; max-height:80vh; border-radius:10px; object-fit:contain;">
+    </div>
 </div>
 
 
@@ -854,10 +860,11 @@ document.getElementById("btnFecharFotoGrande").onclick = () => {
     document.getElementById("modalFotoGrande").style.display = "none";
 };
 
-// fecha ao clicar na sombra fora da imagem
+// fecha ao clicar na sombra fora do container
 document.getElementById("modalFotoGrande").onclick = (e) => {
-    if (e.target.id === "modalFotoGrande") {
-        e.target.style.display = "none";
+    const container = e.currentTarget.querySelector('div');
+    if (e.target === e.currentTarget) {
+        e.currentTarget.style.display = "none";
     }
 };
 
