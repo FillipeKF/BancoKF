@@ -888,7 +888,8 @@ function abrirModalRestore(cis, zip) {
         listaCIs.appendChild(bloco);
     });
 
-    document.getElementById("modalRestore").style.display = "flex";
+    const modal = document.getElementById("modalRestore");
+    if(modal) modal.style.display = "flex";
 }
 
 function abrirModalFotos(ci, zip) {
@@ -902,8 +903,6 @@ function abrirModalFotos(ci, zip) {
     fotosDiv.style.flexWrap = "wrap";
     fotosDiv.style.gap = "10px";
     fotosDiv.style.justifyContent = "center";
-    fotosDiv.style.alignItems = "center";
-    fotosDiv.style.width = "100%";
 
     Object.keys(zip.files).forEach(async filePath => {
         if(filePath.startsWith(ci.__pasta + "/fotos/")) {
@@ -913,8 +912,6 @@ function abrirModalFotos(ci, zip) {
             const blob = await file.async("blob");
             const img = document.createElement("img");
             img.src = URL.createObjectURL(blob);
-
-            // tamanho responsivo garantido
             img.style.width = "80px";
             img.style.height = "80px";
             img.style.objectFit = "cover";
@@ -925,7 +922,9 @@ function abrirModalFotos(ci, zip) {
     });
 
     listaFotos.appendChild(fotosDiv);
-    document.getElementById("modalFotos").style.display = "flex";
+
+    const modal = document.getElementById("modalFotos");
+    if(modal) modal.style.display = "flex";
 }
 
 function fecharModal(id) {
