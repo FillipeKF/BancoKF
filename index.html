@@ -765,7 +765,7 @@ async function backupCIsDoMes() {
 
         btnNao.onclick = () => { modalConfirm.style.display = "none"; };
 
-       btnSim.onclick = async () => {
+btnSim.onclick = async () => {
     modalConfirm.style.display = "none"; // fecha modal de confirmação
     const ids = data.map(c => c.id);
 
@@ -776,16 +776,16 @@ async function backupCIsDoMes() {
             body: JSON.stringify({ ids })
         });
 
-        // Remove as CIs apagadas do modal
+        // Remove os blocos das CIs apagadas
         const listaCIs = document.getElementById("listaCIs");
         if (listaCIs) {
-            data.forEach(ci => {
-                const bloco = listaCIs.querySelector(`div[data-ci-id='${ci.id}']`);
-                if (bloco) listaCIs.removeChild(bloco);
+            ids.forEach(id => {
+                const bloco = listaCIs.querySelector(`div[data-ci-id='${id}']`);
+                if (bloco) bloco.remove();
             });
         }
 
-        // FECHA MODAL DE RESTORE AUTOMATICAMENTE
+        // 🔹 Fecha modal de restore completamente
         const modalRestore = document.getElementById("modalRestore");
         if (modalRestore) modalRestore.style.display = "none";
 
@@ -801,7 +801,6 @@ async function backupCIsDoMes() {
         console.error("Erro ao apagar CIs:", err);
         alert("Falha ao apagar CIs do servidor!");
     }
-
 };
 
     } catch (err) {
