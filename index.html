@@ -728,7 +728,7 @@ async function backupCIsDoMes() {
             return;
         }
 
-        backupDataAtual = data; // salva globalmente para o botão SIM
+        backupDataAtual = data; // salva dados atuais
 
         const zip = new JSZip();
 
@@ -737,9 +737,8 @@ async function backupCIsDoMes() {
             pastaCI.file("dados.txt", JSON.stringify(ci, null, 2));
 
             let fotos = [];
-            try {
-                fotos = Array.isArray(ci.fotos) ? ci.fotos : JSON.parse(ci.fotos || "[]");
-            } catch { fotos = []; }
+            try { fotos = Array.isArray(ci.fotos) ? ci.fotos : JSON.parse(ci.fotos || "[]"); } 
+            catch { fotos = []; }
 
             if (fotos.length > 0) {
                 for (let i = 0; i < fotos.length; i++) {
@@ -767,7 +766,7 @@ async function backupCIsDoMes() {
     }
 }
 
-// ------------------- EVENTOS DOS BOTÕES SIM / NÃO -------------------
+// ------------------- BOTÕES SIM / NÃO -------------------
 document.addEventListener("DOMContentLoaded", () => {
     const btnSim = document.getElementById("btnSimBackup");
     const btnNao = document.getElementById("btnNaoBackup");
@@ -778,18 +777,19 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     btnSim.onclick = async () => {
-        modalConfirm.style.display = "none"; // fecha modal de confirmação
+        // Fecha modal de confirmação
+        modalConfirm.style.display = "none";
 
-        // 🔹 Fecha modal de CIs registradas
+        // Fecha modal de CIs registradas
         const modalRestore = document.getElementById("modalRestore");
         if (modalRestore) modalRestore.style.display = "none";
 
-        // 🔹 Notificação verde
+        // Notificação verde
         const notif = document.getElementById("notificacaoBackup");
         notif.style.display = "block";
         setTimeout(() => { notif.style.display = "none"; }, 3000);
 
-        // 🔹 Opcional: apagar do servidor
+        // Opcional: apagar do servidor
         try {
             const ids = backupDataAtual.map(c => c.id);
             await fetch(`${API_BASE}/atividades/apagar`, {
@@ -801,7 +801,8 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("Erro ao apagar CIs:", err);
         }
 
-        backupDataAtual = []; // limpa dados do backup corrente
+        // Limpa dados atuais
+        backupDataAtual = [];
     };
 });
 
