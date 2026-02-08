@@ -331,19 +331,66 @@ app.put("/itens/:id", async (req, res) => {
 
 
 // Retorna CIs filtradas por mês/ano
-app.get("/atividades/backup", async (req,res)=>{
-    try{
-        const { mes, ano } = req.query;
+const archiver = require("archiver");
+
+app.get("/atividades/backup", async (req, res) => {
+
+    const { mes, ano } = req.query;
+
+    if (!mes || !ano) return res.status(400).send("Informe mês e ano");
+
+    try {
+
         const r = await pool.query("SELECT * FROM atividades");
-        // Filtrar por mês/ano do campo inicio
-        const filtered = r.rows.filter(a => {
-            const d = new Date(a.inicio);
-            return (d.getMonth()+1 == Number(mes)) && (d.getFullYear() == Number(ano));
+
+        const cis = r.rows.filter(ci => {
+            const d = new Date(ci.inicio);
+            return d.getMonth()+1 == mes && d.getFullYear() == ano;
         });
-        res.json(filtered);
+
+        if (!cis.length) return res.status(404).send("Nenhuma CI");
+
+        res.setHeader("Content-Type","application/zip");
+        res.setHeader("Content-Disposition",`attachment; filename=CI_${mes}_${ano}.zip`);
+
+        const archive = archiver("zip",{ zlib:{ level:9 }});
+        archive.pipe(res);
+
+        for (const ci of cis) {
+
+            const pasta = `CI_${ci.ci}_${mes}_${ano}`;
+
+            // JSON da CI
+            archive.append(JSON.stringify(ci,null,2), {
+                name:`${pasta}/dados.json`
+            });
+
+            // Fotos
+            let fotos = [];
+
+            try {
+                fotos = Array.isArray(ci.fotos) ? ci.fotos : JSON.parse(ci.fotos||"[]");
+            } catch {}
+
+            for (let i=0;i<fotos.length;i++){
+
+                try{
+                    const response = await fetch(fotos[i]);
+                    const buffer = await response.arrayBuffer();
+
+                    archive.append(Buffer.from(buffer),{
+                        name:`${pasta}/fotos/foto${i+1}.jpg`
+                    });
+
+                }catch{}
+            }
+        }
+
+        await archive.finalize();
+
     } catch(err){
         console.error(err);
-        res.status(500).json({ error:"Erro ao buscar CIs" });
+        res.status(500).send("Erro backup");
     }
 });
 
