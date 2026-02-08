@@ -199,13 +199,6 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
 }
 
 
-@media (max-width: 480px) {
-    .modal .container-modal {
-        width: 98%;
-        max-width: 98%;
-        padding: 15px;
-    }
-}
 /* Conteúdo principal (inicialmente acessível, overlay bloqueia visual) */
 #mainContent { display: block; }
 
@@ -589,39 +582,21 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
 </div>
 
 <!-- MODAL RESTORE -->
-<!-- MODAL RESTORE -->
 <div id="modalRestore" class="modal" style="display:none;">
-  <div class="container-modal" style="width:95%; max-width:900px; max-height:85vh; overflow-y:auto;">
-    <span class="btn-fechar" onclick="fecharModal('modalRestore')">&times;</span>
-    <h2 style="color:var(--success)">Restaurar CIs do Backup</h2>
-    <div id="listaCIs"></div>
-  </div>
+    <div class="container-modal" style="width:95%; max-width:900px; max-height:85vh; overflow-y:auto;">
+        <span class="btn-fechar" onclick="fecharModal('modalRestore')">&times;</span>
+        <h2 style="color:var(--success)">Restaurar CIs do Backup</h2>
+        <div id="listaCIs"></div>
+    </div>
 </div>
 
-<!-- MODAL FOTOS -->
+<!-- MODAL PREVIEW FOTOS -->
 <div id="modalFotos" class="modal" style="display:none;">
-  <div class="container-modal" style="
-      width:95%; 
-      max-width:900px; 
-      max-height:85vh; 
-      overflow-y:auto; 
-      display:flex; 
-      flex-direction:column; 
-      align-items:center; 
-      justify-content:flex-start;
-      padding:20px;
-  ">
-    <span class="btn-fechar" onclick="fecharModal('modalFotos')">&times;</span>
-    <h2 style="color:var(--success); margin-bottom:15px;">Fotos da CI</h2>
-    <div id="listaFotos" style="
-        display:flex; 
-        flex-wrap:wrap; 
-        gap:10px; 
-        justify-content:center;
-        align-items:center;
-        width:100%;
-    "></div>
-  </div>
+    <div class="container-modal" style="width:95%; max-width:900px; max-height:85vh; overflow-y:auto; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+        <span class="btn-fechar" onclick="fecharModal('modalFotos')">&times;</span>
+        <h2 style="color:var(--success)">Fotos da CI</h2>
+        <div id="listaFotos" style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center;"></div>
+    </div>
 </div>
 
 <!-- MODAL IMAGEM -->
