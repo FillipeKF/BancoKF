@@ -370,7 +370,34 @@ app.post("/atividades/apagar", async (req,res)=>{
     }
 });
 
+app.post("/atividades/restaurar", async (req, res) => {
 
+    const ci = req.body;
+
+    try {
+
+        await pool.query(`
+            INSERT INTO atividades
+            (ci, servico, local, equipe, inicio, fim, relato, fotos)
+            VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+        `, [
+            ci.ci,
+            ci.servico,
+            ci.local,
+            ci.equipe,
+            ci.inicio,
+            ci.fim,
+            ci.relato,
+            JSON.stringify(ci.fotos || [])
+        ]);
+
+        res.json({ ok: true });
+
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ error: e.message });
+    }
+});
 // =======================
 // INICIAR SERVIDOR
 // =======================
