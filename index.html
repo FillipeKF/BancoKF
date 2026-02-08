@@ -589,21 +589,39 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
 </div>
 
 <!-- MODAL RESTORE -->
+<!-- MODAL RESTORE -->
 <div id="modalRestore" class="modal" style="display:none;">
-    <div class="container-modal" style="width:95%; max-width:900px; max-height:85vh; overflow-y:auto;">
-        <span class="btn-fechar" onclick="fecharModal('modalRestore')">&times;</span>
-        <h2 style="color:var(--success)">Restaurar CIs do Backup</h2>
-        <div id="listaCIs"></div>
-    </div>
+  <div class="container-modal" style="width:95%; max-width:900px; max-height:85vh; overflow-y:auto;">
+    <span class="btn-fechar" onclick="fecharModal('modalRestore')">&times;</span>
+    <h2 style="color:var(--success)">Restaurar CIs do Backup</h2>
+    <div id="listaCIs"></div>
+  </div>
 </div>
 
-<!-- MODAL PREVIEW FOTOS -->
+<!-- MODAL FOTOS -->
 <div id="modalFotos" class="modal" style="display:none;">
-    <div class="container-modal" style="width:95%; max-width:900px; max-height:85vh; overflow-y:auto; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-        <span class="btn-fechar" onclick="fecharModal('modalFotos')">&times;</span>
-        <h2 style="color:var(--success)">Fotos da CI</h2>
-        <div id="listaFotos" style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center;"></div>
-    </div>
+  <div class="container-modal" style="
+      width:95%; 
+      max-width:900px; 
+      max-height:85vh; 
+      overflow-y:auto; 
+      display:flex; 
+      flex-direction:column; 
+      align-items:center; 
+      justify-content:flex-start;
+      padding:20px;
+  ">
+    <span class="btn-fechar" onclick="fecharModal('modalFotos')">&times;</span>
+    <h2 style="color:var(--success); margin-bottom:15px;">Fotos da CI</h2>
+    <div id="listaFotos" style="
+        display:flex; 
+        flex-wrap:wrap; 
+        gap:10px; 
+        justify-content:center;
+        align-items:center;
+        width:100%;
+    "></div>
+  </div>
 </div>
 
 <!-- MODAL IMAGEM -->
@@ -870,8 +888,7 @@ function abrirModalRestore(cis, zip) {
         listaCIs.appendChild(bloco);
     });
 
-    const modal = document.getElementById("modalRestore");
-    if(modal) modal.style.display = "flex";
+    document.getElementById("modalRestore").style.display = "flex";
 }
 
 function abrirModalFotos(ci, zip) {
@@ -885,6 +902,8 @@ function abrirModalFotos(ci, zip) {
     fotosDiv.style.flexWrap = "wrap";
     fotosDiv.style.gap = "10px";
     fotosDiv.style.justifyContent = "center";
+    fotosDiv.style.alignItems = "center";
+    fotosDiv.style.width = "100%";
 
     Object.keys(zip.files).forEach(async filePath => {
         if(filePath.startsWith(ci.__pasta + "/fotos/")) {
@@ -894,6 +913,8 @@ function abrirModalFotos(ci, zip) {
             const blob = await file.async("blob");
             const img = document.createElement("img");
             img.src = URL.createObjectURL(blob);
+
+            // tamanho responsivo garantido
             img.style.width = "80px";
             img.style.height = "80px";
             img.style.objectFit = "cover";
@@ -904,9 +925,7 @@ function abrirModalFotos(ci, zip) {
     });
 
     listaFotos.appendChild(fotosDiv);
-
-    const modal = document.getElementById("modalFotos");
-    if(modal) modal.style.display = "flex";
+    document.getElementById("modalFotos").style.display = "flex";
 }
 
 function fecharModal(id) {
