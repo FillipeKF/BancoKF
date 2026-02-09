@@ -73,6 +73,9 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
 .img-preview:hover { transform: scale(1.1); }
 
 .toast-container { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--success); color: white; padding: 25px 40px; border-radius: 20px; z-index: 10001; text-align: center; border: 2px solid #22c55e; }
+.toast-erro{
+    background:#dc2626 !important;
+}
 @keyframes zoomIn { from { transform: translate(-50%, -50%) scale(0.7); opacity: 0; } to { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
 .animar-entrada { animation: zoomIn 0.3s ease-out forwards; }
 
@@ -213,9 +216,10 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
     <div id="toastTexto" style="font-size:18px; font-weight:bold; margin-top:10px">Sucesso!</div>
 </div>
 <div id="toastErro" class="toast-container toast-erro">
-    <span style="font-size:50px">❌</span>
-    <div id="toastErroTexto" style="font-size:18px; font-weight:bold; margin-top:10px"></div>
+    <div id="toastErroTexto" style="font-size:18px; font-weight:bold; margin-bottom:10px"></div>
+    <span style="font-size:50px;color:white;">❌</span>
 </div>
+
 <!-- TOAST GENÉRICO PARA ALMOXARIFADO -->
 <div id="toastAlmoxarifado" class="toast-container" style="background:#16a34a;">
     <span style="font-size:30px">✅</span>
@@ -1167,6 +1171,7 @@ function mostrarToastErro(msg){
     t.classList.add('animar-entrada');
     setTimeout(()=>t.style.display='none',2000);
 }
+
 // ======================= ATIVIDADES =======================
 // Carrega atividades ativas do banco
 function carregarAtividades() {
