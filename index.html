@@ -1168,28 +1168,26 @@ function atualizarLocais(){
     sub.innerHTML = opts.map(x=>`<option value="${x}">${x}</option>`).join('');
 }// ======================= TOAST =======================
 function mostrarToast(msg){
-
-    const t = document.getElementById('toastSucesso');
-    document.getElementById('toastTexto').textContent = msg;
-
-    const audio = document.getElementById("audioSucesso");
-    if(audio){
-        audio.currentTime = 0;
-        audio.volume = 0.4;
-        audio.play().catch(()=>{});
-    }
-
-    t.style.display = 'block';
+    const t=document.getElementById('toastSucesso');
+    document.getElementById('toastTexto').textContent=msg;
+    t.style.display='block';
     t.classList.add('animar-entrada');
-
     setTimeout(()=>t.style.display='none',2000);
 }
-
 function mostrarToastErro(msg){
-    const t=document.getElementById('toastErro');
-    document.getElementById('toastErroTexto').textContent=msg;
-    t.style.display='flex';
+
+    // Vibração (somente mobile / dispositivos compatíveis)
+    if(navigator.vibrate){
+        navigator.vibrate([200, 100, 200]); 
+        // vibra 200ms, pausa 100ms, vibra 200ms
+    }
+
+    const t = document.getElementById('toastErro');
+    document.getElementById('toastErroTexto').textContent = msg;
+
+    t.style.display = 'flex';
     t.classList.add('animar-entrada');
+
     setTimeout(()=>t.style.display='none',2000);
 }
 
@@ -1626,17 +1624,7 @@ function baixarImagem(){
     link.download = imagemAtual || 'imagem.jpg';
     link.click();
 }
-document.addEventListener("click", () => {
-    const audio = document.getElementById("audioSucesso");
-    if(audio){
-        audio.play().then(()=>audio.pause()).catch(()=>{});
-    }
-}, { once:true });
-
 carregarAtividades();
 </script>
 </body>
-
-<audio id="audioSucesso" src="sucesso.mp3"></audio>
-</audio>
 </html>
