@@ -792,7 +792,8 @@ await fetch(`${API_BASE}/atividades/apagar`, {
     body: JSON.stringify({ ids })
 });
 
-alert("CIs apagadas do servidor!");
+mostrarToast("CIs apagadas do servidor!");
+
 atualizarHistorico();
 
     } catch (err) {
