@@ -712,7 +712,7 @@ async function backupCIsDoMes() {
         const year = document.getElementById('filtroAnoHistorico').value;
 
         if (!month || !year) {
-            alert("Selecione mês e ano para o backup");
+            mostrarToast("Selecione mês e ano para o backup");
             return;
         }
 
@@ -722,10 +722,7 @@ async function backupCIsDoMes() {
         const data = await res.json();
 
         if (!Array.isArray(data) || data.length === 0) {
-            if (!Array.isArray(data) || data.length === 0) {
-    alert("Não há CIs nesse período");
-    return;
-}
+            mostrarToast("Não há CIs nesse período");
             return;
         }
 
@@ -801,7 +798,7 @@ atualizarHistorico();
 
     } catch (err) {
         console.error(err);
-        alert("Erro no backup: " + err);
+        mostrarToast("Erro no backup: " + err);
     }
 }
 
@@ -919,7 +916,7 @@ async function registrarItem() {
     const setor = document.getElementById('itemSetor').value;
 
     if (!nome || !quantidade || !setor) {
-        alert("Preencha todos os campos!");
+        mostrarToast("Preencha todos os campos!");
         return;
     }
 
@@ -948,7 +945,7 @@ async function registrarItem() {
         carregarItens();
 
     } catch (err) {
-        alert("Falha ao salvar item: " + err);
+        mostrarToast("Falha ao salvar item: " + err);
         console.error(err);
     }
 }
