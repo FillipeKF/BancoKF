@@ -7,7 +7,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<title>KF Engenharia - Gestor de Campo</title>
 <style>
 :root { 
     --bg: #0f1115; 
@@ -189,16 +189,6 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
   font-size: 14px;
 }
 
-#modalRestore .container-modal img,
-#modalFotos .container-modal img {
-    width: 100%;
-    max-width: 90px;
-    height: auto;
-    object-fit: cover;
-    border-radius: 8px;
-}
-
-
 /* Conteúdo principal (inicialmente acessível, overlay bloqueia visual) */
 #mainContent { display: block; }
 
@@ -236,7 +226,7 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
         <div style="font-size:40px">📝</div>
         <h3>Registrar Atividade</h3>
     </div>
-
+    
     <div class="card-acao" onclick="abrirEquipe()">
         <div id="badgeFuncionarios" class="badge-funcionarios hidden">0 Funcionários</div>
         <div style="font-size:40px">👷</div>
@@ -344,7 +334,7 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
 
         <button class="btn-acao" onclick="registrarItem()">Registrar Item</button>
 
-
+      
 
         <h3 style="margin-top:20px; color:var(--text)">Itens Registrados</h3>
           <!-- FILTRO ACIMA DA TABELA -->
@@ -581,35 +571,7 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
     </div>
 </div>
 
-<!-- MODAL RESTORE -->
-<div id="modalRestore" class="modal" style="display:none;">
-    <div class="container-modal" style="max-width:800px; width:90%; max-height:85vh; overflow-y:auto;">
-        <span class="btn-fechar" onclick="fecharModal('modalRestore')">&times;</span>
-        <h2 style="color:var(--success); margin-bottom:15px;">Restaurar CIs do Backup</h2>
-        <div id="listaCIs"></div>
-    </div>
-</div>
 
-<!-- MODAL FOTOS -->
-<div id="modalFotos" class="modal" style="display:none;">
-    <div class="container-modal" style="max-width:600px; width:90%; max-height:70vh; overflow-y:auto; text-align:center;">
-        <span class="btn-fechar" onclick="fecharModal('modalFotos')">&times;</span>
-        <h2 style="color:var(--primary); margin-bottom:15px;">Fotos da CI</h2>
-        <div id="listaFotos" style="display:flex; flex-direction:column; align-items:center; gap:10px;"></div>
-    </div>
-</div>
-
-<!-- MODAL DE FOTO GRANDE AJUSTADO -->
-<div id="modalFotoGrande" class="modal" 
-     style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); justify-content:center; align-items:center; z-index:9999;">
-    
-    <!-- Container da imagem -->
-    <div style="position:relative; background:#1b1e24; border-radius:15px; padding:10px; max-width:90%; max-height:90%; display:flex; justify-content:center; align-items:center; flex-direction:column;">
-        <span id="btnFecharFotoGrande" 
-              style="position:absolute; top:5px; right:10px; font-size:25px; color:white; cursor:pointer;">&times;</span>
-        <img id="fotoGrande" src="" style="max-width:90%; max-height:80vh; border-radius:10px; object-fit:contain;">
-    </div>
-</div>
 
 
 <!-- MODAL IMAGEM -->
@@ -621,21 +583,7 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
     </div>
 </div>
 
-<!-- Modal de confirmação de apagar CIs -->
-<div id="modalConfirmarBackup" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); justify-content:center; align-items:center; z-index:9999;">
-    <div style="background:#1b1e24; border-radius:15px; padding:20px; max-width:400px; width:90%; text-align:center; color:white;">
-        <h3 style="margin-bottom:15px;">Backup concluído!<br>Deseja apagar essas CIs do servidor?</h3>
-        <div style="display:flex; justify-content:center; gap:15px;">
-            <button id="btnSimBackup" style="padding:8px 16px; background:#16a34a; color:white; border:none; border-radius:6px; cursor:pointer;">Sim</button>
-            <button id="btnNaoBackup" style="padding:8px 16px; background:#dc2626; color:white; border:none; border-radius:6px; cursor:pointer;">Não</button>
-        </div>
-    </div>
-</div>
 
-<!-- Notificação verde -->
-<div id="notificacaoBackup" style="display:none; position:fixed; top:20px; left:50%; transform:translateX(-50%); background:#16a34a; color:white; padding:10px 20px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.5); z-index:9999;">
-    CIs apagadas do servidor!
-</div>
 
 <script>
 let selecionados = [];
@@ -646,8 +594,7 @@ let imagemAtual = "";
 let itensRegistrados = [];
 let itemAtualEditar = null;
 let itemAtualExcluir = null;
-// ======================= BLOQUEIO DE ABERTURA =======================
-let bloquearRestore = false; // impede que modalRestore abra quando necessário
+let modalRestoreAtual = null;
 
 
 // URL base da API
@@ -703,11 +650,7 @@ const res = await fetch(`${BACKEND_URL}/login`, {
 });
 
 function abrirModal(id){ document.getElementById(id).style.display='block'; }
-// ======================= FUNÇÃO FECHAR MODAL =======================
-function fecharModal(id) {
-    const modal = document.getElementById(id);
-    if (modal) modal.style.display = "none";
-}
+function fecharModal(id){ document.getElementById(id).style.display='none'; }
 
 
 
@@ -727,6 +670,7 @@ async function backupCIsDoMes() {
         if (!res.ok) throw "Erro ao buscar CIs";
 
         const data = await res.json();
+
         if (!Array.isArray(data) || data.length === 0) {
             alert("Não há CIs nesse período");
             return;
@@ -735,90 +679,77 @@ async function backupCIsDoMes() {
         const zip = new JSZip();
 
         for (const ci of data) {
-            const pastaCI = zip.folder(`CI_${ci.id}_${ci.inicio}`);
-            pastaCI.file("dados.txt", JSON.stringify(ci, null, 2));
 
+            // TXT da CI
+            zip.file(`${ci.id}-${ci.inicio}.txt`, JSON.stringify(ci, null, 2));
+
+            // ===============================
+            // GARANTE ARRAY REAL DE FOTOS
+            // ===============================
             let fotos = [];
+
             try {
                 fotos = Array.isArray(ci.fotos) ? ci.fotos : JSON.parse(ci.fotos || "[]");
-            } catch { fotos = []; }
+            } catch {
+                fotos = [];
+            }
 
+            // ===============================
+            // BAIXA FOTOS COM BLINDAGEM
+            // ===============================
             if (fotos.length > 0) {
+
+                const folder = zip.folder(`${ci.id}-${ci.inicio}/fotos`);
+
                 for (let i = 0; i < fotos.length; i++) {
-                    let foto = String(fotos[i]).replace("[","").replace("]","").replace(/"/g,"").trim();
-                    if (!foto.startsWith("http")) continue;
+
+                    let foto = String(fotos[i])
+                        .replace("[", "")
+                        .replace("]", "")
+                        .replace(/"/g, "")
+                        .trim();
+
+                    if (!foto.startsWith("http")) {
+                        console.warn("Foto ignorada:", foto);
+                        continue;
+                    }
 
                     try {
                         const fotoBlob = await fetch(foto).then(r => r.blob());
-                        pastaCI.file(`foto${i+1}.jpg`, fotoBlob);
-                    } catch (e) { console.warn("Erro ao baixar:", foto); continue; }
+                        folder.file(`foto${i + 1}.jpg`, fotoBlob);
+                    } catch (e) {
+                        console.warn("Erro ao baixar:", foto);
+                        continue;
+                    }
                 }
             }
         }
 
+        // ===============================
+        // GERA ZIP
+        // ===============================
         const content = await zip.generateAsync({ type: "blob" });
         saveAs(content, `backup_CI_${month}-${year}.zip`);
 
         // ===============================
-        // Modal de confirmação para apagar
+        // APAGA DO SERVIDOR
         // ===============================
-        const modalConfirm = document.getElementById("modalConfirmarBackup");
-        modalConfirm.style.display = "flex";
-
-        const btnSim = document.getElementById("btnSimBackup");
-        const btnNao = document.getElementById("btnNaoBackup");
-
-        btnNao.onclick = () => { modalConfirm.style.display = "none"; };
-
-// ======================= BOTÃO SIM DO BACKUP =======================
-btnSim.onclick = async () => {
-    bloquearRestore = true; // bloqueia qualquer reabertura automática
-    fecharModal("modalConfirmarBackup");
-    fecharModal("modalRestore"); // fecha o modal de CIs registradas
-
-    const ids = data.map(c => c.id);
-
-    try {
-        await fetch(`${API_BASE}/atividades/apagar`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ ids })
-        });
-
-        // Remove blocos do DOM
-        const listaCIs = document.getElementById("listaCIs");
-        if (listaCIs) {
-            ids.forEach(id => {
-                const bloco = listaCIs.querySelector(`div[data-ci-id='${id}']`);
-                if (bloco) bloco.remove();
-            });
-        }
-
-        // Mostra notificação
-        const notif = document.getElementById("notificacaoBackup");
-        if (notif) {
-            notif.style.display = "block";
-            setTimeout(() => { notif.style.display = "none"; }, 3000);
-        }
-
-        // Atualiza histórico sem reabrir modal
-        if (typeof atualizarHistorico === "function") {
-            atualizarHistorico(); 
-        }
-
-    } catch (err) {
-        console.error(err);
-        alert("Falha ao apagar CIs do servidor!");
-    } finally {
-        // Libera bloqueio depois de 500ms (ou depois que modal terminar animação)
-        setTimeout(() => { bloquearRestore = false; }, 500);
-    }
-};
-// ======================= FUNÇÃO PARA FECHAR MODAL DE CIs =======================
-function fecharModalCIsRegistradas() {
-    const modals = ["modalCIsRegistradas", "modalRestore"];
-    modals.forEach(id => fecharModal(id));
+        if (confirm("Backup concluído! Deseja apagar essas CIs do servidor?")) {
+if (modalRestoreAtual) {
+    document.body.removeChild(modalRestoreAtual);
+    modalRestoreAtual = null;
 }
+            const ids = data.map(c => c.id);
+
+            await fetch(`${API_BASE}/atividades/apagar`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ ids })
+            });
+
+            alert("CIs apagadas do servidor!");
+            atualizarHistorico();
+        }
 
     } catch (err) {
         console.error(err);
@@ -826,155 +757,92 @@ function fecharModalCIsRegistradas() {
     }
 }
 
-// ------------------- RESTORE CIs -------------------
+// ------------------- RESTORE CIs TEMPORÁRIO -------------------
 async function restaurarCIs() {
     const input = document.createElement("input");
     input.type = "file";
     input.accept = ".zip";
-
     input.onchange = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
 
         const zip = await JSZip.loadAsync(file);
-        const cis = [];
+        const restoredData = [];
 
-        for (const path in zip.files) {
-            if (path.endsWith("dados.txt")) {
-                const pasta = path.replace("/dados.txt", "");
-                const text = await zip.file(path).async("string");
-                const ci = JSON.parse(text);
-                ci.__pasta = pasta; // pasta do CI no zip
-                cis.push(ci);
+        for (const filename of Object.keys(zip.files)) {
+            if (filename.endsWith(".txt")) {
+                const text = await zip.file(filename).async("string");
+                restoredData.push(JSON.parse(text));
             }
         }
 
-        abrirModalRestore(cis, zip);
+        abrirModalRestore(restoredData, zip);
     };
-
     input.click();
 }
 
-// ======================= FUNÇÃO ABRIR MODAL RESTORE =======================
+// ------------------- MODAL TEMPORÁRIO DE RESTORE -------------------
 function abrirModalRestore(cis, zip) {
-    if (bloquearRestore) return; // evita abrir modal se bloqueado
+modalRestoreAtual = document.createElement("div");
+const modal = modalRestoreAtual;
+    modal.className = "modal animar-entrada";
+    modal.style.display = "flex";
+    modal.style.flexDirection = "column";
+    modal.style.padding = "20px";
+    modal.style.maxHeight = "80vh";
+    modal.style.overflowY = "auto";
+    modal.style.background = "#1b1e24";
+    modal.style.zIndex = 2000;
 
-    const listaCIs = document.getElementById("listaCIs");
-    if (!listaCIs) return console.error("Elemento listaCIs não encontrado");
-    listaCIs.innerHTML = "";
+    const btnFechar = document.createElement("span");
+    btnFechar.innerHTML = "&times;";
+    btnFechar.style.alignSelf = "flex-end";
+    btnFechar.style.cursor = "pointer";
+    btnFechar.style.fontSize = "25px";
+    btnFechar.onclick = () => document.body.removeChild(modal);
+
+    modal.appendChild(btnFechar);
 
     cis.forEach(ci => {
-        const bloco = document.createElement("div");
-        bloco.style.background = "#252a33";
-        bloco.style.borderRadius = "10px";
-        bloco.style.padding = "12px";
-        bloco.style.marginBottom = "15px";
-        bloco.style.cursor = "pointer";
-
-        bloco.dataset.ciId = ci.id; // importante para remover depois
+        const div = document.createElement("div");
+        div.style.background = "#252a33";
+        div.style.margin = "10px 0";
+        div.style.padding = "10px";
+        div.style.borderRadius = "10px";
 
         const h = document.createElement("h3");
-        h.style.color = "var(--success)";
-        h.textContent = `CI ${ci.ci} — ${new Date(ci.inicio).toLocaleDateString()}`;
-        bloco.appendChild(h);
+        h.textContent = `CI: ${ci.id} - ${ci.inicio}`;
+        div.appendChild(h);
 
-        const detalhes = document.createElement("div");
-        detalhes.style.background = "#16191f";
-        detalhes.style.borderRadius = "10px";
-        detalhes.style.padding = "10px";
-        detalhes.style.fontSize = "13px";
-        detalhes.style.marginTop = "5px";
-        detalhes.innerHTML = `
-<b>Serviço:</b> ${ci.servico}<br>
-<b>Equipe:</b> ${ci.equipe}<br>
-<b>Início:</b> ${new Date(ci.inicio).toLocaleString()}<br>
-<b>Fim:</b> ${ci.fim ? new Date(ci.fim).toLocaleString() : "-"}<br>
-<b>Relato:</b> ${ci.relato || "-"}
-        `;
-        bloco.appendChild(detalhes);
+        const pre = document.createElement("pre");
+        pre.textContent = JSON.stringify(ci, null, 2);
+        pre.style.fontSize = "12px";
+        div.appendChild(pre);
 
-        // Ao clicar no CI, abre modal de fotos
-        bloco.onclick = () => abrirModalFotos(ci, zip);
-
-        listaCIs.appendChild(bloco);
-    });
-
-    const modal = document.getElementById("modalRestore");
-    if (modal) modal.style.display = "flex";
-}
-
-// ------------------- MODAL FOTOS -------------------
-// ------------------- ABRIR FOTO GRANDE -------------------
-function abrirFotoGrande(src) {
-    const modal = document.getElementById("modalFotoGrande");
-    const img = document.getElementById("fotoGrande");
-
-    img.src = src;
-    modal.style.display = "flex";
-}
-
-// ------------------- FECHAR FOTO GRANDE -------------------
-document.getElementById("btnFecharFotoGrande").onclick = () => {
-    document.getElementById("modalFotoGrande").style.display = "none";
-};
-
-// fecha ao clicar na sombra fora do container
-document.getElementById("modalFotoGrande").onclick = (e) => {
-    const container = e.currentTarget.querySelector('div');
-    if (e.target === e.currentTarget) {
-        e.currentTarget.style.display = "none";
-    }
-};
-
-// ------------------- ALTERAÇÃO NO MODAL RESTORE -------------------
-async function abrirModalFotos(ci, zip) {
-    const listaFotos = document.getElementById("listaFotos");
-    if (!listaFotos) return console.error("Elemento listaFotos não encontrado");
-
-    listaFotos.innerHTML = "";
-
-    const fotosDiv = document.createElement("div");
-    fotosDiv.style.display = "flex";
-    fotosDiv.style.flexDirection = "column"; // uma abaixo da outra
-    fotosDiv.style.alignItems = "center";
-    fotosDiv.style.gap = "10px";
-
-    for (const filePath of Object.keys(zip.files)) {
-        if (filePath.startsWith(ci.__pasta + "/") && filePath.endsWith(".jpg")) {
-            const file = zip.file(filePath);
-            if (!file) continue;
-
-            try {
-                const blob = await file.async("blob");
+        if (ci.fotos && ci.fotos.length > 0) {
+            const fotosDiv = document.createElement("div");
+            fotosDiv.style.display = "flex";
+            fotosDiv.style.flexWrap = "wrap";
+            fotosDiv.style.gap = "10px";
+            ci.fotos.forEach(async (url, idx) => {
+                const blob = await zip.file(`${ci.id}-${ci.inicio}/fotos/foto${idx+1}.jpg`).async("blob");
                 const img = document.createElement("img");
                 img.src = URL.createObjectURL(blob);
-                img.style.width = "200px";  // miniatura
-                img.style.height = "auto";
+                img.style.width = "80px";
+                img.style.height = "80px";
                 img.style.objectFit = "cover";
                 img.style.borderRadius = "8px";
-                img.style.cursor = "pointer";
-
-                // adiciona evento de clique para abrir maior
-                img.onclick = () => abrirFotoGrande(img.src);
-
                 fotosDiv.appendChild(img);
-            } catch (err) {
-                console.error("Erro ao ler a foto do zip:", filePath, err);
-            }
+            });
+            div.appendChild(fotosDiv);
         }
-    }
 
-    listaFotos.appendChild(fotosDiv);
+        modal.appendChild(div);
+    });
 
-    const modal = document.getElementById("modalFotos");
-    if (modal) modal.style.display = "flex";
+    document.body.appendChild(modal);
 }
 
-// ------------------- FUNÇÃO FECHAR -------------------
-function fecharModal(id) {
-    const modal = document.getElementById(id);
-    if (modal) modal.style.display = "none";
-}
 
 
 function normalizar(texto) {
@@ -1513,7 +1381,7 @@ function finalizarAtividade() {
     // Adiciona arquivos
     Array.from(fotosInput.files).forEach(file => formData.append("fotos", file));
 
-
+    
 fetch(`${API_BASE}/atividades/finalizar`, { method: "POST", body: formData })
    .then(res => res.json())
 .then(data => {
@@ -1612,28 +1480,12 @@ function atualizarHistorico() {
         card.className = `card-lista card-concluido ${classeServico}`;
 
         // Adiciona fotos
-       // NORMALIZA FOTOS (array ou string)
-// ===============================
-let fotos = [];
-
-try {
-    fotos = Array.isArray(a.fotos) ? a.fotos : JSON.parse(a.fotos || "[]");
-} catch {
-    fotos = [];
-}
-
-// Render fotos
-let fotosHTML = '';
-
-if (fotos.length > 0) {
-    fotosHTML =
-        `<div class="img-container">` +
-        fotos.map((f,i) =>
-            `<img src="${f}" class="img-preview"
-             onclick="abrirImagemModal('${f}','CI-${a.ci}-foto${i+1}.jpg')">`
-        ).join("") +
-        `</div>`;
-}
+        let fotosHTML = '';
+        if (a.fotos.length) {
+            fotosHTML = `<div class="img-container">` + 
+                a.fotos.map((f,i) => `<img src="${f}" class="img-preview" onclick="abrirImagemModal('${f}','CI-${a.ci}-foto${i+1}.jpg')">`).join('') + 
+                `</div>`;
+        }
 
         card.innerHTML = `
             <strong>CI ${a.ci}</strong><br>
@@ -1662,50 +1514,6 @@ function previewImages(input){
         reader.readAsDataURL(file);
     });
 }
-
-// RestaurarCi
-async function restaurarCI() {
-
-    const input = document.getElementById("restoreZip");
-    const file = input.files[0];
-
-    if (!file) return;
-
-    const zip = await JSZip.loadAsync(file);
-
-    const cis = [];
-
-    for (const nome in zip.files) {
-
-        if (!nome.endsWith(".txt")) continue;
-
-        const txt = await zip.files[nome].async("string");
-
-        try {
-            const ci = JSON.parse(txt);
-            cis.push(ci);
-        } catch(e){
-            console.error("CI inválida:", nome);
-        }
-    }
-
-    if (!cis.length) {
-        alert("Nenhuma CI encontrada");
-        return;
-    }
-
-    await fetch(`${API_BASE}/atividades/restaurar`,{
-        method:"POST",
-        headers:{ "Content-Type":"application/json" },
-        body: JSON.stringify({ cis })
-    });
-
-    alert("CIs restauradas com sucesso!");
-
-    fecharModal("modalRestore");
-    atualizarHistorico();
-}
-
 
 // TOAST
 function mostrarToast(msg){ const t=document.getElementById('toastSucesso'); document.getElementById('toastTexto').textContent=msg; t.style.display='block'; t.classList.add('animar-entrada'); setTimeout(()=>t.style.display='none',2000); }
