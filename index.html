@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+    
 <head>
 
 <meta charset="UTF-8">
@@ -1167,10 +1168,20 @@ function atualizarLocais(){
     sub.innerHTML = opts.map(x=>`<option value="${x}">${x}</option>`).join('');
 }// ======================= TOAST =======================
 function mostrarToast(msg){
-    const t=document.getElementById('toastSucesso');
-    document.getElementById('toastTexto').textContent=msg;
-    t.style.display='block';
+
+    const t = document.getElementById('toastSucesso');
+    document.getElementById('toastTexto').textContent = msg;
+
+    // 🔊 toca som
+    const audio = document.getElementById("audioSucesso");
+    if(audio){
+        audio.currentTime = 0;
+        audio.play().catch(()=>{});
+    }
+
+    t.style.display = 'block';
     t.classList.add('animar-entrada');
+
     setTimeout(()=>t.style.display='none',2000);
 }
 function mostrarToastErro(msg){
@@ -1617,4 +1628,8 @@ function baixarImagem(){
 carregarAtividades();
 </script>
 </body>
+
+<audio id="audioSucesso" preload="auto">
+    <source src="sucesso.mp3" type="audio/mpeg">
+</audio>
 </html>
