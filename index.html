@@ -526,7 +526,9 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
 
             <button class="btn-acao" style="background:#16a34a;" onclick="restaurarCIs()">📂 Restaurar CIs</button>
         </div>
-
+<div id="contadorHistorico"
+     style="margin-bottom:8px;font-weight:bold;color:#0d6efd">
+</div>
         <div id="listaHistorico"></div>
     </div>
 </div>
@@ -1525,11 +1527,16 @@ function atualizarHistorico() {
 
     // ✅ Ordena do mais recente para o mais antigo
     filtradas.sort((a, b) => new Date(b.fim) - new Date(a.fim));
+document.getElementById("contadorHistorico").innerText =
+`CIs registradas: ${filtradas.length}`;
+   if (filtradas.length === 0) {
 
-    if (filtradas.length === 0) {
-        lista.innerHTML = "Nenhuma CI finalizada.";
-        return;
-    }
+    document.getElementById("contadorHistorico").innerText =
+    "CIs registradas: 0";
+
+    lista.innerHTML = "Nenhuma CI finalizada.";
+    return;
+}
 
     filtradas.forEach(a => {
         const serv = normalizar(a.servico);
