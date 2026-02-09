@@ -1250,10 +1250,16 @@ if(ciJaExiste){
     })
     .then(async res => {
 
-        if (!res.ok) {
-            const t = await res.text();
-            throw new Error(t);
-        }
+       if (!res.ok) {
+
+    if(res.status === 409){
+        mostrarToastErro("Essa CI já existe!");
+        return;
+    }
+
+    const t = await res.text();
+    throw new Error(t);
+}
 
         return res.json();
     })
