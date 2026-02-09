@@ -526,7 +526,7 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
 
             <button class="btn-acao" style="background:#16a34a;" onclick="restaurarCIs()">📂 Restaurar CIs</button>
         </div>
-
+<div id="contadorHistorico" style="margin-bottom:8px;font-weight:bold;color:#0d6efd"></div>
         <div id="listaHistorico"></div>
     </div>
 </div>
@@ -803,9 +803,12 @@ await fetch(`${API_BASE}/atividades/apagar`, {
     body: JSON.stringify({ ids })
 });
 atividadesConcluidas = [];
+document.getElementById("contadorHistorico").innerText =
+`CIs registradas: ${atividadesConcluidas.length}`;
 document.getElementById("listaHistorico").innerHTML =
 "<p style='opacity:.6'>Nenhuma CI registrada</p>";
-
+document.getElementById("contadorHistorico").innerText =
+"CIs registradas: 0";
 mostrarToast("CIs apagadas do servidor!");
 atualizarHistorico();
 
