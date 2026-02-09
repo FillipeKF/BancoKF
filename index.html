@@ -722,7 +722,10 @@ async function backupCIsDoMes() {
         const data = await res.json();
 
         if (!Array.isArray(data) || data.length === 0) {
-            alert("Não há CIs nesse período");
+            if (!Array.isArray(data) || data.length === 0) {
+    alert("Não há CIs nesse período");
+    return;
+}
             return;
         }
 
