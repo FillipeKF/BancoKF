@@ -212,7 +212,10 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
     <span style="font-size:50px">✅</span>
     <div id="toastTexto" style="font-size:18px; font-weight:bold; margin-top:10px">Sucesso!</div>
 </div>
-
+<div id="toastErro" class="toast-container toast-erro">
+    <span style="font-size:50px">❌</span>
+    <div id="toastErroTexto" style="font-size:18px; font-weight:bold; margin-top:10px"></div>
+</div>
 <!-- TOAST GENÉRICO PARA ALMOXARIFADO -->
 <div id="toastAlmoxarifado" class="toast-container" style="background:#16a34a;">
     <span style="font-size:30px">✅</span>
@@ -712,7 +715,7 @@ async function backupCIsDoMes() {
         const year = document.getElementById('filtroAnoHistorico').value;
 
         if (!month || !year) {
-            mostrarToast("Selecione mês e ano para o backup");
+            mostrarToastErro("Selecione mês e ano para o backup");
             return;
         }
 
@@ -722,7 +725,7 @@ async function backupCIsDoMes() {
         const data = await res.json();
 
         if (!Array.isArray(data) || data.length === 0) {
-            mostrarToast("Não há CIs nesse período");
+            mostrarToastErro("Não há CIs nesse período");
             return;
         }
 
@@ -798,7 +801,7 @@ atualizarHistorico();
 
     } catch (err) {
         console.error(err);
-        mostrarToast("Erro no backup: " + err);
+        mostrarToastErro("Erro no backup: " + err);
     }
 }
 
@@ -916,7 +919,7 @@ async function registrarItem() {
     const setor = document.getElementById('itemSetor').value;
 
     if (!nome || !quantidade || !setor) {
-        mostrarToast("Preencha todos os campos!");
+        mostrarToastErro("Preencha todos os campos!");
         return;
     }
 
@@ -945,7 +948,7 @@ async function registrarItem() {
         carregarItens();
 
     } catch (err) {
-        mostrarToast("Falha ao salvar item: " + err);
+        mostrarToastErro("Falha ao salvar item: " + err);
         console.error(err);
     }
 }
@@ -1157,7 +1160,13 @@ function mostrarToast(msg){
     t.classList.add('animar-entrada');
     setTimeout(()=>t.style.display='none',2000);
 }
-
+function mostrarToastErro(msg){
+    const t=document.getElementById('toastErro');
+    document.getElementById('toastErroTexto').textContent=msg;
+    t.style.display='flex';
+    t.classList.add('animar-entrada');
+    setTimeout(()=>t.style.display='none',2000);
+}
 // ======================= ATIVIDADES =======================
 // Carrega atividades ativas do banco
 function carregarAtividades() {
