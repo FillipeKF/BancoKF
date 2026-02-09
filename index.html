@@ -513,13 +513,34 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
 </div>
  <!-- BOTÕES DE BACKUP E RESTORE -->
         <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:15px;">
-            <button class="btn-acao" style="background:#0d6efd;" onclick="backupCIsDoMes()">💾 Backup CIs</button>
+          <button class="btn-acao" style="background:#0d6efd;" onclick="abrirModalConfirmarBackup()">💾 Backup CIs</button>
+
             <button class="btn-acao" style="background:#16a34a;" onclick="restaurarCIs()">📂 Restaurar CIs</button>
         </div>
 
         <div id="listaHistorico"></div>
     </div>
 </div>
+
+
+<!-- MODAL CONFIRMA BACKUP CI -->
+<div id="modalConfirmarBackup" class="modal" style="display:none;z-index:5000">
+    <div class="modal-content">
+
+        <h3>Confirmar Backup</h3>
+        <p>Deseja realizar o backup das CIs selecionadas?</p>
+
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">
+
+            <button class="btn-acao" onclick="fecharModalConfirmarBackup()">Não</button>
+
+            <button class="btn-acao" style="background:#dc2626" onclick="confirmarBackupCI()">Sim</button>
+
+        </div>
+    </div>
+</div>
+
+
 <!-- MODAL EDITAR ATIVIDADE -->
 <div id="modalEditarAtividade" class="modal">
     <div class="container-modal">
@@ -594,7 +615,7 @@ let imagemAtual = "";
 let itensRegistrados = [];
 let itemAtualEditar = null;
 let itemAtualExcluir = null;
-let modalRestoreAtual = null;
+
 
 
 // URL base da API
@@ -651,6 +672,29 @@ const res = await fetch(`${BACKEND_URL}/login`, {
 
 function abrirModal(id){ document.getElementById(id).style.display='block'; }
 function fecharModal(id){ document.getElementById(id).style.display='none'; }
+
+
+
+function abrirModalConfirmarBackup(){
+    document.getElementById("modalConfirmarBackup").style.display = "flex";
+}
+
+function fecharModalConfirmarBackup(){
+    document.getElementById("modalConfirmarBackup").style.display = "none";
+}
+
+// clicou SIM
+async function confirmarBackupCI(){
+
+    fecharModalConfirmarBackup();
+
+    // executa backup normal
+    await backupCIsDoMes();
+
+    // FECHA MODAL CI REGISTRADA
+    fecharModal("modalHistorico"); // ajuste se ID diferente
+}
+
 
 
 
@@ -734,22 +778,16 @@ async function backupCIsDoMes() {
         // ===============================
         // APAGA DO SERVIDOR
         // ===============================
-        if (confirm("Backup concluído! Deseja apagar essas CIs do servidor?")) {
-if (modalRestoreAtual) {
-    document.body.removeChild(modalRestoreAtual);
-    modalRestoreAtual = null;
-}
-            const ids = data.map(c => c.id);
+ const ids = data.map(c => c.id);
 
-            await fetch(`${API_BASE}/atividades/apagar`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ ids })
-            });
+await fetch(`${API_BASE}/atividades/apagar`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ids })
+});
 
-            alert("CIs apagadas do servidor!");
-            atualizarHistorico();
-        }
+alert("CIs apagadas do servidor!");
+atualizarHistorico();
 
     } catch (err) {
         console.error(err);
@@ -783,8 +821,7 @@ async function restaurarCIs() {
 
 // ------------------- MODAL TEMPORÁRIO DE RESTORE -------------------
 function abrirModalRestore(cis, zip) {
-modalRestoreAtual = document.createElement("div");
-const modal = modalRestoreAtual;
+    const modal = document.createElement("div");
     modal.className = "modal animar-entrada";
     modal.style.display = "flex";
     modal.style.flexDirection = "column";
