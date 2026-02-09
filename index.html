@@ -1059,7 +1059,7 @@ async function excluirItem(id) {
         mostrarToast("Item excluído!");
 
     } catch (err) {
-        alert("Falha ao excluir item: " + err);
+        mostrarToastErro("Falha ao excluir item: " + err);
         console.error(err);
     }
 }
@@ -1086,7 +1086,7 @@ async function confirmarEdicaoItem() {
     const novoSetor = document.getElementById('editItemSetor').value;
 
     if (!novoNome || !novaQuantidade || !novoSetor) {
-        alert("Preencha todos os campos!");
+        mostrarToastErro("Preencha todos os campos!");
         return;
     }
 
@@ -1118,7 +1118,7 @@ async function confirmarEdicaoItem() {
         itemAtualEditar = null;
 
     } catch (err) {
-        alert("Falha ao editar item: " + err);
+        mostrarToastErro("Falha ao editar item: " + err);
         console.error(err);
     }
 }
@@ -1212,7 +1212,7 @@ function iniciarAtividade() {
     const local = document.getElementById('fSubLocal').value;
 
     if (!selecionados.length || !ci || !servico || !local) {
-        alert("Preencha todos os campos!");
+        mostrarToastErro("Preencha todos os campos!");
         return;
     }
 
@@ -1261,7 +1261,7 @@ function iniciarAtividade() {
     })
     .catch(err => {
         console.error("INICIAR ERRO:", err);
-        alert("Falha ao iniciar atividade (veja console)");
+        mostrarToastErro("Falha ao iniciar atividade (veja console)");
     });
 
 }
@@ -1319,7 +1319,7 @@ function salvarEdicaoAtividade() {
                         .filter(e => e);
 
     if (!novaCi || !novoServico || !novoLocal || !novaEquipe.length) {
-        alert("Preencha todos os campos!");
+        mostrarToastErro("Preencha todos os campos!");
         return;
     }
 
@@ -1421,7 +1421,7 @@ function finalizarAtividade() {
 
     const fotosInput = document.getElementById('fFotos');
     if (fotosInput.files.length === 0) {
-        alert("É obrigatório enviar pelo menos 1 foto!");
+        mostrarToastErro("É obrigatório enviar pelo menos 1 foto!");
         return;
     }
 
@@ -1472,7 +1472,7 @@ fetch(`${API_BASE}/atividades/finalizar`, { method: "POST", body: formData })
     })
     .catch(err => {
         console.error(err);
-        alert("Erro ao salvar atividade!");
+        mostrarToastErro("Erro ao salvar atividade!");
     });
 }
 //Historico
