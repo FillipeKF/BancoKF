@@ -802,6 +802,10 @@ await fetch(`${API_BASE}/atividades/apagar`, {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ ids })
 });
+atividadesConcluidas = [];
+document.getElementById("listaHistorico").innerHTML =
+"<p style='opacity:.6'>Nenhuma CI registrada</p>";
+
 mostrarToast("CIs apagadas do servidor!");
 atualizarHistorico();
 
