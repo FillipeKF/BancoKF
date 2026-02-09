@@ -194,19 +194,6 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
   font-size: 14px;
 }
 
-.toast-erro{
-    background:#dc2626 !important;
-    border:2px solid #dc2626 !important;
-    color:white;
-    display:flex;
-    align-items:center;
-    gap:8px;
-}
-
-.toast-x{
-    font-size:14px;   /* tamanho pequeno */
-    line-height:1;
-}
 /* Conteúdo principal (inicialmente acessível, overlay bloqueia visual) */
 #mainContent { display: block; }
 
@@ -230,11 +217,10 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
     <span style="font-size:50px">✅</span>
     <div id="toastTexto" style="font-size:18px; font-weight:bold; margin-top:10px">Sucesso!</div>
 </div>
-<div id="toastErro" class="toast toast-erro">
-    <span id="toastErroTexto"></span>
-    <span class="toast-x">❌</span>
+<div id="toastErro" class="toast-container toast-erro">
+    <div id="toastErroTexto" style="font-size:18px; font-weight:bold; margin-bottom:10px"></div>
+ <span style="font-size:18px;color:white;">❌</span>
 </div>
-
 
 <!-- TOAST GENÉRICO PARA ALMOXARIFADO -->
 <div id="toastAlmoxarifado" class="toast-container" style="background:#16a34a;">
