@@ -705,9 +705,12 @@ async function confirmarBackupCI(){
 
     fecharModalConfirmarBackup();
 
-    await backupCIsDoMes();
+    const sucesso = await backupCIsDoMes();
 
-    fecharModal("modalHistorico"); // fecha CI registrada
+    if(sucesso){
+        fecharModal("modalHistorico"); // só fecha se deu certo
+    }
+
 }
 
 
@@ -719,21 +722,20 @@ async function backupCIsDoMes() {
     try {
         const month = document.getElementById('filtroMesHistorico').value;
         const year = document.getElementById('filtroAnoHistorico').value;
-
-        if (!month || !year) {
-            mostrarToastErro("Selecione mês e ano para o backup");
-            return;
-        }
+if (!month || !year) {
+    mostrarToastErro("Selecione mês e ano para o backup");
+    return false;
+}
 
         const res = await fetch(`${API_BASE}/atividades/backup?mes=${month}&ano=${year}`);
         if (!res.ok) throw "Erro ao buscar CIs";
 
         const data = await res.json();
 
-        if (!Array.isArray(data) || data.length === 0) {
-            mostrarToastErro("Não há CIs nesse período");
-            return;
-        }
+if (!Array.isArray(data) || data.length === 0) {
+    mostrarToastErro("Não há CIs nesse período");
+    return false;
+}
 
         const zip = new JSZip();
 
@@ -800,14 +802,15 @@ await fetch(`${API_BASE}/atividades/apagar`, {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ ids })
 });
-
 mostrarToast("CIs apagadas do servidor!");
-
 atualizarHistorico();
 
+return true;
+
     } catch (err) {
-        console.error(err);
-        mostrarToastErro("Erro no backup: " + err);
+       console.error(err);
+    mostrarToastErro("Erro no backup: " + err);
+    return false;
     }
 }
 
