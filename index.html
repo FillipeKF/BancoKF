@@ -523,20 +523,28 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
 </div>
 
 
-<!-- MODAL CONFIRMA BACKUP CI -->
-<div id="modalConfirmarBackup" class="modal" style="display:none;z-index:5000">
-    <div class="modal-content">
+<!-- MODAL CONFIRMAR BACKUP CI -->
+<div id="modalConfirmarBackup" class="modal">
+    <div class="container-modal">
 
-        <h3>Confirmar Backup</h3>
-        <p>Deseja realizar o backup das CIs selecionadas?</p>
+        <span class="btn-fechar" onclick="fecharModalConfirmarBackup()">&times;</span>
+
+        <h2 style="color:var(--primary)">Confirmar Backup</h2>
+
+        <p>Deseja realizar o backup das CIs?</p>
 
         <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">
 
-            <button class="btn-acao" onclick="fecharModalConfirmarBackup()">Não</button>
+            <button class="btn-acao" onclick="fecharModalConfirmarBackup()">
+                Não
+            </button>
 
-            <button class="btn-acao" style="background:#dc2626" onclick="confirmarBackupCI()">Sim</button>
+            <button class="btn-acao" style="background:#dc2626" onclick="confirmarBackupCI()">
+                Sim
+            </button>
 
         </div>
+
     </div>
 </div>
 
@@ -676,23 +684,21 @@ function fecharModal(id){ document.getElementById(id).style.display='none'; }
 
 
 function abrirModalConfirmarBackup(){
-    document.getElementById("modalConfirmarBackup").style.display = "flex";
+    abrirModal("modalConfirmarBackup");
 }
 
 function fecharModalConfirmarBackup(){
-    document.getElementById("modalConfirmarBackup").style.display = "none";
+    fecharModal("modalConfirmarBackup");
 }
 
-// clicou SIM
+// SIM
 async function confirmarBackupCI(){
 
     fecharModalConfirmarBackup();
 
-    // executa backup normal
     await backupCIsDoMes();
 
-    // FECHA MODAL CI REGISTRADA
-    fecharModal("modalHistorico"); // ajuste se ID diferente
+    fecharModal("modalHistorico"); // fecha CI registrada
 }
 
 
