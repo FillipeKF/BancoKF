@@ -195,6 +195,22 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
   font-size: 14px;
 }
 
+
+@keyframes shake {
+  0% { transform: translateX(0); }
+  15% { transform: translateX(-8px); }
+  30% { transform: translateX(8px); }
+  45% { transform: translateX(-6px); }
+  60% { transform: translateX(6px); }
+  75% { transform: translateX(-4px); }
+  100% { transform: translateX(0); }
+}
+
+.toast-shake {
+  animation: shake .45s ease;
+}
+
+
 /* Conteúdo principal (inicialmente acessível, overlay bloqueia visual) */
 #mainContent { display: block; }
 
@@ -1175,22 +1191,24 @@ function mostrarToast(msg){
     setTimeout(()=>t.style.display='none',2000);
 }
 function mostrarToastErro(msg){
-
-    // Vibração (somente mobile / dispositivos compatíveis)
-    if(navigator.vibrate){
-        navigator.vibrate([200, 100, 200]); 
-        // vibra 200ms, pausa 100ms, vibra 200ms
-    }
-
     const t = document.getElementById('toastErro');
+
     document.getElementById('toastErroTexto').textContent = msg;
 
     t.style.display = 'flex';
-    t.classList.add('animar-entrada');
 
-    setTimeout(()=>t.style.display='none',2000);
+    // força reset da animação
+    t.classList.remove('toast-shake');
+    void t.offsetWidth;
+    t.classList.add('toast-shake');
+
+    // vibra só se suportar (Android)
+    if (navigator.vibrate) navigator.vibrate(200);
+
+    setTimeout(() => {
+        t.style.display = 'none';
+    }, 2000);
 }
-
 // ======================= ATIVIDADES =======================
 // Carrega atividades ativas do banco
 function carregarAtividades() {
