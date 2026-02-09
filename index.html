@@ -1203,24 +1203,21 @@ function mostrarToast(msg){
     setTimeout(()=>t.style.display='none',2000);
 }
 function mostrarToastErro(msg){
-    const t = document.getElementById('toastErro');
 
-    document.getElementById('toastErroTexto').textContent = msg;
+    const t=document.getElementById('toastErro');
+    document.getElementById('toastErroTexto').textContent=msg;
 
-    t.style.display = 'flex';
+    t.style.display='flex';
 
-    // força reset da animação
-    t.classList.remove('toast-shake');
+    t.classList.remove('animar-entrada');
     void t.offsetWidth;
-    t.classList.add('toast-shake');
+    t.classList.add('animar-entrada');
 
-    // vibra só se suportar (Android)
-    if (navigator.vibrate) navigator.vibrate(200);
+    if(navigator.vibrate) navigator.vibrate(200);
 
-    setTimeout(() => {
-        t.style.display = 'none';
-    }, 2000);
+    setTimeout(()=>t.style.display='none',2000);
 }
+
 // ======================= ATIVIDADES =======================
 // Carrega atividades ativas do banco
 function carregarAtividades() {
