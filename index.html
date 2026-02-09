@@ -1172,10 +1172,10 @@ function mostrarToast(msg){
     const t = document.getElementById('toastSucesso');
     document.getElementById('toastTexto').textContent = msg;
 
-    // 🔊 toca som
     const audio = document.getElementById("audioSucesso");
     if(audio){
         audio.currentTime = 0;
+        audio.volume = 0.4;
         audio.play().catch(()=>{});
     }
 
@@ -1184,6 +1184,7 @@ function mostrarToast(msg){
 
     setTimeout(()=>t.style.display='none',2000);
 }
+
 function mostrarToastErro(msg){
     const t=document.getElementById('toastErro');
     document.getElementById('toastErroTexto').textContent=msg;
@@ -1625,11 +1626,17 @@ function baixarImagem(){
     link.download = imagemAtual || 'imagem.jpg';
     link.click();
 }
+document.addEventListener("click", () => {
+    const audio = document.getElementById("audioSucesso");
+    if(audio){
+        audio.play().then(()=>audio.pause()).catch(()=>{});
+    }
+}, { once:true });
+
 carregarAtividades();
 </script>
 </body>
 
-<audio id="audioSucesso" preload="auto">
-    <source src="sucesso.mp3" type="audio/mpeg">
+<audio id="audioSucesso" src="sucesso.mp3"></audio>
 </audio>
 </html>
