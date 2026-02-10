@@ -682,18 +682,22 @@ const loginError = document.getElementById("loginError");
 
 function formatarCI(input){
 
-    let v = input.value.replace(/\D/g, "");
+    let raw = input.value.replace(/\D/g, "");
 
-    // só permite até 3 números
-    if(v.length > 3) v = v.slice(0,3);
+    // Se já estava completo e usuário tentou apagar → limpa tudo
+    if(input.value.includes("/") && raw.length < 3){
+        input.value = "";
+        return;
+    }
 
-    if(v.length === 3){
+    // limita 3 números
+    if(raw.length > 3) raw = raw.slice(0,3);
 
+    if(raw.length === 3){
         const ano = new Date().getFullYear();
-        input.value = `${v}/${ano}`;
-
+        input.value = `${raw}/${ano}`;
     } else {
-        input.value = v;
+        input.value = raw;
     }
 }
 
