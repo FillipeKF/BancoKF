@@ -333,7 +333,12 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
         </div>
 
         <label>Número da CI</label>
-  <input type="text" id="fCI" placeholder="Ex: 001/2024" maxlength="8" oninput="formatarCI(this)">
+ <input type="text"
+       id="fCI"
+       placeholder="Ex: 001/2026"
+       maxlength="8"
+       onkeydown="ciKeyDown(event,this)"
+       oninput="formatarCI(this)">
 
         <button class="btn-acao" onclick="iniciarAtividade()">Confirmar Início</button>
     </div>
@@ -664,7 +669,7 @@ let imagemAtual = "";
 let itensRegistrados = [];
 let itemAtualEditar = null;
 let itemAtualExcluir = null;
-
+let ciCompleta = false;
 
 
 // URL base da API
@@ -680,24 +685,29 @@ const loginError = document.getElementById("loginError");
 
 
 
+function ciKeyDown(e,input){
+
+    // se já estava completa e apertar backspace → limpa tudo
+    if(ciCompleta && e.key === "Backspace"){
+        e.preventDefault();
+        input.value = "";
+        ciCompleta = false;
+    }
+}
+
 function formatarCI(input){
 
-    let raw = input.value.replace(/\D/g, "");
+    let raw = input.value.replace(/\D/g,"");
 
-    // Se já estava completo e usuário tentou apagar → limpa tudo
-    if(input.value.includes("/") && raw.length < 3){
-        input.value = "";
-        return;
-    }
-
-    // limita 3 números
     if(raw.length > 3) raw = raw.slice(0,3);
 
     if(raw.length === 3){
         const ano = new Date().getFullYear();
         input.value = `${raw}/${ano}`;
+        ciCompleta = true;
     } else {
         input.value = raw;
+        ciCompleta = false;
     }
 }
 
