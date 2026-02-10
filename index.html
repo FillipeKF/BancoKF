@@ -112,7 +112,8 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
 .card-pintura { border-left: 5px solid #ef4444; background:#331b1b; }
 .card-eletrica { border-left: 5px solid #facc15; background:#332b1b; }
 .card-hidraulica { border-left: 5px solid #0d6efd; background:#1b2233; }
-.card-civil { border-left: 5px solid #a855f7; background:#2a1b33; }
+.card-pedreiro { border-left: 5px solid #a855f7; background:#2a1b33; }
+.card-marcenaria { border-left: 5px solid #76A5AF; background:#2a1b33; }
 
 .desenvolvido { text-align: right; font-size: 14px; color: var(--text); margin-top: 5px; font-weight: normal; }
 
@@ -306,10 +307,7 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
                             <div class="func-item" onclick="selectFunc(this, 'Elio', event)">Elio</div>
                                   <div class="func-item" onclick="selectFunc(this, 'Vicente', event)">Vicente</div>
                                      <div class="func-item" onclick="selectFunc(this, 'Paulo', event)">Paulo</div>
-                                      <div class="func-item" onclick="selectFunc(this, 'DanielEnc', event)">DanielEnc</div>
-                                       <div class="func-item" onclick="selectFunc(this, 'AmareloEnc', event)">AmareloEnc</div>
-                                        <div class="func-item" onclick="selectFunc(this, 'RafaelEnc', event)">RafaelEnc</div>
-                                         <div class="func-item" onclick="selectFunc(this, 'MarcoEnc', event)">MarcoEnc</div>
+                               
 
             </div>
         </div>
@@ -319,7 +317,8 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
             <option value="Pintura">Pintura</option>
             <option value="Eletrica">Eletrica</option>
             <option value="Hidraulica">Hidraulica</option>
-            <option value="Civil">Civil</option>
+            <option value="Pedreiro">Pedreiro</option>
+                      <option value="Marcenaria">Marcenaria</option>
         </select>
 
         <label>Local</label>
@@ -367,7 +366,8 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
             <option value="Pintura">Pintura</option>
             <option value="Elétrica">Elétrica</option>
             <option value="Hidráulica">Hidráulica</option>
-            <option value="Civil">Civil</option>
+            <option value="Pedreiro">Pedreiro</option>
+               <option value="Marcenaria">Marcenaria</option>
         </select>
 
         <button class="btn-acao" onclick="registrarItem()">Registrar Item</button>
@@ -385,6 +385,7 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
                 <option value="Elétrica">Elétrica</option>
                 <option value="Hidráulica">Hidráulica</option>
                 <option value="Pedreiro">Pedreiro</option>
+                      <option value="Marcenaria">Marcenaria</option>
             </select>
         </div>
         <div style="max-height:300px; overflow-y:auto; border:1px solid #444; border-radius:12px;">
@@ -423,7 +424,8 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
             <option value="Pintura">Pintura</option>
             <option value="Elétrica">Elétrica</option>
             <option value="Hidráulica">Hidráulica</option>
-            <option value="Civil">Civil</option>
+            <option value="Pedreiro">Pedreiro</option>
+              <option value="Marcenaria">Marcenaria</option>
         </select>
 
         <button class="btn-acao" onclick="confirmarEdicaoItem()">Salvar Alterações</button>
@@ -545,7 +547,8 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
             <option value="Pintura">Pintura</option>
             <option value="Elétrica">Elétrica</option>
             <option value="Hidráulica">Hidráulica</option>
-            <option value="Civil">Pedreiro</option>
+            <option value="Pedreiro">Pedreiro</option>
+               <option value="Marcenaria">Marcenaria</option>
         </select>
     </div>
 </div>
@@ -1028,7 +1031,8 @@ function atualizarListaItens() {
         pintura: "#ef4444",
         eletrica: "#facc15",
         hidraulica: "#0d6efd",
-        civil: "#a855f7"
+        pedreiro: "#a855f7",
+        marcenaria: "#76a5af"
     };
 
     itensFiltrados.forEach(item => {
@@ -1439,7 +1443,8 @@ const mapa = {
     pintura: { classe: "card-pintura", icone: "🎨" },
     eletrica: { classe: "card-eletrica", icone: "💡" },
     hidraulica: { classe: "card-hidraulica", icone: "🚰" },
-    civil: { classe: "card-civil", icone: "🔨" }
+    pedreiro: { classe: "card-pedreiro", icone: "🔨" },
+    marcenaria: { classe: "card-marcenaria", icone: "🔨" }
 };
 
 const cfg = mapa[serv] || { classe: "", icone: "🛠️" };
@@ -1591,7 +1596,8 @@ function atualizarHistorico() {
             pintura: "card-pintura",
             eletrica: "card-eletrica",
             hidraulica: "card-hidraulica",
-            civil: "card-civil"
+            pedreiro: "card-pedreiro",
+            marcenaria: "card-marcenaria"
         };
 
         const classeServico = mapa[serv] || "";
