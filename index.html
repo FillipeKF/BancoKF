@@ -113,7 +113,7 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
 .card-eletrica { border-left: 5px solid #facc15; background:#332b1b; }
 .card-hidraulica { border-left: 5px solid #0d6efd; background:#1b2233; }
 .card-pedreiro { border-left: 5px solid #a855f7; background:#2a1b33; }
-.card-marcenaria { border-left: 5px solid #76A5AF; background:#2a1b33; }
+.card-marcenaria { border-left: 5px solid #a4690d ; background:#2a1b33; }
 
 .desenvolvido { text-align: right; font-size: 14px; color: var(--text); margin-top: 5px; font-weight: normal; }
 
@@ -333,7 +333,7 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
         </div>
 
         <label>Número da CI</label>
-        <input type="text" id="fCI" placeholder="Ex: 001/2024">
+  <input type="text" id="fCI" placeholder="Ex: 001/2024" maxlength="8" oninput="formatarCI(this)">
 
         <button class="btn-acao" onclick="iniciarAtividade()">Confirmar Início</button>
     </div>
@@ -680,7 +680,22 @@ const loginError = document.getElementById("loginError");
 
 
 
+function formatarCI(input){
 
+    let v = input.value.replace(/\D/g, "");
+
+    // só permite até 3 números
+    if(v.length > 3) v = v.slice(0,3);
+
+    if(v.length === 3){
+
+        const ano = new Date().getFullYear();
+        input.value = `${v}/${ano}`;
+
+    } else {
+        input.value = v;
+    }
+}
 
 loginBtn.addEventListener("click", async () => {
   const usuario = document.getElementById("username").value;
@@ -1032,7 +1047,7 @@ function atualizarListaItens() {
         eletrica: "#facc15",
         hidraulica: "#0d6efd",
         pedreiro: "#a855f7",
-        marcenaria: "#76a5af"
+        marcenaria: "#a4690d"
     };
 
     itensFiltrados.forEach(item => {
@@ -1260,6 +1275,12 @@ function iniciarAtividade() {
 const ciJaExiste =
     atividadesAtivas.some(a => String(a.ci).toUpperCase() === ci) ||
     atividadesConcluidas.some(a => String(a.ci).toUpperCase() === ci);
+
+    // 🔐 valida formato CI
+    if(!/^\d{3}\/\d{4}$/.test(ci)){
+        mostrarToastErro("CI inválida (use 000/0000)");
+        return;
+    }
 
 if(ciJaExiste){
     mostrarToastErro("Essa CI já está registrada!");
