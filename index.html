@@ -757,12 +757,14 @@ const res = await fetch(`${BACKEND_URL}/login`, {
       loginOverlay.style.display = "none"; // remove overlay
     } else {
       loginError.style.display = "block";
+       mostrarToastErro(data.error || "Usuário ou senha incorretos");
       loginError.innerText = data.error || "Usuário ou senha incorretos";
     }
 
   } catch(err) {
     console.error(err);
     loginError.style.display = "block";
+      mostrarToastErro("Erro de conexão com o servidor");
     loginError.innerText = "Erro de conexão com o servidor";
   }
 });
@@ -1496,11 +1498,11 @@ function atualizarEquipeCampo(){
        const serv = normalizar(a.servico);
 
 const mapa = {
-    pintura: { classe: "card-pintura", icone: "🎨" },
+   pintura: { classe: "card-pintura", icone: "🖌️" },
     eletrica: { classe: "card-eletrica", icone: "💡" },
     hidraulica: { classe: "card-hidraulica", icone: "🚰" },
     pedreiro: { classe: "card-pedreiro", icone: "🔨" },
-    marcenaria: { classe: "card-marcenaria", icone: "🔨" }
+     marcenaria: { classe: "card-marcenaria", icone: "🪚" }
 };
 
 const cfg = mapa[serv] || { classe: "", icone: "🛠️" };
