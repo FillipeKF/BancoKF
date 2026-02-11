@@ -33,26 +33,25 @@ body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin:0; pad
 .header-main {
     position: relative;
     overflow: hidden;
-    background-color: #0b2b6f; /* Cor de fundo base */
-    background-image: 
-        /* Camada 1: Grande e inclinada */
-        url("data:image/svg+xml,%3Csvg width='431' height='373' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='10%25' y='50%25' fill='rgba(255,255,255,0.06)' font-family='Arial' font-weight='black' font-size='140' transform='rotate(-20 150 150)'%3EKF%3C/text%3E%3C/svg%3E"),
-        /* Camada 2: Pequena e em outro ângulo */
-        url("data:image/svg+xml,%3Csvg width='293' height='211' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='60%25' y='80%25' fill='rgba(255,255,255,0.04)' font-family='Arial' font-weight='black' font-size='40' transform='rotate(35 100 100)'%3EKF%3C/text%3E%3C/svg%3E"),
-        /* Camada 3: Média atravessada */
-        url("data:image/svg+xml,%3Csvg width='569' height='461' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='40%25' y='20%25' fill='rgba(255,255,255,0.05)' font-family='Arial' font-weight='black' font-size='80' transform='rotate(-10 200 200)'%3EKF%3C/text%3E%3C/svg%3E"),
-        /* O seu gradiente original */
-        linear-gradient(90deg, #0b2b6f, #0f4cb8);
+    /* Gradiente de fundo */
+    background: linear-gradient(90deg, #0b2b6f, #0f4cb8);
     
-    /* Faz as camadas se moverem em ritmos diferentes */
+    /* Múltiplas camadas de letras KF minúsculas e desordenadas */
+    background-image: 
+        url("data:image/svg+xml,%3Csvg width='120' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='10' y='30' fill='rgba(255,255,255,0.06)' font-family='Arial' font-weight='bold' font-size='14' transform='rotate(-15 20 20)'%3EKF%3C/text%3E%3C/svg%3E"),
+        url("data:image/svg+xml,%3Csvg width='150' height='130' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='80' y='90' fill='rgba(255,255,255,0.04)' font-family='Arial' font-weight='bold' font-size='12' transform='rotate(25 80 80)'%3EKF%3C/text%3E%3C/svg%3E"),
+        url("data:image/svg+xml,%3Csvg width='200' height='180' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='40' y='50' fill='rgba(255,255,255,0.05)' font-family='Arial' font-weight='bold' font-size='16' transform='rotate(-40 50 50)'%3EKF%3C/text%3E%3C/svg%3E");
+
+    /* Isso garante que os padrões se desencontrem e fiquem caóticos */
+    background-position: 15% 10%, 45% 65%, 80% 30%;
     background-repeat: repeat;
-    background-position: 10% 20%, 85% 40%, 33% 70%, 0 0;
     
     text-align: center;
-    padding: 80px 20px;
-    font-size: 28px;
+    padding: 50px 20px;
+    font-size: 24px;
     font-weight: bold;
     border-radius: 12px;
+    margin-bottom: 30px;
     border-bottom: 4px solid var(--primary);
     color: #fff;
 }
