@@ -34,8 +34,8 @@ body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin:0; pad
     position: relative;
     background: linear-gradient(90deg, #0b2b6f, #0f4cb8); 
     text-align: center; 
-    padding: 60px 20px; 
-    font-size: 24px; 
+    padding: 80px 20px; /* Aumentei o espaço para as letras aparecerem melhor */
+    font-size: 28px; 
     font-weight: bold; 
     border-radius: 12px; 
     margin-bottom: 30px; 
@@ -45,23 +45,24 @@ body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin:0; pad
     z-index: 1;
 }
 
-/* Camada de alta densidade - Muitos KF pequenos e espalhados */
 .header-main::before {
     content: "";
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
-    opacity: 10; /* Ajuste para ver mais ou menos as letras */
+    opacity: 5; /* Ajuste a intensidade total aqui */
     z-index: -1;
     background-image: 
-        /* Camada 1: Mini KF repetindo a cada 40px */
-        url("data:image/svg+xml,%3Csvg width='47' height='43' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='5' y='25' fill='white' font-family='Arial' font-weight='900' font-size='10' transform='rotate(-25)'%3EKF%3C/text%3E%3C/svg%3E"),
-        /* Camada 2: Mini KF repetindo em ângulos diferentes a cada 60px */
-        url("data:image/svg+xml,%3Csvg width='61' height='59' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='30' y='40' fill='white' font-family='Arial' font-weight='900' font-size='8' transform='rotate(35)'%3EKF%3C/text%3E%3C/svg%3E"),
-        /* Camada 3: KF um pouco mais "esticado" para quebrar o padrão */
-        url("data:image/svg+xml,%3Csvg width='83' height='71' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='10' y='50' fill='white' font-family='Arial' font-weight='900' font-size='12' transform='rotate(10)'%3EKF%3C/text%3E%3C/svg%3E");
+        /* CAMADA 1: LETRAS GIGANTES (120px) */
+        url("data:image/svg+xml,%3Csvg width='300' height='300' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='10' y='150' fill='white' font-family='Arial Black' font-weight='900' font-size='120' transform='rotate(-15)'%3EKF%3C/text%3E%3C/svg%3E"),
+        /* CAMADA 2: LETRAS MÉDIAS (50px) */
+        url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='100' y='80' fill='white' font-family='Arial Black' font-weight='900' font-size='50' transform='rotate(20)'%3EKF%3C/text%3E%3C/svg%3E"),
+        /* CAMADA 3: LETRAS PEQUENAS (15px) */
+        url("data:image/svg+xml,%3Csvg width='80' height='80' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='10' y='30' fill='white' font-family='Arial Black' font-weight='900' font-size='15' transform='rotate(-40)'%3EKF%3C/text%3E%3C/svg%3E"),
+        /* CAMADA 4: MAIS LETRAS PEQUENAS PARA ENCHER */
+        url("data:image/svg+xml,%3Csvg width='110' height='110' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='50' y='80' fill='white' font-family='Arial Black' font-weight='900' font-size='12' transform='rotate(10)'%3EKF%3C/text%3E%3C/svg%3E");
     
     background-repeat: repeat;
-    background-position: 0 0, 15px 15px, 30px 5px;
+    background-position: 0 0, 50px 50px, 20px 80px, 100px 10px;
 }
 
 .dashboard-grid {
