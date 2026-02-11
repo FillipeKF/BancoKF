@@ -758,14 +758,14 @@ const res = await fetch(`${BACKEND_URL}/login`, {
     } else {
       loginError.style.display = "block";
        mostrarToastErro(data.error || "Usuário ou senha incorretos");
-      loginError.innerText = data.error || "Usuário ou senha incorretos";
+     
     }
 
   } catch(err) {
     console.error(err);
     loginError.style.display = "block";
       mostrarToastErro("Erro de conexão com o servidor");
-    loginError.innerText = "Erro de conexão com o servidor";
+    
   }
 });
 
