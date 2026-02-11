@@ -29,6 +29,27 @@
 
 body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin:0; padding:20px; color:#fff; }
 .header-main { background: linear-gradient(90deg,#0b2b6f,#0f4cb8); text-align:center; padding:20px; font-size:24px; font-weight:bold; border-radius:12px; margin-bottom:30px; border-bottom: 4px solid var(--primary); }
+:root {
+  --primary: #00d4ff; /* Exemplo de cor para a borda */
+}
+
+.header-main { 
+  /* Mantemos o seu gradiente original como base */
+  background: 
+    /* Camada 1: O padrão de letras KF semi-transparentes */
+    url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='10' y='30' fill='rgba(255, 255, 255, 0.05)' font-family='Arial' font-weight='bold' font-size='12'%3EKF%3C/text%3E%3C/svg%3E"),
+    linear-gradient(90deg, #0b2b6f, #0f4cb8); 
+  
+  text-align: center; 
+  padding: 40px 20px; /* Aumentei um pouco o padding para o fundo aparecer mais */
+  font-size: 24px; 
+  font-weight: bold; 
+  border-radius: 12px; 
+  margin-bottom: 30px; 
+  border-bottom: 4px solid var(--primary);
+  position: relative;
+  overflow: hidden;
+}
 
 .dashboard-grid {
     display: grid;
