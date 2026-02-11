@@ -30,15 +30,30 @@
 body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin:0; padding:20px; color:#fff; }
 .header-main { background: linear-gradient(90deg,#0b2b6f,#0f4cb8); text-align:center; padding:20px; font-size:24px; font-weight:bold; border-radius:12px; margin-bottom:30px; border-bottom: 4px solid var(--primary); }
 
-.header-main {
-    position: relative;
-    overflow: hidden;
-    /* Gradiente de fundo */
- 
-    
-    /* Múltiplas camadas de letras KF minúsculas e desordenadas */
+.header-main { 
+    position: relative; /* Necessário para as letras ficarem presas aqui dentro */
+    background: linear-gradient(90deg, #0b2b6f, #0f4cb8); 
+    text-align: center; 
+    padding: 60px 20px; 
+    font-size: 24px; 
+    font-weight: bold; 
+    border-radius: 12px; 
+    margin-bottom: 30px; 
+    border-bottom: 4px solid var(--primary); 
+    color: #fff;
+    overflow: hidden; /* Corta as letras que sobrarem das bordas */
+    z-index: 1;
+}
+
+/* Camada das letras KF - Agora garantido que ficam por CIMA do azul */
+.header-main::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    opacity: 0.15; /* Controle aqui a visibilidade geral das letras */
+    z-index: -1; /* Fica atrás do texto, mas na frente do azul */
     background-image: 
-        url("data:image/svg+xml,%3Csvg width='120' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='10' y='30' fill='rgba(255,255,255,0.06)' font-family='Arial' font-weight='bold' font-size='14' transform='rotate(-15 20 20)'%3EKF%3C/text%3E%3C/svg%3E"),
+      url("data:image/svg+xml,%3Csvg width='120' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='10' y='30' fill='rgba(255,255,255,0.06)' font-family='Arial' font-weight='bold' font-size='14' transform='rotate(-15 20 20)'%3EKF%3C/text%3E%3C/svg%3E"),
         url("data:image/svg+xml,%3Csvg width='150' height='130' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='80' y='90' fill='rgba(255,255,255,0.04)' font-family='Arial' font-weight='bold' font-size='12' transform='rotate(25 80 80)'%3EKF%3C/text%3E%3C/svg%3E"),
         url("data:image/svg+xml,%3Csvg width='200' height='180' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='40' y='50' fill='rgba(255,255,255,0.05)' font-family='Arial' font-weight='bold' font-size='16' transform='rotate(-40 50 50)'%3EKF%3C/text%3E%3C/svg%3E"),
          url("data:image/svg+xml,%3Csvg width='200' height='180' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='40' y='50' fill='rgba(255,255,255,0.05)' font-family='Arial' font-weight='bold' font-size='16' transform='rotate(10 30 30)'%3EKF%3C/text%3E%3C/svg%3E"),
@@ -46,22 +61,8 @@ body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin:0; pad
                   url("data:image/svg+xml,%3Csvg width='200' height='180' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='10' y='25' fill='rgba(255,255,255,0.05)' font-family='Arial' font-weight='bold' font-size='16' transform='rotate(10 30 30)'%3EKF%3C/text%3E%3C/svg%3E"),
                            url("data:image/svg+xml,%3Csvg width='200' height='180' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='20' y='60' fill='rgba(255,255,255,0.05)' font-family='Arial' font-weight='bold' font-size='16' transform='rotate(10 30 30)'%3EKF%3C/text%3E%3C/svg%3E"),
                  url("data:image/svg+xml,%3Csvg width='200' height='180' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='40' y='50' fill='rgba(255,255,255,0.05)' font-family='Arial' font-weight='bold' font-size='16' transform='rotate(-5 10 10)'%3EKF%3C/text%3E%3C/svg%3E"),
-                         url("data:image/svg+xml,%3Csvg width='200' height='180' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='40' y='50' fill='rgba(255,255,255,0.05)' font-family='Arial' font-weight='bold' font-size='16' transform='rotate(15 70 70)'%3EKF%3C/text%3E%3C/svg%3E")
-                         
-                         linear-gradient(90deg, #0b2b6f, #0f4cb8); /* O azul volta aqui */
-
-    /* Isso garante que os padrões se desencontrem e fiquem caóticos */
-    background-position: 15% 10%, 45% 65%, 80% 30%;
+                         url("data:image/svg+xml,%3Csvg width='200' height='180' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='40' y='50' fill='rgba(255,255,255,0.05)' font-family='Arial' font-weight='bold' font-size='16' transform='rotate(15 70 70)'%3EKF%3C/text%3E%3C/svg%3E");
     background-repeat: repeat;
-    
-    text-align: center;
-    padding: 50px 20px;
-    font-size: 24px;
-    font-weight: bold;
-    border-radius: 12px;
-    margin-bottom: 30px;
-    border-bottom: 4px solid var(--primary);
-    color: #fff;
 }
 
 .dashboard-grid {
