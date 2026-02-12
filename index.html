@@ -726,6 +726,8 @@ let itemAtualExcluir = null;
 let ciCompleta = false;
 let chartMedia = null;
 let graficoMedia = null;
+let rankingAnterior = [];
+
 
 // URL base da API
 const API_BASE = "https://bancokf.onrender.com";
@@ -755,29 +757,19 @@ function mostrarMediaMes(){
     const MEDIA = 5;
     const LIMITE = 10;
 
-    // ==========================
-    // PEGA TODOS OS NOMES
-    // ==========================
+    // ============================
+    // NOMES FIXOS
+    // ============================
 
-    const todos = new Set();
+    const nomes = Array.from(document.querySelectorAll('#fOptions .func-item'))
+        .map(el => el.textContent.trim());
 
-    [...atividadesAtivas, ...atividadesConcluidas].forEach(a=>{
-        if(Array.isArray(a.equipe)){
-            a.equipe.forEach(n=>todos.add(n));
-        } else if(a.equipe){
-            a.equipe.split(",").forEach(n=>todos.add(n.trim()));
-        }
-    });
-
-    const nomes = Array.from(todos);
-
-    // inicia tudo com zero
     const contagem = {};
-    nomes.forEach(n=>contagem[n]=0);
+    nomes.forEach(n => contagem[n] = 0);
 
-    // ==========================
-    // CONTA APENAS CONCLUÍDAS
-    // ==========================
+    // ============================
+    // CONTA CONCLUÍDAS
+    // ============================
 
     atividadesConcluidas.forEach(a=>{
 
@@ -793,47 +785,83 @@ function mostrarMediaMes(){
         }
     });
 
-    const valores = nomes.map(n=>contagem[n]);
+    // ============================
+    // RANKING
+    // ============================
 
-    // ==========================
-    // CORES DINÂMICAS
-    // ==========================
+    const rankingAtual = [...nomes].sort((a,b)=>contagem[b]-contagem[a]);
 
-    const cores = valores.map(v=> v >= MEDIA ? "#16a34a" : "#dc2626");
+    // ============================
+    // MEDALHAS + MOVIMENTO
+    // ============================
 
-    // ==========================
-    // MOBILE HORIZONTAL
-    // ==========================
+    const labels = rankingAtual.map((nome,i)=>{
+
+        let medalha = "";
+        if(i==0) medalha="🥇 ";
+        if(i==1) medalha="🥈 ";
+        if(i==2) medalha="🥉 ";
+
+        let movimento = "";
+
+        const posAnterior = rankingAnterior.indexOf(nome);
+
+        if(posAnterior !== -1){
+            if(posAnterior > i) movimento=" ↑";
+            if(posAnterior < i) movimento=" ↓";
+        }
+
+        return medalha + nome + movimento;
+    });
+
+    rankingAnterior = [...rankingAtual];
+
+    const valores = rankingAtual.map(n => contagem[n]);
+
+    // ============================
+    // CORES
+    // ============================
+
+    const cores = valores.map(v => v >= MEDIA ? "#16a34a" : "#dc2626");
 
     const mobile = window.innerWidth < 768;
 
+    // ============================
+    // DESTROI PARA REANIMAR
+    // ============================
+
     if(graficoMedia) graficoMedia.destroy();
 
+    // ============================
+    // CRIA COM ANIMAÇÃO
+    // ============================
+
     graficoMedia = new Chart(document.getElementById("graficoMedia"), {
-        type: 'bar',
-        data: {
-            labels: nomes,
-            datasets: [
+        type:'bar',
+        data:{
+            labels,
+            datasets:[
                 {
-                    label: "CIs",
                     data: valores,
                     backgroundColor: cores,
-                    borderRadius: 6
+                    borderRadius:8
                 },
                 {
                     type:'line',
-                    label:'Média',
-                    data: nomes.map(()=>MEDIA),
+                    data: rankingAtual.map(()=>MEDIA),
                     borderColor:'orange',
                     borderWidth:2,
-                    pointRadius:0,
-                    fill:false
+                    pointRadius:0
                 }
             ]
         },
         options:{
             indexAxis: mobile ? 'y' : 'x',
             responsive:true,
+            animation:{
+                duration:1200,
+                easing:'easeOutQuart'
+            },
             plugins:{
                 legend:{display:false}
             },
