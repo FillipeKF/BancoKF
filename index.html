@@ -890,15 +890,30 @@ y:{beginAtZero:true,max:LIMITE}
 });
 }
 
-setInterval(()=>{
+setInterval(async ()=>{
 
-const modal=document.getElementById("modalMedia");
+    try{
 
-if(modal && modal.style.display==="flex"){
-mostrarMediaMes();
-}
+        const r = await fetch(`${API_BASE}/atividades`);
+        atividadesConcluidas = await r.json();
 
-},5000);
+        // se modal estiver aberto, atualiza gráfico
+        const modal = document.getElementById("modalMedia");
+
+        if(modal && modal.style.display==="flex"){
+            mostrarMediaMes();
+        }
+
+        // atualiza histórico se estiver visível
+        if(document.getElementById("modalHistorico")?.style.display==="flex"){
+            atualizarHistorico();
+        }
+
+    }catch(e){
+        console.log("sync fail",e);
+    }
+
+},3000); // a cada 3 segundos
 
 
 
