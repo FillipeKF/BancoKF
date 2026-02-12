@@ -172,6 +172,20 @@ app.post("/atividades/inicio", async (req, res) => {
 
     const { ci, servico, local, equipe, inicio } = req.body;
 
+    // 🔒 BLOQUEIA CI DUPLICADA (ativas + concluídas)
+    const existe = await pool.query(`
+      SELECT 1 FROM atividades_ativas WHERE ci = $1
+      UNION
+      SELECT 1 FROM atividades WHERE ci = $1
+      LIMIT 1
+    `,[ci]);
+
+    if(existe.rowCount > 0){
+      return res.status(409).json({
+        error: "CI já registrada"
+      });
+    }
+
     const r = await pool.query(`
       INSERT INTO atividades_ativas(ci,servico,local,equipe,inicio)
       VALUES($1,$2,$3,$4,$5)
@@ -192,7 +206,6 @@ app.post("/atividades/inicio", async (req, res) => {
   }
 
 });
-
 app.post("/atividades/finalizar", upload.array("fotos"), async (req, res) => {
 
   try {
@@ -370,7 +383,24 @@ app.post("/atividades/apagar", async (req,res)=>{
     }
 });
 
+app.post("/atividades/restore", async(req,res)=>{
 
+const ci=req.body;
+
+await pool.query(`
+INSERT INTO atividades_ativas(ci,servico,local,equipe,inicio)
+VALUES($1,$2,$3,$4,$5)
+ON CONFLICT DO NOTHING
+`,[
+ci.ci,
+ci.servico,
+ci.local,
+ci.equipe,
+ci.inicio
+]);
+
+res.json({ok:true});
+});
 // =======================
 // INICIAR SERVIDOR
 // =======================
