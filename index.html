@@ -246,12 +246,7 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
    align-items:flex-start !important;
    padding-top:20px;
 }
-.container-modal{
-   max-height:none !important;
-   height:auto !important;
-   overflow:visible !important;
-   margin-bottom:40px;
-}
+
 .modal{
     overflow-y:auto;
     padding:20px 0;
@@ -263,9 +258,17 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
 .media-modal{
     width:90vw;
     max-width:1200px;
-    height:auto;
-    max-height:90vh;
+    height:80vh;
+    max-height:80vh;
     padding:20px;
+
+    display:flex;
+    flex-direction:column;
+}
+
+/* área do gráfico */
+.media-modal canvas{
+    flex:1;
 }
 
 /* MOBILE */
@@ -273,13 +276,9 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
 
 .media-modal{
     width:95vw;
+    height:85vh;
     max-height:85vh;
     overflow-y:auto;
-}
-
-/* força altura do canvas */
-#graficoMedia{
-    min-height:600px;
 }
 
 }
@@ -660,7 +659,7 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
 
 <h3>Média mensal por funcionário</h3>
 
-<canvas id="graficoMedia"></canvas>
+<canvas id="graficoMedia" style="width:100%;height:100%"></canvas>
 
 </div>
 </div>
