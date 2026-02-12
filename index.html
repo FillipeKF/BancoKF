@@ -256,10 +256,33 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
     overflow-y:auto;
     padding:20px 0;
 }
-#graficoMedia{
-   min-height:500px;
+
+
+
+
+.media-modal{
+    width:90vw;
+    max-width:1200px;
+    height:auto;
+    max-height:90vh;
+    padding:20px;
 }
 
+/* MOBILE */
+@media(max-width:768px){
+
+.media-modal{
+    width:95vw;
+    max-height:85vh;
+    overflow-y:auto;
+}
+
+/* força altura do canvas */
+#graficoMedia{
+    min-height:600px;
+}
+
+}
 
 
 
@@ -631,7 +654,7 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
 
 <!--Modal Media do Mes-->
 <div id="modalMedia" class="modal">
-<div class="container-modal" style="max-width:700px">
+<div class="container-modal media-modal">
 
 <span class="btn-fechar" onclick="fecharModal('modalMedia')">&times;</span>
 
@@ -856,6 +879,7 @@ pointRadius:0
 options:{
 indexAxis:mobile?'y':'x',
 responsive:true,
+maintainAspectRatio:false,
 animation:{duration:1200},
 plugins:{legend:{display:false}},
 scales:mobile?{
