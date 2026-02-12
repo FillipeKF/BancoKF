@@ -713,7 +713,7 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
 </div>
 
 
-
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 let selecionados = [];
 let atividadesAtivas = [];
@@ -725,6 +725,7 @@ let itemAtualEditar = null;
 let itemAtualExcluir = null;
 let ciCompleta = false;
 let chartMedia = null;
+let graficoMedia = null;
 
 // URL base da API
 const API_BASE = "https://bancokf.onrender.com";
@@ -743,62 +744,86 @@ function mostrarMediaMes(){
 
     abrirModal('modalMedia');
 
+    const mes = document.getElementById('filtroMesHistorico').value;
+    const ano = document.getElementById('filtroAnoHistorico').value;
+
+    if(!mes || !ano){
+        mostrarToastErro("Selecione mês e ano");
+        return;
+    }
+
+    // =========================
+    // CONTAGEM POR FUNCIONÁRIO
+    // =========================
+
     const contagem = {};
 
-    // percorre CIs concluídas
-    atividadesConcluidas.forEach(ci => {
+    atividadesConcluidas.forEach(a => {
 
-        let equipe = Array.isArray(ci.equipe)
-            ? ci.equipe
-            : String(ci.equipe).split(",");
+        const d = new Date(a.fim);
 
-        equipe.forEach(nome => {
-            nome = nome.trim();
-            if(!nome) return;
+        if((d.getMonth()+1)==mes && d.getFullYear()==ano){
 
-            contagem[nome] = (contagem[nome] || 0) + 1;
-        });
+            a.equipe.forEach(nome=>{
+
+                if(!contagem[nome]) contagem[nome]=0;
+
+                contagem[nome]++;
+            });
+        }
     });
 
     const nomes = Object.keys(contagem);
-    const valores = nomes.map(n => Math.min(contagem[n],10));
+    const valores = Object.values(contagem);
 
-    const media = 5;
+    if(!nomes.length){
+        mostrarToastErro("Nenhuma CI nesse período");
+        return;
+    }
 
-    // cores dinâmicas
-    const cores = valores.map(v => v >= media ? "#16a34a" : "#ef4444");
+    const MEDIA = 5;
+
+    // cores automáticas
+    const cores = valores.map(v=> v >= MEDIA ? "#16a34a" : "#dc2626");
+
+    // =========================
+    // DESTROI GRÁFICO ANTIGO
+    // =========================
+
+    if(graficoMedia) graficoMedia.destroy();
 
     const ctx = document.getElementById("graficoMedia");
 
-    if(chartMedia) chartMedia.destroy();
-
-    chartMedia = new Chart(ctx, {
-        type: "bar",
+    graficoMedia = new Chart(ctx, {
+        type: 'bar',
         data: {
             labels: nomes,
             datasets: [
                 {
-                    label: "Quantidade de CIs",
+                    label: "CIs",
                     data: valores,
                     backgroundColor: cores
                 },
                 {
-                    type: "line",
-                    label: "Média",
-                    data: nomes.map(()=>media),
-                    borderColor: "orange",
+                    type: 'line',
+                    label: 'Média',
+                    data: nomes.map(()=>MEDIA),
+                    borderColor: 'orange',
                     borderWidth: 2,
-                    pointRadius: 0
+                    fill:false,
+                    pointRadius:0
                 }
             ]
         },
         options:{
             responsive:true,
+            plugins:{
+                legend:{display:false}
+            },
             scales:{
                 y:{
-                    min:0,
-                    max:10,
-                    ticks:{ stepSize:1 }
+                    beginAtZero:true,
+                    max:10
                 }
             }
         }
