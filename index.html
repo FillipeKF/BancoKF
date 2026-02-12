@@ -737,7 +737,7 @@ const API_BASE = "https://bancokf.onrender.com";
 const loginOverlay = document.getElementById("loginOverlay");
 const loginBtn = document.getElementById("loginBtn");
 const loginError = document.getElementById("loginError");
-
+const mobile = window.innerWidth < 768;
 
 
 function mostrarMediaMes(){
@@ -752,49 +752,64 @@ function mostrarMediaMes(){
         return;
     }
 
-    // =========================
-    // CONTAGEM POR FUNCIONÁRIO
-    // =========================
+    const MEDIA = 5;
+    const LIMITE = 10;
 
+    // ==========================
+    // PEGA TODOS OS NOMES
+    // ==========================
+
+    const todos = new Set();
+
+    [...atividadesAtivas, ...atividadesConcluidas].forEach(a=>{
+        if(Array.isArray(a.equipe)){
+            a.equipe.forEach(n=>todos.add(n));
+        } else if(a.equipe){
+            a.equipe.split(",").forEach(n=>todos.add(n.trim()));
+        }
+    });
+
+    const nomes = Array.from(todos);
+
+    // inicia tudo com zero
     const contagem = {};
+    nomes.forEach(n=>contagem[n]=0);
 
-    atividadesConcluidas.forEach(a => {
+    // ==========================
+    // CONTA APENAS CONCLUÍDAS
+    // ==========================
+
+    atividadesConcluidas.forEach(a=>{
 
         const d = new Date(a.fim);
 
         if((d.getMonth()+1)==mes && d.getFullYear()==ano){
 
             a.equipe.forEach(nome=>{
-
-                if(!contagem[nome]) contagem[nome]=0;
-
-                contagem[nome]++;
+                if(contagem[nome] !== undefined){
+                    contagem[nome]++;
+                }
             });
         }
     });
 
-    const nomes = Object.keys(contagem);
-    const valores = Object.values(contagem);
+    const valores = nomes.map(n=>contagem[n]);
 
-    if(!nomes.length){
-        mostrarToastErro("Nenhuma CI nesse período");
-        return;
-    }
+    // ==========================
+    // CORES DINÂMICAS
+    // ==========================
 
-    const MEDIA = 5;
-
-    // cores automáticas
     const cores = valores.map(v=> v >= MEDIA ? "#16a34a" : "#dc2626");
 
-    // =========================
-    // DESTROI GRÁFICO ANTIGO
-    // =========================
+    // ==========================
+    // MOBILE HORIZONTAL
+    // ==========================
+
+    const mobile = window.innerWidth < 768;
 
     if(graficoMedia) graficoMedia.destroy();
 
-    const ctx = document.getElementById("graficoMedia");
-
-    graficoMedia = new Chart(ctx, {
+    graficoMedia = new Chart(document.getElementById("graficoMedia"), {
         type: 'bar',
         data: {
             labels: nomes,
@@ -802,20 +817,22 @@ function mostrarMediaMes(){
                 {
                     label: "CIs",
                     data: valores,
-                    backgroundColor: cores
+                    backgroundColor: cores,
+                    borderRadius: 6
                 },
                 {
-                    type: 'line',
-                    label: 'Média',
+                    type:'line',
+                    label:'Média',
                     data: nomes.map(()=>MEDIA),
-                    borderColor: 'orange',
-                    borderWidth: 2,
-                    fill:false,
-                    pointRadius:0
+                    borderColor:'orange',
+                    borderWidth:2,
+                    pointRadius:0,
+                    fill:false
                 }
             ]
         },
         options:{
+            indexAxis: mobile ? 'y' : 'x',
             responsive:true,
             plugins:{
                 legend:{display:false}
@@ -823,12 +840,13 @@ function mostrarMediaMes(){
             scales:{
                 y:{
                     beginAtZero:true,
-                    max:10
+                    max:LIMITE
                 }
             }
         }
     });
 }
+
 
 
 function ciKeyDown(e,input){
