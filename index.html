@@ -927,75 +927,97 @@ async function restaurarCIs() {
 
 // ------------------- MODAL TEMPORÁRIO DE RESTORE -------------------
 function abrirModalRestore(cis, zip) {
-    const modal = document.createElement("div");
-    modal.className = "modal animar-entrada";
-    modal.style.display = "flex";
-    modal.style.flexDirection = "column";
-    modal.style.padding = "20px";
-    modal.style.maxHeight = "80vh";
-    modal.style.overflowY = "auto";
-    modal.style.background = "#1b1e24";
-    modal.style.zIndex = 2000;
 
+    const modal = document.createElement("div");
+
+    // Overlay centralizado
+    modal.style.position = "fixed";
+    modal.style.inset = "0";
+    modal.style.background = "rgba(0,0,0,.6)";
+    modal.style.display = "flex";
+    modal.style.alignItems = "center";
+    modal.style.justifyContent = "center";
+    modal.style.zIndex = "3000";
+
+    // Caixa do modal
+    const box = document.createElement("div");
+    box.className = "container-modal";
+    box.style.maxHeight = "80vh";
+    box.style.overflowY = "auto";
+    box.style.width = "90%";
+    box.style.maxWidth = "600px";
+
+    modal.appendChild(box);
+
+    // Botão fechar
     const btnFechar = document.createElement("span");
     btnFechar.innerHTML = "&times;";
-    btnFechar.style.alignSelf = "flex-end";
-    btnFechar.style.cursor = "pointer";
-    btnFechar.style.fontSize = "25px";
+    btnFechar.className = "btn-fechar";
     btnFechar.onclick = () => document.body.removeChild(modal);
 
-    modal.appendChild(btnFechar);
+    box.appendChild(btnFechar);
 
-    cis.forEach(ci => {
+    // Título
+    const titulo = document.createElement("h2");
+    titulo.textContent = "CIs encontradas no backup";
+    titulo.style.color = "var(--primary)";
+    box.appendChild(titulo);
+
+    // Para cada CI
+    cis.forEach(async ci => {
+
         const div = document.createElement("div");
         div.style.background = "#252a33";
-        div.style.margin = "10px 0";
-        div.style.padding = "10px";
-        div.style.borderRadius = "10px";
+        div.style.margin = "15px 0";
+        div.style.padding = "12px";
+        div.style.borderRadius = "12px";
 
         const h = document.createElement("h3");
-        h.textContent = `CI: ${ci.id} - ${ci.inicio}`;
+        h.textContent = `CI ${ci.ci || ci.id}`;
         div.appendChild(h);
 
-        const pre = document.createElement("pre");
-        pre.textContent = JSON.stringify(ci, null, 2);
-        pre.style.fontSize = "12px";
-        div.appendChild(pre);
-    if (Array.isArray(ci.fotos) && ci.fotos.length > 0) {
+        const p = document.createElement("p");
+        p.textContent = `Serviço: ${ci.servico} | Local: ${ci.local}`;
+        p.style.opacity = ".7";
+        div.appendChild(p);
 
-    const fotosDiv = document.createElement("div");
-    fotosDiv.style.display = "flex";
-    fotosDiv.style.flexWrap = "wrap";
-    fotosDiv.style.gap = "10px";
+        // Fotos
+        if (Array.isArray(ci.fotos) && ci.fotos.length) {
 
-    ci.fotos.forEach(async (_, idx) => {
+            const fotosDiv = document.createElement("div");
+            fotosDiv.style.display = "flex";
+            fotosDiv.style.flexWrap = "wrap";
+            fotosDiv.style.gap = "10px";
+            fotosDiv.style.marginTop = "10px";
 
-        const caminho = `${ci.id}-${ci.inicio}/fotos/foto${idx + 1}.jpg`;
+            for (let i = 0; i < ci.fotos.length; i++) {
 
-        if (!zip.file(caminho)) return;
+                const caminho = `${ci.ci || ci.id}-${ci.inicio}/fotos/foto${i+1}.jpg`;
 
-        const blob = await zip.file(caminho).async("blob");
+                const file = zip.file(caminho);
 
-        const img = document.createElement("img");
-        img.src = URL.createObjectURL(blob);
-        img.style.width = "80px";
-        img.style.height = "80px";
-        img.style.objectFit = "cover";
-        img.style.borderRadius = "8px";
+                if (!file) continue;
 
-        fotosDiv.appendChild(img);
-    });
+                const blob = await file.async("blob");
 
-    div.appendChild(fotosDiv);
+                const img = document.createElement("img");
+                img.src = URL.createObjectURL(blob);
+                img.style.width = "90px";
+                img.style.height = "90px";
+                img.style.objectFit = "cover";
+                img.style.borderRadius = "10px";
 
+                fotosDiv.appendChild(img);
+            }
+
+            div.appendChild(fotosDiv);
         }
 
-        modal.appendChild(div);
+        box.appendChild(div);
     });
 
     document.body.appendChild(modal);
 }
-
 
 
 function normalizar(texto) {
