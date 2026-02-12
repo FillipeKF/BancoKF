@@ -926,53 +926,75 @@ async function restaurarCIs() {
 }
 
 // ------------------- MODAL TEMPORÁRIO DE RESTORE -------------------
-function abrirModalRestore(cis) {
+function abrirModalRestore(cis, zip) {
 
-const modal=document.createElement("div");
-modal.className="modal animar-entrada";
-modal.style.position = "fixed";
-modal.style.top = "0";
-modal.style.left = "0";
-modal.style.width = "100%";
-modal.style.height = "100%";
-modal.style.justifyContent = "center";
-modal.style.alignItems = "center";
-modal.style.display="flex";
-modal.style.flexDirection="column";
-modal.style.padding="20px";
-modal.style.background="rgba(0,0,0,.7)";
-modal.style.zIndex=9999;
+    const modal = document.createElement("div");
+    modal.className = "modal";
+    modal.style.display = "flex";
 
-modal.innerHTML=`
-<h3>Restaurar ${cis.length} CI(s)?</h3>
-<button id="btnRestoreTudo">RESTAURAR</button>
-<button id="btnCancelar">Cancelar</button>
-`;
+    const container = document.createElement("div");
+    container.className = "container-modal";
+    container.style.maxHeight = "80vh";
+    container.style.overflowY = "auto";
 
-document.body.appendChild(modal);
+    const btnFechar = document.createElement("span");
+    btnFechar.className = "btn-fechar";
+    btnFechar.innerHTML = "&times;";
+    btnFechar.onclick = () => document.body.removeChild(modal);
 
-document.getElementById("btnCancelar").onclick=()=>{
- modal.remove();
-};
+    container.appendChild(btnFechar);
 
-document.getElementById("btnRestoreTudo").onclick=async()=>{
+    cis.forEach(ci => {
 
- for(const ci of cis){
+        const div = document.createElement("div");
+        div.style.background = "#252a33";
+        div.style.margin = "10px 0";
+        div.style.padding = "10px";
+        div.style.borderRadius = "10px";
 
-   await fetch(`${API_BASE}/atividades/restore`,{
-     method:"POST",
-     headers:{"Content-Type":"application/json"},
-     body:JSON.stringify(ci)
-   });
+        const h = document.createElement("h3");
+        h.textContent = `CI: ${ci.id} - ${ci.inicio}`;
+        div.appendChild(h);
 
- }
+        const pre = document.createElement("pre");
+        pre.textContent = JSON.stringify(ci, null, 2);
+        pre.style.fontSize = "12px";
+        div.appendChild(pre);
 
- modal.remove();
- mostrarToastSucesso("CIs restauradas!");
- carregarAtividades(); // ou sua função de reload
-};
+        if (ci.fotos?.length) {
 
+            const fotosDiv = document.createElement("div");
+            fotosDiv.style.display = "flex";
+            fotosDiv.style.flexWrap = "wrap";
+            fotosDiv.style.gap = "10px";
+
+            ci.fotos.forEach(async (url, idx) => {
+
+                const blob = await zip
+                    .file(`${ci.id}-${ci.inicio}/fotos/foto${idx+1}.jpg`)
+                    .async("blob");
+
+                const img = document.createElement("img");
+                img.src = URL.createObjectURL(blob);
+                img.style.width = "80px";
+                img.style.height = "80px";
+                img.style.objectFit = "cover";
+                img.style.borderRadius = "8px";
+
+                fotosDiv.appendChild(img);
+            });
+
+            div.appendChild(fotosDiv);
+        }
+
+        container.appendChild(div);
+    });
+
+    modal.appendChild(container);
+    document.body.appendChild(modal);
 }
+
+
 
 
 function normalizar(texto) {
