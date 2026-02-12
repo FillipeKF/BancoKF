@@ -761,143 +761,121 @@ const loginError = document.getElementById("loginError");
 const mobile = window.innerWidth < 768;
 
 
-function mostrarMediaMes(){
+async function mostrarMediaMes(){
 
-    abrirModal('modalMedia');
+abrirModal('modalMedia');
 
-    const mes = document.getElementById('filtroMesHistorico').value;
-    const ano = document.getElementById('filtroAnoHistorico').value;
+const mes = document.getElementById('filtroMesHistorico').value;
+const ano = document.getElementById('filtroAnoHistorico').value;
 
-    if(!mes || !ano){
-        mostrarToastErro("Selecione mês e ano");
-        return;
-    }
-
-    const MEDIA = 5;
-    const LIMITE = 10;
-
-    // ============================
-    // NOMES FIXOS
-    // ============================
-
-    const nomes = Array.from(document.querySelectorAll('#fOptions .func-item'))
-        .map(el => el.textContent.trim());
-
-    const contagem = {};
-    nomes.forEach(n => contagem[n] = 0);
-
-    // ============================
-    // CONTA CONCLUÍDAS
-    // ============================
-
-    atividadesConcluidas.forEach(a=>{
-
-        const d = new Date(a.fim);
-
-        if((d.getMonth()+1)==mes && d.getFullYear()==ano){
-
-            a.equipe.forEach(nome=>{
-                if(contagem[nome] !== undefined){
-                    contagem[nome]++;
-                }
-            });
-        }
-    });
-
-    // ============================
-    // RANKING
-    // ============================
-
-    const rankingAtual = [...nomes].sort((a,b)=>contagem[b]-contagem[a]);
-
-    // ============================
-    // MEDALHAS + MOVIMENTO
-    // ============================
-
-    const labels = rankingAtual.map((nome,i)=>{
-
-        let medalha = "";
-        if(i==0) medalha="🥇 ";
-        if(i==1) medalha="🥈 ";
-        if(i==2) medalha="🥉 ";
-
-        let movimento = "";
-
-        const posAnterior = rankingAnterior.indexOf(nome);
-
-        if(posAnterior !== -1){
-            if(posAnterior > i) movimento=" ↑";
-            if(posAnterior < i) movimento=" ↓";
-        }
-
-        return medalha + nome + movimento;
-    });
-
-    rankingAnterior = [...rankingAtual];
-
-    const valores = rankingAtual.map(n => contagem[n]);
-
-    // ============================
-    // CORES
-    // ============================
-
-    const cores = valores.map(v => v >= MEDIA ? "#16a34a" : "#dc2626");
-
-    const mobile = window.innerWidth < 768;
-
-    // ============================
-    // DESTROI PARA REANIMAR
-    // ============================
-
-    if(graficoMedia) graficoMedia.destroy();
-
-    // ============================
-    // CRIA COM ANIMAÇÃO
-    // ============================
-
-    graficoMedia = new Chart(document.getElementById("graficoMedia"), {
-        type:'bar',
-        data:{
-            labels,
-            datasets:[
-                {
-                    data: valores,
-                    backgroundColor: cores,
-                    borderRadius:8
-                },
-                {
-                    type:'line',
-                    data: rankingAtual.map(()=>MEDIA),
-                    borderColor:'orange',
-                    borderWidth:2,
-                    pointRadius:0
-                }
-            ]
-        },
-        options:{
-            indexAxis: mobile ? 'y' : 'x',
-            responsive:true,
-            animation:{
-                duration:1200,
-                easing:'easeOutQuart'
-            },
-            plugins:{
-                legend:{display:false}
-            },
-           scales: mobile ? {
-    x:{
-        beginAtZero:true,
-        max:LIMITE
-    }
-} : {
-    y:{
-        beginAtZero:true,
-        max:LIMITE
-    }
+if(!mes || !ano){
+mostrarToastErro("Selecione mês e ano");
+return;
 }
-        }
-    });
+
+// 🔥 atualiza backend sem refresh
+const r = await fetch(`${API_BASE}/atividades`);
+atividadesConcluidas = await r.json();
+
+const MEDIA = 5;
+const LIMITE = 10;
+
+// NOMES FIXOS
+const nomes = Array.from(document.querySelectorAll('#fOptions .func-item'))
+.map(el=>el.textContent.trim());
+
+// inicia zerado
+const contagem = {};
+nomes.forEach(n=>contagem[n]=0);
+
+// conta CIs
+atividadesConcluidas.forEach(a=>{
+
+const d=new Date(a.fim);
+
+if((d.getMonth()+1)==mes && d.getFullYear()==ano){
+
+a.equipe.forEach(nome=>{
+if(contagem[nome]!=undefined) contagem[nome]++;
+});
+
 }
+});
+
+// ranking
+const rankingAtual=[...nomes].sort((a,b)=>contagem[b]-contagem[a]);
+
+// labels com medalha + seta
+const labels=rankingAtual.map((nome,i)=>{
+
+let medalha="";
+if(i==0) medalha="🥇 ";
+if(i==1) medalha="🥈 ";
+if(i==2) medalha="🥉 ";
+
+let movimento="";
+const ant=rankingAnterior.indexOf(nome);
+
+if(ant!=-1){
+if(ant>i) movimento=" ↑";
+if(ant<i) movimento=" ↓";
+}
+
+return medalha+nome+movimento;
+});
+
+rankingAnterior=[...rankingAtual];
+
+const valores=rankingAtual.map(n=>contagem[n]);
+
+const cores=valores.map(v=>v>=MEDIA?"#16a34a":"#dc2626");
+
+const mobile=window.innerWidth<768;
+
+if(graficoMedia) graficoMedia.destroy();
+
+graficoMedia=new Chart(document.getElementById("graficoMedia"),{
+type:'bar',
+data:{
+labels,
+datasets:[
+{
+data:valores,
+backgroundColor:cores,
+borderRadius:8
+},
+{
+type:'line',
+data:rankingAtual.map(()=>MEDIA),
+borderColor:'orange',
+borderWidth:2,
+pointRadius:0
+}
+]
+},
+options:{
+indexAxis:mobile?'y':'x',
+responsive:true,
+animation:{duration:1200},
+plugins:{legend:{display:false}},
+scales:mobile?{
+x:{beginAtZero:true,max:LIMITE}
+}:{
+y:{beginAtZero:true,max:LIMITE}
+}
+}
+});
+}
+
+setInterval(()=>{
+
+const modal=document.getElementById("modalMedia");
+
+if(modal && modal.style.display==="flex"){
+mostrarMediaMes();
+}
+
+},5000);
 
 
 
@@ -1961,23 +1939,7 @@ function baixarImagem(){
     link.download = imagemAtual || 'imagem.jpg';
     link.click();
 }
-async function mostrarMediaMes(){
 
-   const r = await fetch(`${API_BASE}/atividades`);
-   const dados = await r.json();
-
-   montarGrafico(dados);
-}
-
-setInterval(()=>{
-
-   const modal = document.getElementById("modalMedia");
-
-   if(modal && modal.style.display === "flex"){
-       mostrarMediaMes();
-   }
-
-},5000);
 
 carregarAtividades();
 </script>
