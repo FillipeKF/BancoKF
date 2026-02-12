@@ -926,66 +926,46 @@ async function restaurarCIs() {
 }
 
 // ------------------- MODAL TEMPORÁRIO DE RESTORE -------------------
-function abrirModalRestore(cis, zip) {
-    const modal = document.createElement("div");
-    modal.className = "modal animar-entrada";
-    modal.style.display = "flex";
-    modal.style.flexDirection = "column";
-    modal.style.padding = "20px";
-    modal.style.maxHeight = "80vh";
-    modal.style.overflowY = "auto";
-    modal.style.background = "#1b1e24";
-    modal.style.zIndex = 2000;
+function abrirModalRestore(cis) {
 
-    const btnFechar = document.createElement("span");
-    btnFechar.innerHTML = "&times;";
-    btnFechar.style.alignSelf = "flex-end";
-    btnFechar.style.cursor = "pointer";
-    btnFechar.style.fontSize = "25px";
-    btnFechar.onclick = () => document.body.removeChild(modal);
+const modal=document.createElement("div");
+modal.className="modal animar-entrada";
+modal.style.display="flex";
+modal.style.flexDirection="column";
+modal.style.padding="20px";
+modal.style.background="#1b1e24";
+modal.style.zIndex=9999;
 
-    modal.appendChild(btnFechar);
+modal.innerHTML=`
+<h3>Restaurar ${cis.length} CI(s)?</h3>
+<button id="btnRestoreTudo">RESTAURAR</button>
+<button id="btnCancelar">Cancelar</button>
+`;
 
-    cis.forEach(ci => {
-        const div = document.createElement("div");
-        div.style.background = "#252a33";
-        div.style.margin = "10px 0";
-        div.style.padding = "10px";
-        div.style.borderRadius = "10px";
+document.body.appendChild(modal);
 
-        const h = document.createElement("h3");
-        h.textContent = `CI: ${ci.id} - ${ci.inicio}`;
-        div.appendChild(h);
+document.getElementById("btnCancelar").onclick=()=>{
+ modal.remove();
+};
 
-        const pre = document.createElement("pre");
-        pre.textContent = JSON.stringify(ci, null, 2);
-        pre.style.fontSize = "12px";
-        div.appendChild(pre);
+document.getElementById("btnRestoreTudo").onclick=async()=>{
 
-        if (ci.fotos && ci.fotos.length > 0) {
-            const fotosDiv = document.createElement("div");
-            fotosDiv.style.display = "flex";
-            fotosDiv.style.flexWrap = "wrap";
-            fotosDiv.style.gap = "10px";
-            ci.fotos.forEach(async (url, idx) => {
-                const blob = await zip.file(`${ci.id}-${ci.inicio}/fotos/foto${idx+1}.jpg`).async("blob");
-                const img = document.createElement("img");
-                img.src = URL.createObjectURL(blob);
-                img.style.width = "80px";
-                img.style.height = "80px";
-                img.style.objectFit = "cover";
-                img.style.borderRadius = "8px";
-                fotosDiv.appendChild(img);
-            });
-            div.appendChild(fotosDiv);
-        }
+ for(const ci of cis){
 
-        modal.appendChild(div);
-    });
+   await fetch(`${API_BASE}/atividades/restore`,{
+     method:"POST",
+     headers:{"Content-Type":"application/json"},
+     body:JSON.stringify(ci)
+   });
 
-    document.body.appendChild(modal);
+ }
+
+ modal.remove();
+ mostrarToastSucesso("CIs restauradas!");
+ carregarAtividades(); // ou sua função de reload
+};
+
 }
-
 
 
 function normalizar(texto) {
