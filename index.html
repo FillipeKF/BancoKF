@@ -293,15 +293,10 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
     </div>
 
     <div class="card-acao" onclick="abrirHistorico()">
-    <div style="font-size:40px">🗄️</div>
-    <h3>CIs Registradas</h3>
-
-    <button onclick="event.stopPropagation(); mostrarMediaMes()"
-        style="margin:10px 0;padding:8px 14px;border-radius:8px;background:#0d6efd;color:white;border:none">
-        📊 Média do mês
-    </button>
-</div>
-</div>
+        <div style="font-size:40px">🗄️</div>
+        
+        <h3>CIs Registradas</h3>
+        
     </div>
 
   <div class="card-acao" onclick="abrirAlmoxarifado()">
@@ -309,18 +304,6 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
     <h3>Almoxarifado</h3>
 </div>
 </div>
-
-
-<div id="modalMedia" class="modal">
-    <div class="container-modal" style="max-width:700px">
-        <span class="btn-fechar" onclick="fecharModal('modalMedia')">&times;</span>
-
-        <h3>Média mensal por funcionário</h3>
-
-        <canvas id="graficoMedia"></canvas>
-    </div>
-</div>
-
 
 <!-- MODAL CADASTRO -->
 <div id="modalCadastro" class="modal">
@@ -587,6 +570,10 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
     <div>
         <label style="color:var(--text); font-weight:bold; font-size:13px;">Filtrar por Serviço:</label>
         <select id="filtroServicoHistorico" onchange="atualizarHistorico()">
+            <button onclick="mostrarMediaMes()"
+style="margin-left:10px;padding:6px 12px;border-radius:8px;background:#0d6efd;color:white;border:none">
+📊 Média
+</button>
             <option value="">Todos</option>
             <option value="Pintura">Pintura</option>
             <option value="Elétrica">Elétrica</option>
@@ -607,6 +594,18 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
     </div>
 </div>
 
+<!--Modal Media do Mes-->
+<div id="modalMedia" class="modal">
+<div class="container-modal" style="max-width:700px">
+
+<span class="btn-fechar" onclick="fecharModal('modalMedia')">&times;</span>
+
+<h3>Média mensal por funcionário</h3>
+
+<canvas id="graficoMedia"></canvas>
+
+</div>
+</div>
 
 <!-- MODAL CONFIRMAR BACKUP CI -->
 <div id="modalConfirmarBackup" class="modal">
@@ -723,83 +722,73 @@ const loginBtn = document.getElementById("loginBtn");
 const loginError = document.getElementById("loginError");
 
 
+
 function mostrarMediaMes(){
 
-    const filtroMes = document.getElementById('filtroMesHistorico').value;
-    const filtroAno = document.getElementById('filtroAnoHistorico').value;
+    abrirModal('modalMedia');
 
-    if(!filtroMes || !filtroAno){
-        mostrarToastErro("Selecione mês e ano");
-        return;
-    }
-
-    // filtra CIs do mês
-    const mesCIs = atividadesConcluidas.filter(a=>{
-        const d = new Date(a.fim);
-        return (d.getMonth()+1)==filtroMes && d.getFullYear()==filtroAno;
-    });
-
-    if(!mesCIs.length){
-        mostrarToastErro("Nenhuma CI neste período");
-        return;
-    }
-
-    // conta por funcionário
     const contagem = {};
 
-    mesCIs.forEach(ci=>{
-        ci.equipe.forEach(nome=>{
+    // percorre CIs concluídas
+    atividadesConcluidas.forEach(ci => {
+
+        let equipe = Array.isArray(ci.equipe)
+            ? ci.equipe
+            : String(ci.equipe).split(",");
+
+        equipe.forEach(nome => {
+            nome = nome.trim();
+            if(!nome) return;
+
             contagem[nome] = (contagem[nome] || 0) + 1;
         });
     });
 
     const nomes = Object.keys(contagem);
-    const valores = Object.values(contagem);
+    const valores = nomes.map(n => Math.min(contagem[n],10));
 
-    const MEDIA = 5; // média fixa inicial
+    const media = 5;
 
-    const cores = valores.map(v => v >= MEDIA ? "#16a34a" : "#ef4444");
-
-    abrirModal('modalMedia');
+    // cores dinâmicas
+    const cores = valores.map(v => v >= media ? "#16a34a" : "#ef4444");
 
     const ctx = document.getElementById("graficoMedia");
 
     if(chartMedia) chartMedia.destroy();
 
-    chartMedia = new Chart(ctx,{
-        type:"bar",
-        data:{
-            labels:nomes,
-            datasets:[
+    chartMedia = new Chart(ctx, {
+        type: "bar",
+        data: {
+            labels: nomes,
+            datasets: [
                 {
-                    label:"CIs",
-                    data:valores,
-                    backgroundColor:cores
+                    label: "Quantidade de CIs",
+                    data: valores,
+                    backgroundColor: cores
                 },
                 {
-                    type:"line",
-                    label:"Média",
-                    data:Array(nomes.length).fill(MEDIA),
-                    borderColor:"#f97316",
-                    borderWidth:2,
-                    pointRadius:0
+                    type: "line",
+                    label: "Média",
+                    data: nomes.map(()=>media),
+                    borderColor: "orange",
+                    borderWidth: 2,
+                    pointRadius: 0
                 }
             ]
         },
         options:{
             responsive:true,
-            plugins:{
-                legend:{display:true}
-            },
             scales:{
                 y:{
-                    beginAtZero:true,
-                    ticks:{stepSize:1}
+                    min:0,
+                    max:10,
+                    ticks:{ stepSize:1 }
                 }
             }
         }
     });
 }
+
 
 function ciKeyDown(e,input){
 
