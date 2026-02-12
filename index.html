@@ -242,6 +242,20 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
 
 
 
+.modal{
+   align-items:flex-start !important;
+   padding-top:20px;
+}
+.container-modal{
+   max-height:none !important;
+   height:auto !important;
+   overflow:visible !important;
+}
+#graficoMedia{
+   min-height:500px;
+}
+
+
 
 
 /* Conteúdo principal (inicialmente acessível, overlay bloqueia visual) */
@@ -1937,16 +1951,23 @@ function baixarImagem(){
     link.download = imagemAtual || 'imagem.jpg';
     link.click();
 }
+async function mostrarMediaMes(){
+
+   const r = await fetch(`${API_BASE}/atividades`);
+   const dados = await r.json();
+
+   montarGrafico(dados);
+}
 
 setInterval(()=>{
 
-    const modal = document.getElementById("modalMedia");
+   const modal = document.getElementById("modalMedia");
 
-    if(modal && modal.style.display === "flex"){
-        mostrarMediaMes();
-    }
+   if(modal && modal.style.display === "flex"){
+       mostrarMediaMes();
+   }
 
-}, 5000);
+},5000);
 
 carregarAtividades();
 </script>
