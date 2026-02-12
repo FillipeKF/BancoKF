@@ -1005,8 +1005,22 @@ function abrirModalRestore(cis, zip) {
                     img.style.height = "90px";
                     img.style.objectFit = "cover";
                     img.style.borderRadius = "8px";
+                    
 
-                    fotosDiv.appendChild(img);
+             const url = URL.createObjectURL(blob);
+// efeito hover
+img.style.transition = "0.2s";
+img.onmouseenter = () => img.style.transform = "scale(1.05)";
+img.onmouseleave = () => img.style.transform = "scale(1)";
+img.src = url;
+img.style.cursor = "zoom-in";
+
+img.onclick = () => abrirImagemModal(
+    url,
+    `CI-${ci.ci || ci.id}-foto${i+1}.jpg`
+);
+
+fotosDiv.appendChild(img);
 
                 } catch(e) {
                     console.warn("Foto ignorada");
