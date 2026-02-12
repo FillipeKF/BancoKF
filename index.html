@@ -927,25 +927,26 @@ async function restaurarCIs() {
 
 // ------------------- MODAL TEMPORÁRIO DE RESTORE -------------------
 function abrirModalRestore(cis, zip) {
-
     const modal = document.createElement("div");
-    modal.className = "modal";
+    modal.className = "modal animar-entrada";
     modal.style.display = "flex";
-
-    const container = document.createElement("div");
-    container.className = "container-modal";
-    container.style.maxHeight = "80vh";
-    container.style.overflowY = "auto";
+    modal.style.flexDirection = "column";
+    modal.style.padding = "20px";
+    modal.style.maxHeight = "80vh";
+    modal.style.overflowY = "auto";
+    modal.style.background = "#1b1e24";
+    modal.style.zIndex = 2000;
 
     const btnFechar = document.createElement("span");
-    btnFechar.className = "btn-fechar";
     btnFechar.innerHTML = "&times;";
+    btnFechar.style.alignSelf = "flex-end";
+    btnFechar.style.cursor = "pointer";
+    btnFechar.style.fontSize = "25px";
     btnFechar.onclick = () => document.body.removeChild(modal);
 
-    container.appendChild(btnFechar);
+    modal.appendChild(btnFechar);
 
     cis.forEach(ci => {
-
         const div = document.createElement("div");
         div.style.background = "#252a33";
         div.style.margin = "10px 0";
@@ -960,40 +961,40 @@ function abrirModalRestore(cis, zip) {
         pre.textContent = JSON.stringify(ci, null, 2);
         pre.style.fontSize = "12px";
         div.appendChild(pre);
+    if (Array.isArray(ci.fotos) && ci.fotos.length > 0) {
 
-        if (ci.fotos?.length) {
+    const fotosDiv = document.createElement("div");
+    fotosDiv.style.display = "flex";
+    fotosDiv.style.flexWrap = "wrap";
+    fotosDiv.style.gap = "10px";
 
-            const fotosDiv = document.createElement("div");
-            fotosDiv.style.display = "flex";
-            fotosDiv.style.flexWrap = "wrap";
-            fotosDiv.style.gap = "10px";
+    ci.fotos.forEach(async (_, idx) => {
 
-            ci.fotos.forEach(async (url, idx) => {
+        const caminho = `${ci.id}-${ci.inicio}/fotos/foto${idx + 1}.jpg`;
 
-                const blob = await zip
-                    .file(`${ci.id}-${ci.inicio}/fotos/foto${idx+1}.jpg`)
-                    .async("blob");
+        if (!zip.file(caminho)) return;
 
-                const img = document.createElement("img");
-                img.src = URL.createObjectURL(blob);
-                img.style.width = "80px";
-                img.style.height = "80px";
-                img.style.objectFit = "cover";
-                img.style.borderRadius = "8px";
+        const blob = await zip.file(caminho).async("blob");
 
-                fotosDiv.appendChild(img);
-            });
+        const img = document.createElement("img");
+        img.src = URL.createObjectURL(blob);
+        img.style.width = "80px";
+        img.style.height = "80px";
+        img.style.objectFit = "cover";
+        img.style.borderRadius = "8px";
 
-            div.appendChild(fotosDiv);
-        }
-
-        container.appendChild(div);
+        fotosDiv.appendChild(img);
     });
 
-    modal.appendChild(container);
+    div.appendChild(fotosDiv);
+
+        }
+
+        modal.appendChild(div);
+    });
+
     document.body.appendChild(modal);
 }
-
 
 
 
