@@ -1937,6 +1937,17 @@ function baixarImagem(){
     link.download = imagemAtual || 'imagem.jpg';
     link.click();
 }
+
+setInterval(()=>{
+
+    const modal = document.getElementById("modalMedia");
+
+    if(modal && modal.style.display === "flex"){
+        mostrarMediaMes();
+    }
+
+}, 5000);
+
 carregarAtividades();
 </script>
 </body>
