@@ -118,30 +118,43 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
 
 .desenvolvido { text-align: right; font-size: 14px; color: var(--text); margin-top: 5px; font-weight: normal; }
 
-/* MEDIA QUERIES */
+/* Tablet / laptops menores */
 @media (max-width: 1024px) {
-    .dashboard-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); margin: 20px; }
-    .card-lista { min-width: 160px; max-width: 200px; }
-    .header-main { font-size: 22px; padding: 15px; }
-}
-
-@media (max-width: 768px) {
-    body { padding:10px; }
-    .dashboard-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin: 10px; }
-    .card-lista { min-width: 140px; max-width: 180px; font-size: 12px; padding: 10px; }
-    #listaAndamento, #listaHistorico { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+    .dashboard-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); margin: 15px; }
+    .card-lista { min-width: 140px; }
     .header-main { font-size: 20px; padding: 12px; }
-    input, select, textarea, .btn-acao { padding: 10px; font-size: 13px; }
-    .img-preview { width: 60px; height: 60px; }
 }
 
-@media (max-width: 480px) {
-    .dashboard-grid { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin: 5px; }
-    .card-lista { min-width: 120px; max-width: 160px; font-size: 11px; padding: 8px; }
+/* Tablets menores e smartphones médios */
+@media (max-width: 768px) {
+    .dashboard-grid { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin: 10px; }
+    .card-lista { min-width: 120px; font-size: 11px; padding: 8px; }
     .header-main { font-size: 18px; padding: 10px; }
     .img-preview { width: 50px; height: 50px; }
+    input, select, textarea, .btn-acao { padding: 8px; font-size: 12px; }
 }
 
+/* Mobile extremo */
+@media (max-width: 480px) {
+    .dashboard-grid { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 8px; margin: 5px; }
+    .card-lista { min-width: 100px; font-size: 10px; padding: 6px; }
+    .header-main { font-size: 16px; padding: 8px; }
+    .img-preview { width: 40px; height: 40px; }
+    input, select, textarea, .btn-acao { padding: 6px; font-size: 11px; }
+}
+
+/* Mobile extremo 300px */
+@media (max-width: 300px) {
+    #modalMedia .container-modal {
+        width: 100vw !important;
+        border-radius: 0 !important;
+        padding: 5px !important;
+    }
+    .dashboard-grid { grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: 5px; }
+    .card-lista { min-width: 90px; font-size: 9px; padding: 4px; }
+    .img-preview { width: 30px; height: 30px; }
+    .header-main { font-size: 14px; padding: 6px; }
+}
 .desenvolvido {
     text-align: right;
     font-size: 14px;
@@ -261,27 +274,34 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
     align-items:flex-start !important;
 }
 
-#modalMedia .container-modal{
-    width:95vw !important;
-    max-width:900px !important;   /* desktop mais largo */
-    max-height:90vh !important;  /* limita altura */
-    overflow-y:auto !important;  /* só vertical */
-    overflow-x:hidden !important; /* mata horizontal */
+#modalMedia .container-modal {
+    width: 95vw !important;
+    max-width: 900px !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding: 15px;
+    box-sizing: border-box;
+    border-radius: 12px;
 }
+
 
 /* canvas nunca pode estourar */
-#graficoMedia{
-    max-width:100% !important;
+/* Canvas gráfico */
+  #graficoMedia {
+      width:100% !important;
+      height:500px !important; /* altura menor em mobile extremo */
 }
-
 /* MOBILE */
-@media(max-width:300px){
-
-    #modalMedia .container-modal{
-        width:100vw !important;
-        border-radius:0 !important;
-    }
-
+@media (max-width:300px) {
+  #modalMedia .container-modal {
+      width:100vw !important;
+      max-height:90vh !important;
+      padding:5px;
+      border-radius:0 !important;
+      overflow-x:hidden;   /* garante nenhum scroll horizontal */
+      overflow-y:auto;     /* scroll vertical apenas se necessário */
+  }
 }
 
 
