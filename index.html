@@ -275,7 +275,7 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
 }
 
 /* MOBILE */
-@media(max-width:768px){
+@media(max-width:300px){
 
     #modalMedia .container-modal{
         width:100vw !important;
@@ -801,7 +801,7 @@ const r = await fetch(`${API_BASE}/atividades`);
 atividadesConcluidas = await r.json();
 
 const MEDIA = 5;
-const LIMITE = 10;
+const LIMITE = 30;
 
 // NOMES FIXOS
 const nomes = Array.from(document.querySelectorAll('#fOptions .func-item'))
@@ -889,7 +889,7 @@ scales: mobile ? {
         beginAtZero:true,
         max:LIMITE,
         ticks:{
-            padding:2   // <<< diminui espaço dos números
+            padding:0.5   // <<< diminui espaço dos números
         },
         grid:{
             drawTicks:false
@@ -902,7 +902,7 @@ scales: mobile ? {
         beginAtZero:true,
         max:LIMITE,
         ticks:{
-            padding:2   // <<< cola números no gráfico
+            padding:0.5   // <<< cola números no gráfico
         },
         grid:{
             drawTicks:false
