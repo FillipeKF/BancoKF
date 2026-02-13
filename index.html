@@ -255,31 +255,32 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
 
 
 
-.media-modal{
-    width:90vw;
-    max-width:1200px;
-    height:80vh;
-    max-height:80vh;
-    padding:20px;
+/* ===== MODAL MEDIA RESPONSIVO ===== */
 
-    display:flex;
-    flex-direction:column;
+#modalMedia{
+    align-items:flex-start !important;
 }
 
-/* área do gráfico */
-.media-modal canvas{
-    flex:1;
+#modalMedia .container-modal{
+    width:95vw !important;
+    max-width:900px !important;   /* desktop mais largo */
+    max-height:90vh !important;  /* limita altura */
+    overflow-y:auto !important;  /* só vertical */
+    overflow-x:hidden !important; /* mata horizontal */
+}
+
+/* canvas nunca pode estourar */
+#graficoMedia{
+    max-width:100% !important;
 }
 
 /* MOBILE */
 @media(max-width:768px){
 
-.media-modal{
-    width:95vw;
-    height:85vh;
-    max-height:85vh;
-    overflow-y:auto;
-}
+    #modalMedia .container-modal{
+        width:100vw !important;
+        border-radius:0 !important;
+    }
 
 }
 
@@ -878,6 +879,7 @@ pointRadius:0
 options:{
 indexAxis:mobile?'y':'x',
 responsive:true,
+maintainAspectRatio:false,
 maintainAspectRatio:false,
 animation:{duration:1200},
 plugins:{legend:{display:false}},
