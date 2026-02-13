@@ -288,23 +288,37 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
 
 /* canvas nunca pode estourar */
 /* Canvas gráfico */
-  #graficoMedia {
-      width:100% !important;
-      height:450px !important; /* altura menor em mobile extremo */
+#graficoMedia {
+    width: 100% !important;
+    height: 450px !important;  /* desktop */
 }
+
 /* MOBILE */
-@media (max-width:300px) {
-  #modalMedia .container-modal {
-      width:100vw !important;
-      max-height:90vh !important;
-      padding:5px;
-      border-radius:0 !important;
-      overflow-x:hidden;   /* garante nenhum scroll horizontal */
-      overflow-y:hidden;     /* scroll vertical apenas se necessário */
-  }
+#modalMedia .container-modal {
+    width: 95vw;
+    max-width: 900px;
+    max-height: 90vh;       /* scroll interno se necessário */
+    overflow-y: auto;       /* scroll dentro do container */
+    overflow-x: hidden;
+    padding: 15px;
+    box-sizing: border-box;
+    border-radius: 12px;
+    background: var(--card);
 }
 
+/* MOBILE EXTREMO */
+@media (max-width: 300px) {
+    #modalMedia .container-modal {
+        width: 100vw !important;
+        max-height: 90vh !important;
+        padding: 5px;
+        border-radius: 0 !important;
+    }
 
+    #graficoMedia {
+        height: 200px !important; /* menor altura para caber na tela */
+    }
+}
 
 /* Conteúdo principal (inicialmente acessível, overlay bloqueia visual) */
 #mainContent { display: block; }
