@@ -279,7 +279,7 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
     max-width: 900px !important;
     max-height: 90vh !important;
     overflow-y: auto !important;
-    overflow-x: hidden !important;
+    overflow-x: auto !important;
     padding: 15px;
     box-sizing: border-box;
     border-radius: 12px;
@@ -288,11 +288,10 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
 
 /* canvas nunca pode estourar */
 /* Canvas gráfico */
-#graficoMedia {
-    width: 100% !important;
-    height: 450px !important;  /* desktop */
+  #graficoMedia {
+      width:100% !important;
+      height:450px !important; /* altura menor em mobile extremo */
 }
-
 /* MOBILE */
 #modalMedia .container-modal {
     width: 95vw;
@@ -306,19 +305,7 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
     background: var(--card);
 }
 
-/* MOBILE EXTREMO */
-@media (max-width: 300px) {
-    #modalMedia .container-modal {
-        width: 100vw !important;
-        max-height: 90vh !important;
-        padding: 5px;
-        border-radius: 0 !important;
-    }
 
-    #graficoMedia {
-        height: 200px !important; /* menor altura para caber na tela */
-    }
-}
 
 /* Conteúdo principal (inicialmente acessível, overlay bloqueia visual) */
 #mainContent { display: block; }
