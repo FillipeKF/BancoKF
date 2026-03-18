@@ -1,4 +1,3 @@
-require("dotenv").config();
 process.env.NODE_OPTIONS = "--dns-result-order=ipv4first";
 
 const express = require("express");
@@ -42,6 +41,7 @@ const upload = multer({ storage });
 // POSTGRES (NEON)
 // =======================
 const pool = new Pool({
+  connectionString: "postgresql://neondb_owner:npg_5xEZNaQXO8ye@ep-rapid-pine-acre78eh-pooler.sa-east-1.aws.neon.tech/neondb?sslmode=verify-full",
   connectionString: "postgresql://neondb_owner:npg_ojkm7E2ZpMHn@ep-rapid-pine-acre78eh-pooler.sa-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require",
   ssl: true
 });
@@ -113,7 +113,11 @@ async function checkAlmoxarifado(req, res, next) {
   const { usuario } = req.body;
   if (!usuario) return res.status(400).json({ ok:false, error:"Usuário não informado" });
 
+app.post("/login", async (req, res) => {
   try {
+    let { usuario, senha } = req.body;
+    if (!usuario || !senha) 
+      return res.status(400).json({ ok:false, error:"Usuário e senha obrigatórios" });
     const r = await pool.query("SELECT permissao FROM usuarios WHERE usuario=$1 AND ativo=true", [usuario]);
     if (!r.rows[0] || r.rows[0].permissao !== "almoxarifado") {
       return res.status(403).json({ ok:false, error:"Acesso negado" });
@@ -129,20 +133,32 @@ async function checkAlmoxarifado(req, res, next) {
 // ROTAS
 // =======================
 
+    // CONVERTE PARA MAIÚSCULAS
+    usuario = usuario.trim().toUpperCase();
+    senha = senha.trim().toUpperCase();
 app.post("/login", async (req, res) => {
   try {
     const { usuario, senha } = req.body;
     if (!usuario || !senha) return res.status(400).json({ ok:false, error:"Usuário e senha obrigatórios" });
 
     const r = await pool.query(
+      "SELECT * FROM usuarios WHERE UPPER(usuario)= $1 AND UPPER(senha)= $2 AND ativo=true",
       "SELECT * FROM usuarios WHERE usuario=$1 AND senha=$2 AND ativo=true",
       [usuario, senha]
     );
+@@ -21,138 +142,191 @@ app.post("/login", async (req, res) => {
 
     if (r.rows.length === 0) {
       return res.status(401).json({ ok:false, error:"Usuário ou senha inválidos" });
     }
 
+    res.json({ ok:true, usuario: r.rows[0].usuario });
+    // Retornando a permissão junto com o login
+    res.json({ 
+      ok:true, 
+      usuario: r.rows[0].usuario,
+      permissao: r.rows[0].permissao
+    });
     res.json({ ok:true, usuario: r.rows[0].usuario, permissao: r.rows[0].permissao });
   } catch(err) {
     console.error("LOGIN ERRO:", err);
@@ -150,8 +166,20 @@ app.post("/login", async (req, res) => {
   }
 });
 
+function checkAlmoxarifado(req, res, next) {
+    const { permissao } = req.body; // Recebe permissao do front (ou via token)
+    if(permissao !== 'almoxarifado'){
+        return res.status(403).json({ ok:false, error:"Acesso negado" });
+    }
+    next();
+}
+
+
 // Listar atividades ativas
 app.get("/atividades/ativas", async (_, res) => {
+@@ -292,9 +300,10 @@
+    console.error("GET ITENS:", err);
+    res.status(500).json({ error: "Erro ao buscar itens" });
   try {
     const r = await pool.query("SELECT * FROM atividades_ativas");
     res.json(r.rows.map(a => ({ ...a, equipe: a.equipe.split(",") })));
@@ -174,6 +202,7 @@ app.get("/atividades", async (_, res) => {
     console.error(err);
     res.status(500).json({ error: "Erro ao buscar atividades." });
   }
+});app.post("/itens", async (req, res) => {
 });
 
 // Iniciar atividade
@@ -205,22 +234,33 @@ app.post("/atividades/inicio", async (req, res) => {
   }
 });
 
+app.post("/itens", checkAlmoxarifado, async (req, res) => {
 // Finalizar atividade
 app.post("/atividades/finalizar", upload.array("fotos"), async (req, res) => {
   try {
+    const { nome, quantidade, setor } = req.body;
     const idAtiva = Number(req.body.idAtiva);
     if (!idAtiva) throw "ID ATIVA NÃO RECEBIDO";
 
+    await pool.query(`
+@@ -305,93 +314,93 @@
+    res.json({ ok:true });
     const { ci, servico, local, equipe, inicio, relato, fim } = req.body;
 
+  } catch(err) {
     let fotosURLs = [];
 
+    console.error("POST ITEM:", err);
     if (req.files && req.files.length > 0) {
       for (const file of req.files) {
         const fileName = `${Date.now()}-${file.originalname}`;
         const { error } = await supabase.storage.from("uploads").upload(fileName, file.buffer, { contentType: file.mimetype });
         if (error) throw error;
 
+    res.status(500).json({
+      error:"Erro ao salvar item",
+      detalhe:String(err)
+    });
         const { data } = supabase.storage.from("uploads").getPublicUrl(fileName);
         fotosURLs.push(data.publicUrl);
       }
@@ -238,6 +278,7 @@ app.post("/atividades/finalizar", upload.array("fotos"), async (req, res) => {
     console.error("FINALIZAR ERRO REAL:", err);
     res.status(500).json({ error: "Falha ao finalizar atividade", detalhe: String(err) });
   }
+})// DELETE
 });
 
 // Itens
@@ -251,8 +292,15 @@ app.get("/itens", async (_, res) => {
   }
 });
 
+// DELETE
+app.delete("/itens/:id", async (req,res)=>{
 app.post("/itens", checkAlmoxarifado, async (req, res) => {
   try {
+    await pool.query("DELETE FROM itens WHERE id=$1",[req.params.id]);
+    res.json({ok:true});
+  } catch(err){
+    console.error("DELETE ITEM:", err);
+    res.status(500).json({ error:"Erro ao excluir", detalhe:String(err) });
     const { nome, quantidade, setor } = req.body;
     await pool.query("INSERT INTO itens(nome, quantidade, setor) VALUES($1,$2,$3)", [nome, quantidade, setor]);
     res.json({ ok:true });
@@ -262,11 +310,22 @@ app.post("/itens", checkAlmoxarifado, async (req, res) => {
   }
 });
 
+// PUT (editar item)
+app.put("/itens/:id", async (req, res) => {
 app.put("/itens/:id", checkAlmoxarifado, async (req, res) => {
   try {
     const { id } = req.params;
     const { nome, quantidade, setor } = req.body;
     if (!nome || !quantidade || !setor) return res.status(400).json({ ok: false, error: "Todos os campos são obrigatórios" });
+
+    if (!nome || !quantidade || !setor) {
+      return res.status(400).json({ ok: false, error: "Todos os campos são obrigatórios" });
+    }
+
+    await pool.query(
+      "UPDATE itens SET nome=$1, quantidade=$2, setor=$3 WHERE id=$4",
+      [nome, quantidade, setor, id]
+    );
 
     await pool.query("UPDATE itens SET nome=$1, quantidade=$2, setor=$3 WHERE id=$4", [nome, quantidade, setor, id]);
     res.json({ ok: true });
@@ -286,8 +345,22 @@ app.delete("/itens/:id", checkAlmoxarifado, async (req,res)=>{
   }
 });
 
+// Retorna CIs filtradas por mês/ano
 // Backup de atividades
 app.get("/atividades/backup", async (req,res)=>{
+    try{
+        const { mes, ano } = req.query;
+        const r = await pool.query("SELECT * FROM atividades");
+        // Filtrar por mês/ano do campo inicio
+        const filtered = r.rows.filter(a => {
+            const d = new Date(a.inicio);
+            return (d.getMonth()+1 == Number(mes)) && (d.getFullYear() == Number(ano));
+        });
+        res.json(filtered);
+    } catch(err){
+        console.error(err);
+        res.status(500).json({ error:"Erro ao buscar CIs" });
+    }
   try{
     const { mes, ano } = req.query;
     const r = await pool.query("SELECT * FROM atividades");
@@ -302,8 +375,22 @@ app.get("/atividades/backup", async (req,res)=>{
   }
 });
 
+// Apagar CIs (POST com array de ids)
 // Apagar atividades
 app.post("/atividades/apagar", async (req,res)=>{
+    try{
+        const { ids } = req.body;
+        for(const id of ids){
+            // Deletar fotos do Supabase
+            const r = await pool.query("SELECT fotos FROM atividades WHERE id=$1",[id]);
+            if(r.rows[0]?.fotos){
+                const fotos = JSON.parse(r.rows[0].fotos);
+                for(const url of fotos){
+                    const fileName = url.split("/").pop();
+                    await supabase.storage.from("uploads").remove([fileName]);
+                }
+            }
+            await pool.query("DELETE FROM atividades WHERE id=$1",[id]);
   try{
     const { ids } = req.body;
     for(const id of ids){
@@ -314,6 +401,10 @@ app.post("/atividades/apagar", async (req,res)=>{
           const fileName = url.split("/").pop();
           await supabase.storage.from("uploads").remove([fileName]);
         }
+        res.json({ ok:true });
+    } catch(err){
+        console.error(err);
+        res.status(500).json({ error:"Erro ao apagar CIs" });
       }
       await pool.query("DELETE FROM atividades WHERE id=$1",[id]);
     }
@@ -323,6 +414,7 @@ app.post("/atividades/apagar", async (req,res)=>{
     res.status(500).json({ error:"Erro ao apagar CIs" });
   }
 });
+
 
 // =======================
 // INICIAR SERVIDOR
