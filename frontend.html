@@ -1,7 +1,12 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+    
 <head>
+
 <meta charset="UTF-8">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KF Engenharia - Gestor de Campo</title>
 <style>
@@ -14,36 +19,119 @@
     --danger: #ef4444;
     --border: #333;
 }
+
+/* Remover efeito azul ao tocar no mobile */
+* {
+    -webkit-tap-highlight-color: transparent; /* Safari e Chrome mobile */
+    -webkit-touch-callout: none; /* desabilita menu ao segurar */
+}
+
+
 body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin:0; padding:20px; color:#fff; }
 .header-main { background: linear-gradient(90deg,#0b2b6f,#0f4cb8); text-align:center; padding:20px; font-size:24px; font-weight:bold; border-radius:12px; margin-bottom:30px; border-bottom: 4px solid var(--primary); }
+
+
 .dashboard-grid {
-    display: flex;              /* Flex para centralizar melhor */
-    flex-wrap: wrap;            /* Permite que os cards quebrem linha se necessário */
-    justify-content: center;    /* Centraliza horizontalmente */
-    align-items: center;        /* Centraliza verticalmente */
-    gap: 20px;                  /* Espaçamento entre cards */
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 20px;
     max-width: 1200px;
-    margin: 200px auto;          /* centraliza horizontal e adiciona distância do topo */
+    margin: 0 auto;
+    padding: 20px;
 }
-.card-acao { background: var(--card); padding: 30px; border-radius: 16px; text-align: center; cursor: pointer; transition: 0.3s; border: 1px solid var(--border); position: relative; font-size:14px; }
+
+/* Dropdown de Selecionar Equipe começa fechado */
+#fOptions {
+    display: none; /* começa fechado */
+    position: absolute;
+    background: #1b1e24;
+    border: 1px solid #444;
+    padding: 5px;
+    z-index: 10;
+}
+
+
+.card-acao {
+    position: relative; /* importante para que os badges fiquem relativos a este container */
+}
+/* badges base */
+.badge {
+    background: var(--success);
+    color: white;
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    display: none;
+}
+
+/* badge de CI */
+.badge-cis {
+    background: var(--primary);
+}
+
+/* container dos badges */
+.badge-container {
+    position: absolute; /* badges ficam sobre o card */
+    top: 10px;
+    left: 10px;
+    display: flex;
+    flex-direction: column; /* empilha verticalmente */
+    gap: 5px; /* espaço entre badges */
+    align-items: flex-start; /* alinha à esquerda */
+    z-index: 10; /* garante que fique acima do conteúdo */
+}
 .card-acao:hover { border-color: var(--primary); transform: translateY(-3px); }
-.badge-funcionarios { position:absolute; top:10px; left:10px; background:var(--success); color:white; font-weight:bold; padding:5px 10px; border-radius:12px; font-size:12px; display:none; }
+.badge-funcionarios {
+    position: absolute;
+    background: var(--success);
+    color: white;
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    display: none;
+}
+
 .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 1000; overflow-y: auto; padding: 20px; backdrop-filter: blur(5px); }
 .container-modal { max-width: 500px; background: var(--card); padding: 25px; border-radius: 18px; margin: 20px auto; position: relative; border: 1px solid #444; }
 .btn-fechar { position: absolute; top: 15px; right: 20px; font-size: 25px; color: #ef4444; cursor: pointer; }
+
 label { display:block; margin-top:15px; font-weight:bold; color: var(--text); font-size: 14px; }
 input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; margin-top:8px; border-radius:10px; background:#2a2e36; color:#fff; border:1px solid #444; box-sizing: border-box; }
+
 .multi-display { cursor: pointer; user-select: none; }
 .func-item { padding:12px; cursor:pointer; display:flex; align-items:center; gap:10px; user-select: none; }
 .func-item:hover { background: #333a45; }
 .func-item.active { background: #0d6efd33; color: #0d6efd; font-weight: bold; }
+
 .btn-acao { background: var(--primary); border:none; font-weight:bold; color: white; cursor:pointer; margin-top:20px; }
 .btn-finalizar { background: var(--success); }
+
 #previewFotos { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
 .img-preview { width: 80px; height: 80px; border-radius: 8px; object-fit: cover; border: 2px solid var(--primary); cursor:pointer; transition: transform 0.2s; }
 .img-preview:hover { transform: scale(1.1); }
-.hidden { display: none; }
+
 .toast-container { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--success); color: white; padding: 25px 40px; border-radius: 20px; z-index: 10001; text-align: center; border: 2px solid #22c55e; }
+.toast-erro{
+    position:fixed;
+    top:50%;
+    left:50%;
+    transform:translate(-50%, -50%);
+    background:#dc2626;
+    border:2px solid #dc2626;
+    color:white;
+
+    padding:20px 30px;
+    border-radius:12px;
+
+    display:none;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+
+    z-index:9999;
+}
 @keyframes zoomIn { from { transform: translate(-50%, -50%) scale(0.7); opacity: 0; } to { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
 .animar-entrada { animation: zoomIn 0.3s ease-out forwards; }
 
@@ -54,81 +142,813 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
 .btn-download { background:#0d6efd; }
 .btn-fechar-img { background:#ef4444; }
 
-.card-lista { background: #252a33; padding: 15px; border-radius: 12px; margin-bottom: 12px; border-left: 4px solid var(--primary); position: relative; cursor:pointer; font-size:13px; }
+.card-lista { background: #252a33; padding: 15px; border-radius: 12px; margin-bottom: 12px; border-left: 5px solid var(--primary); position: relative; cursor:pointer; font-size:13px; display:flex; flex-direction:column; justify-content:center; min-width:200px; max-width:240px; }
+
 .card-concluido { border-left-color: var(--success); opacity: 0.9; }
 
-/* CORES POR SERVIÇO */
-.card-pintura { border-left: 5px solid #ef4444; background:#331b1b; }   /* Vermelho */
-.card-eletrica { border-left: 5px solid #facc15; background:#332b1b; } /* Amarelo */
-.card-hidraulica { border-left: 5px solid #0d6efd; background:#1b2233; } /* Azul */
-.card-civil { border-left: 5px solid #a855f7; background:#2a1b33; }      /* Roxo */
-/* MODAL EQUPE MAIS LARGA */
-/* MODAL EQUIPE - tamanho normal */
-/* MODAL CIs REGISTRADAS com mesmo tamanho de Equipe em Campo */
-/* MODAL EQUIPE E CI REGISTRADA - MESMO TAMANHO */
-#modalEquipe .container-modal,
-#modalHistorico .container-modal {
-    max-width: 1200px;  /* largura grande, mesma para ambos */
-    width: 95%;          /* ocupa quase toda a tela */
-}
-/* GRID DE CARDS */
-#listaAndamento, #listaHistorico {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr); /* 5 colunas */
-    gap: 15px;
-    max-height: 600px;       /* altura do modal */
-    overflow-y: auto;        /* scroll vertical */
-    overflow-x: hidden;      /* sem scroll horizontal */
-    padding: 10px;
+#listaAndamento, #listaHistorico { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; max-height: 600px; overflow-y: auto; padding: 10px; }
+
+.card-pintura { border-left: 5px solid #ef4444; background:#4625257e; }
+.card-eletrica { border-left: 5px solid #facc15; background:#b78e3b8e; }
+.card-hidraulica { border-left: 5px solid #0d6efd; background:#43527a62; }
+.card-pedreiro { border-left: 5px solid #7A7878; background:#68676986; }
+.card-marcenaria { border-left: 5px solid #3C2A0D ; background:#3f35337e; }
+
+
+
+/* Tablet / laptops menores */
+@media (max-width: 1024px) {
+    .dashboard-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); margin: 15px; }
+    .card-lista { min-width: 140px; }
+    .header-main { font-size: 20px; padding: 12px; }
 }
 
-/* CARDS */
-.card-lista {
-    padding: 15px;
-    border-radius: 12px;
-    border-left: 5px solid var(--primary);
-    font-size: 13px;
-    cursor: pointer;
+/* Tablets menores e smartphones médios */
+@media (max-width: 768px) {
+    .dashboard-grid { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin: 10px; }
+    .card-lista { min-width: 120px; font-size: 11px; padding: 8px; }
+    .header-main { font-size: 18px; padding: 10px; }
+    .img-preview { width: 50px; height: 50px; }
+    input, select, textarea, .btn-acao { padding: 8px; font-size: 12px; }
+}
+
+/* Mobile extremo */
+@media (max-width: 480px) {
+    .dashboard-grid { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 8px; margin: 5px; }
+    .card-lista { min-width: 100px; font-size: 10px; padding: 6px; }
+    .header-main { font-size: 16px; padding: 8px; }
+    .img-preview { width: 40px; height: 40px; }
+    input, select, textarea, .btn-acao { padding: 6px; font-size: 11px; }
+     .btn-finalizar {
+        padding: 12px 18px;
+        font-size: 14px;
+    }
+      .btnEditarCi {
+        padding: 15px 25px;
+        font-size: 14px;
+    }
+   
+}
+
+/* Mobile extremo 300px */
+@media (max-width: 300px) {
+    #modalMedia .container-modal {
+        width: 100vw !important;
+        border-radius: 0 !important;
+        padding: 5px !important;
+    }
+    .dashboard-grid { grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: 5px; }
+    .card-lista { min-width: 90px; font-size: 9px; padding: 4px; }
+    .img-preview { width: 30px; height: 30px; }
+    .header-main { font-size: 14px; padding: 6px; }
+}
+.topo-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 20px;   /* aumenta altura */
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+
+
+/* novo estilo do usuário */
+/* container para empilhar usuário + data */
+/* container do usuário + data */
+/* container do usuário + data */
+.usuario-container {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    min-width: 200px;  /* largura mínima maior */
-    max-width: 240px;  /* largura máxima maior */
+    align-items: flex-start;
+    gap: 4px; /* espaço entre usuário e data */
 }
 
+/* ícones */
+.icon {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 6px;
+    color: #26f32d; /* mesma cor do glow da data */
+}
+/* usuário com glow (já existente) */
+.usuario-logado {
+    display: flex;
+    align-items: center;
+    padding: 8px 14px;
+    border-radius: 14px;
+    background: rgba(87, 197, 13, 0.419);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(34, 235, 23, 0.426);
+    box-shadow: 0 0 15px rgba(0, 150, 255, 0.15);
+    font-size: 14px;
+    font-weight: 600;
+    color: #ffffff;
+    position: relative;
+    overflow: hidden;
+    gap: 6px;
+    z-index: 0; /* conteúdo acima do pseudo-elemento */
+}
+
+.usuario-logado::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at top left,
+        rgba(64, 252, 12, 0.675),
+        transparent 60%);
+    pointer-events: none;
+    z-index: -1; /* pseudo-elemento atrás do conteúdo */
+}
+
+/* garante que ícones e texto fiquem na mesma linha */
+.usuario-logado .icon {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 6px;
+    color: #33ff55; /* cor do ícone */
+}
+
+/* garante que ícones e texto fiquem na mesma linha */
+.usuario-logado, .data-atual {
+    display: flex;
+    align-items: center;
+}
+
+/* animação glow da data continua */
+.data-atual {
+    font-size: 13px;
+    font-weight: 500;
+    font-family: 'Segoe UI', sans-serif;
+    color: #ffffff;
+    text-shadow: 0 0 8px rgba(42, 254, 84, 0.529);
+    animation: glowPulse 2.5s ease-in-out infinite alternate;
+}
+/* animação de brilho suave */
+/* animação glow pulsante */
+@keyframes glowPulse {
+    0% {
+        text-shadow: 0 0 4px rgba(51, 255, 234, 0.4),
+                     0 0 8px rgba(51, 255, 234, 0.3);
+    }
+    50% {
+        text-shadow: 0 0 8px rgba(51, 255, 234, 0.7),
+                     0 0 16px rgba(51, 255, 234, 0.5);
+    }
+    100% {
+        text-shadow: 0 0 4px rgba(51, 255, 234, 0.4),
+                     0 0 8px rgba(51, 255, 234, 0.3);
+    }
+}
+.modal *:focus {
+    outline: none;  /* remove contorno azul ao focar */
+    box-shadow: none; /* remove sombra de foco */
+}
+@media (hover:none) {
+    .card-acao:hover {
+        transform: none; /* remove hover no touch */
+    }
+}
+
+
+/* ------------------- CAMADA DE LOGIN ------------------- */
+#loginOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15,17,21,0.95);
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.loginBox {
+  background: var(--card);
+  padding: 30px;
+  border-radius: 16px;
+  width: 300px;
+  text-align: center;
+  border: 1px solid var(--border);
+  box-shadow: 0 0 25px rgba(0,0,0,0.5);
+}
+
+.loginBox input {
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #444;
+  width: 100%;
+  background: #2a2e36;
+  color: #fff;
+}
+
+.loginBox button {
+  margin-top: 15px;
+  padding: 10px;
+  width: 100%;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+#loginError {
+  color: var(--danger);
+  margin-top: 10px;
+  display: none;
+  font-size: 14px;
+}
+
+
+@keyframes shake {
+    0% { transform:translate(-50%,-50%) translateX(0); }
+    25% { transform:translate(-50%,-50%) translateX(-6px); }
+    50% { transform:translate(-50%,-50%) translateX(6px); }
+    75% { transform:translate(-50%,-50%) translateX(-6px); }
+    100% { transform:translate(-50%,-50%) translateX(0); }
+}
+
+
+.item-pintura { background:#8d171722; }
+.item-eletrica { background:#92400e22; }
+.item-hidraulica { background:#065f4622; }
+.item-pedreiro { background:#37415122; }
+.item-marcenaria { background:#713f1222; }
+
+#listaItens tr{
+    transition:.2s;
+}
+
+#listaItens tr:hover{
+    filter:brightness(1.2);
+}
+
+
+.toast-erro.animar-entrada{
+    animation:shake .4s;
+}
+
+
+
+.modal{
+   align-items:flex-start !important;
+   padding-top:20px;
+}
+
+.modal{
+    overflow-y:auto;
+    padding:20px 0;
+}
+
+
+
+
+/* ===== MODAL MEDIA RESPONSIVO ===== */
+
+#modalMedia{
+    align-items:flex-start !important;
+}
+
+#modalMedia .container-modal {
+    width: 95vw !important;
+    max-width: 900px !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+    overflow-x: auto !important;
+    padding: 15px;
+    box-sizing: border-box;
+    border-radius: 12px;
+}
+
+
+/* canvas nunca pode estourar */
+/* Canvas gráfico */
+  #graficoMedia {
+      width:100% !important;
+      height:450px !important; /* altura menor em mobile extremo */
+}
+/* MOBILE */
+#modalMedia .container-modal {
+    width: 95vw;
+    max-width: 900px;
+    max-height: 90vh;       /* scroll interno se necessário */
+    overflow-y: auto;       /* scroll dentro do container */
+    overflow-x: hidden;
+    padding: 15px;
+    box-sizing: border-box;
+    border-radius: 12px;
+    background: var(--card);
+}
+
+/* ============================= */
+/* PADRÃO CAMPOS NOVA ATIVIDADE */
+/* ============================= */
+
+#modalCadastro select,
+#modalCadastro input,
+#modalCadastro textarea,
+#modalCadastro .multi-display,
+#modalCadastro .btn-acao {
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+
+/* Corrige diferença específica do campo Equipe */
+#modalCadastro .multi-display {
+    display: flex;
+    align-items: center;
+    min-height: 42px;
+}
+
+/* Garante que todos os labels fiquem iguais */
+#modalCadastro label {
+    font-size: 14px;
+    margin-top: 10px;
+    display: block;
+}
+
+/* ============================= */
+/* PADRÃO CAMPO EQUIPE - ATIVIDADE */
+/* ============================= */
+
+#modalEquipe .multi-display,
+#modalEquipe select,
+#modalEquipe input,
+#modalEquipe textarea,
+#modalEquipe .btn-acao {
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+
+/* Altura igual ao padrão do cadastro */
+#modalEquipe .multi-display {
+    display: flex;
+    align-items: center;
+    min-height: 42px;
+}
+
+/* Labels padronizados */
+#modalEquipe label {
+    font-size: 14px;
+    margin-top: 10px;
+    display: block;
+}
+
+
+#modalFinalizar .container-modal {
+    min-height: 75vh;      /* altura maior */
+    max-height: 90vh;      /* limite máximo */
+    display: flex;
+    flex-direction: column;
+}
+#modalFinalizar textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+/* ============================= */
+/* CI maior em Equipe Ativa */
+/* ============================= */
+
+.card-lista strong {
+    font-size: 22px;
+    color: var(--text);
+}
+.card-lista {
+    font-size: 15px;
+    padding: 18px;
+    line-height: 1.6;
+}
+
+#modalHistorico .container-modal {
+    overflow-x: hidden !important;
+}
+@media (min-width: 1200px) {
+    /* Containers maiores */
+    .modal .container-modal {
+        width: 90%;
+        max-width: 1400px;
+        padding: 35px 40px;
+        border-radius: 18px;
+        margin: 40px auto;
+        font-size: 18px; /* fonte base */
+    }
+
+    /* Força todos os textos dentro do modal a herdar a fonte */
+    .modal .container-modal * {
+        font-size: 23px !important;
+    }
+
+    /* Inputs, selects, textareas, multi-display */
+    .modal input,
+    .modal select,
+    .modal textarea,
+    .modal .multi-display {
+        font-size: 23px !important;
+        padding: 14px !important;
+    }
+
+    /* Botões */
+    .modal .btn-acao,
+    .modal .btn-finalizar {
+        font-size: 18px !important;
+        padding: 16px !important;
+    }
+
+    /* Labels */
+    .modal label {
+        font-size: 18px !important;
+    }
+
+    /* Modal específico: modalMedia */
+    #modalMedia .container-modal {
+        max-width: 1400px;
+        width: 90%;
+        padding: 35px 40px;
+        font-size: 18px !important;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    /* Canvas gráfico maior */
+    #graficoMedia {
+        height: 600px !important;
+    }
+}
 #listaHistorico {
     display: grid;
-    grid-template-columns: repeat(5, minmax(180px, 1fr)); /* 5 colunas, cards largos */
-    gap: 10px;
-    max-height: 600px;  /* altura do modal */
-    overflow-y: auto;   /* scroll vertical */
-    overflow-x: hidden; /* sem scroll horizontal */
-    padding: 10px;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 28px;
+    width: 100%;
 }
 
-/* Cards de histórico */
 #listaHistorico .card-lista {
-    font-size: 13px;
-    padding: 15px;
-    min-width: auto;
-    height: auto;
+    padding: 20px;
+    border-radius: 14px;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.3);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+#listaHistorico .card-lista strong {
+    font-size: 22px;
+    color: #ffffff !important;
+    letter-spacing: 0.5px;
+}
+#listaHistorico .card-lista span,
+#listaHistorico .card-lista p {
+    font-size: 15px;
+    color: #d1d5db;
 }
 
-/* Reaproveitando cores por serviço */
-.card-pintura { border-left: 5px solid #ef4444; background:#331b1b; }
-.card-eletrica { border-left: 5px solid #facc15; background:#332b1b; }
-.card-hidraulica { border-left: 5px solid #0d6efd; background:#1b2233; }
-.card-civil { border-left: 5px solid #a855f7; background:#2a1b33; }
-}}
+
+
+/* ===== ALMOXARIFADO - CAMPOS MAIORES ===== */
+
+#modalAlmoxarifado .container-modal {
+    width: 95vw;
+    max-width: 1000px;
+    padding: 30px;
+}
+
+/* Labels maiores */
+#modalAlmoxarifado label {
+    font-size: 15px;
+    font-weight: 600;
+    margin-top: 12px;
+    display: block;
+}
+
+/* Inputs e Select maiores */
+#modalAlmoxarifado input,
+#modalAlmoxarifado select {
+    width: 100%;
+    padding: 12px;
+    font-size: 15px;
+    border-radius: 10px;
+    margin-top: 6px;
+}
+
+/* Botão maior */
+#modalAlmoxarifado .btn-acao {
+    margin-top: 18px;
+    padding: 14px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+/* Filtro maior */
+#modalAlmoxarifado #filtroSetorItens {
+    padding: 10px !important;
+    font-size: 15px !important;
+    border-radius: 10px !important;
+}
+
+
+@media (min-width: 1024px) {
+
+    #modalAlmoxarifado .container-modal {
+        max-width: 1100px;
+    }
+
+    #modalAlmoxarifado input,
+    #modalAlmoxarifado select {
+        font-size: 16px;
+        padding: 14px;
+    }
+
+    #modalAlmoxarifado .btn-acao {
+        font-size: 17px;
+        padding: 16px;
+    }
+}
+
+/* ===== ALMOXARIFADO RESPONSIVO SEM SCROLL ===== */
+
+/* MOBILE */
+@media (max-width: 768px) {
+
+    #modalAlmoxarifado .container-modal {
+        width: 92vw !important;
+        max-width: 92vw !important;
+        padding: 18px !important;
+        box-sizing: border-box;
+        overflow-x: hidden;
+    }
+
+    #modalAlmoxarifado input,
+    #modalAlmoxarifado select {
+        font-size: 14px;
+        padding: 10px;
+    }
+
+    #modalAlmoxarifado .btn-acao {
+        font-size: 15px;
+        padding: 12px;
+    }
+}
+
+/* Remove qualquer overflow lateral */
+#modalAlmoxarifado {
+    overflow-x: hidden;
+}
+
+
+
+/* ===== CARD DESATIVADO VISUAL ===== */
+.card-desativado {
+ 
+    pointer-events: none; /* impede clique */
+    position: relative;
+    transition: 0.3s ease;
+}
+
+.card-desativado::after {
+    content: "🔒 Acesso Restrito";
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(2px);
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+}
+
+
+
+/* ===== CORREÇÃO MOBILE - ALMOXARIFADO ===== */
+@media (max-width: 768px) {
+
+    #tabelaItens {
+        font-size: 11px;
+    }
+
+    #tabelaItens th,
+    #tabelaItens td {
+        padding: 6px !important;
+    }
+
+    /* Diminuir largura da coluna Quantidade */
+    #tabelaItens th:nth-child(2),
+    #tabelaItens td:nth-child(2) {
+        width: 35px !important;
+    }
+
+}
+
+
+.lembrar-container {
+    display: flex;
+    align-items: center;
+    gap: 6px; /* distância pequena entre checkbox e texto */
+    font-size: 14px;
+    margin-top: 8px;
+    cursor: pointer;
+}
+
+.lembrar-container input[type="checkbox"] {
+    width: auto !important;
+    margin: 0;
+}
+
+
+
+
+
+
+
+
+
+/* ========================= */
+/* PADRÃO = DESKTOP PRIMEIRO */
+/* ========================= */
+
+/* Esconde o rodapé mobile no desktop */
+.rodape-mobile {
+    display: none;
+}
+
+/* ========================= */
+/* ESTILO PREMIUM DESENVOLVIDO - AZUL NEON */
+/* ========================= */
+
+.desenvolvido-topo,
+.rodape-mobile {
+    position: fixed;
+       overflow: hidden;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+
+    text-align: center;
+    padding: 14px 0;
+    font-size: 14px;
+    letter-spacing: 1.5px;
+    font-weight: 500;
+
+    background: rgba(10, 15, 25, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+
+    border-top: 1px solid rgba(0, 200, 255, 0);
+
+    z-index: 999;
+    overflow: hidden;
+
+    transition: 0.3s ease;
+}
+
+/* Glow radial fixo de fundo */
+.desenvolvido-topo::after,
+.rodape-mobile::after {
+    content: "";  
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center,
+        rgba(0, 200, 255, 0.08),
+        transparent 70%);
+    pointer-events: none;
+}
+
+/* Texto com glow fixo elegante */
+.desenvolvido-topo span,
+.rodape-mobile span {
+      position: relative;
+    z-index: 2;
+    color: #e5e8e8;
+    font-weight: 600;
+    letter-spacing: 1px;
+
+  
+}
+
+/* Hover leve */
+.desenvolvido-topo:hover span,
+.rodape-mobile:hover span {
+    text-shadow:
+        0 0 2px #0d6efd,
+        0 0 4px #0099ff,
+        0 0 6px #0066ff;
+}
+
+
+
+/* ========================= */
+/* MOBILE */
+/* ========================= */
+
+@media (max-width: 768px) {
+
+    .desenvolvido-topo {
+        display: none;
+    }
+
+    .rodape-mobile {
+        display: block;
+    }
+
+}
+
+
+
+/* ===== ONDA VIDRO LÍQUIDO DISCRETA ===== */
+
+.onda-liquida {
+    position: fixed;
+    pointer-events: none;
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    
+    width: 12px;
+    height: 12px;
+
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+
+    background: radial-gradient(circle at center,
+        rgba(255, 255, 255, 0.25) 0%,
+        rgba(255, 255, 255, 0.15) 40%,
+        rgba(255, 255, 255, 0.1) 60%,
+        transparent 80%);
+
+    border: 1px solid rgba(255,255,255,0.25);
+
+    animation: expandirLiquido 800ms ease-out forwards;
+    z-index: 99999;
+}
+
+@keyframes expandirLiquido {
+    0% {
+        transform: translate(-50%, -50%) scale(0.3);
+        opacity: 0.8;
+    }
+    60% {
+        opacity: 0.4;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(3);
+        opacity: 0;
+    }
+}
+
+
+.badge-cis {
+    position: absolute;
+    bottom: 10px;  /* fica na parte inferior */
+    left: 10px;
+    background: var(--primary);
+    color: white;
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    display: none;
+}
+/* Conteúdo principal (inicialmente acessível, overlay bloqueia visual) */
+#mainContent { display: block; }
 
 
 </style>
 </head>
+
 <body>
+
+    <!-- ------------------- LOGIN OVERLAY ------------------- -->
+<div id="loginOverlay">
+  <div class="loginBox">
+    <h2>Login</h2>
+    <input type="text" id="username" placeholder="Usuário">
+    <input type="password" id="password" placeholder="Senha">
+   <label class="lembrar-container">
+    <input type="checkbox" id="lembrarLogin">
+    <span>Lembrar login</span>
+</label>
+    <button id="loginBtn">Entrar</button>
+    <p id="loginError"></p>
+  </div>
+</div>
 
 <div id="toastSucesso" class="toast-container">
     <span style="font-size:50px">✅</span>
     <div id="toastTexto" style="font-size:18px; font-weight:bold; margin-top:10px">Sucesso!</div>
+</div>
+<div id="toastErro" class="toast-container toast-erro">
+    <div id="toastErroTexto" style="font-size:18px; font-weight:bold; margin-bottom:10px"></div>
+ <span style="font-size:18px;color:white;">❌</span>
 </div>
 
 <!-- TOAST GENÉRICO PARA ALMOXARIFADO -->
@@ -138,24 +958,62 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
 </div>
 
 <div class="header-main">KF ENGENHARIA - CAMPO</div>
+<div class="topo-info">
+    <div class="usuario-container">
+        <!-- Usuário com ícone -->
+        <div id="usuarioLogado" class="usuario-logado">
+            <span class="icon usuario-icon">
+                <!-- Ícone de usuário (pode trocar por outro SVG) -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+                </svg>
+            </span>
+       
+        </div>
+
+        <!-- Data com ícone -->
+       <div class="data-atual">
+    <span class="icon data-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1.5A1.5 1.5 0 0 1 16 2.5v11A1.5 1.5 0 0 1 14.5 15h-13A1.5 1.5 0 0 1 0 13.5v-11A1.5 1.5 0 0 1 1.5 1H3V.5a.5.5 0 0 1 .5-.5zM1 4v9.5a.5.5 0 0 0 .5.5H14.5a.5.5 0 0 0 .5-.5V4H1z"/>
+        </svg>
+    </span>
+    <span id="textoData"></span>
+</div>
+    </div>
+</div>
+
+<div class="desenvolvido-topo">
+    Desenvolvido por <span id="devName">Fillipe Leal</span>
+    <div class="particles"></div>
+</div>
+
+<footer class="rodape-mobile">
+    Desenvolvido por <span id="devNameMobile">Fillipe Leal</span>
+    <div class="particles"></div>
+</footer>
 <div class="dashboard-grid">
     <div class="card-acao" onclick="abrirModal('modalCadastro')">
         <div style="font-size:40px">📝</div>
-        <h3>Registrar Início</h3>
+        <h3>Registrar Atividade</h3>
     </div>
     
-    <div class="card-acao" onclick="abrirEquipe()">
-        <div id="badgeFuncionarios" class="badge-funcionarios hidden">0 Funcionários</div>
-        <div style="font-size:40px">👷</div>
-        <h3>Equipe em Campo</h3>
+<div class="card-acao" onclick="abrirEquipe()">
+    <!-- Container para badges -->
+    <div class="badge-container">
+        <div id="badgeCIs" class="badge badge-cis hidden">0 CI(s)</div>
+        <div id="badgeFuncionarios" class="badge badge-funcionarios hidden">0 Funcionário(s)</div>
     </div>
 
-    <div class="card-acao" onclick="abrirHistorico()">
-        <div style="font-size:40px">🗄️</div>
-        <h3>CIs Registradas</h3>
-    </div>
+    <div style="font-size:40px">👷</div>
+    <h3>Equipe em Campo</h3>
+</div>
+<div id="cardHistorico" class="card-acao" onclick="abrirHistorico()">
+    <div style="font-size:40px">🗄️</div>
+    <h3>CIs Registradas</h3>
+</div>
 
-  <div class="card-acao" onclick="abrirAlmoxarifado()">
+ <div id="cardAlmoxarifado" class="card-acao" onclick="abrirAlmoxarifado()">
     <div style="font-size:40px">📦</div>
     <h3>Almoxarifado</h3>
 </div>
@@ -178,42 +1036,53 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
                  <div class="func-item" onclick="selectFunc(this, 'Rogerio', event)">Rogerio</div>
                   <div class="func-item" onclick="selectFunc(this, 'Wiliam', event)">Wiliam</div>
                 <div class="func-item" onclick="selectFunc(this, 'Nadao', event)">Nadao</div>
-                   <div class="func-item" onclick="selectFunc(this, 'Lorao', event)">Lorao</div>
-                      <div class="func-item" onclick="selectFunc(this, 'Soneca', event)">Soneca</div>
-                         <div class="func-item" onclick="selectFunc(this, 'Mirim', event)">Mirim</div>
-                               <div class="func-item" onclick="selectFunc(this, 'Junior', event)">Junior</div>
-                            <div class="func-item" onclick="selectFunc(this, 'Elio', event)">Elio</div>
-                                  <div class="func-item" onclick="selectFunc(this, 'Vicente', event)">Vicente</div>
-                                     <div class="func-item" onclick="selectFunc(this, 'Paulo', event)">Paulo</div>
-                                      <div class="func-item" onclick="selectFunc(this, 'DanielEnc', event)">DanielEnc</div>
-                                       <div class="func-item" onclick="selectFunc(this, 'AmareloEnc', event)">AmareloEnc</div>
-                                        <div class="func-item" onclick="selectFunc(this, 'RafaelEnc', event)">RafaelEnc</div>
-                                         <div class="func-item" onclick="selectFunc(this, 'MarcoEnc', event)">MarcoEnc</div>
+                <div class="func-item" onclick="selectFunc(this, 'Lorao', event)">Lorao</div>
+                  <div class="func-item" onclick="selectFunc(this, 'Soneca', event)">Soneca</div>
+                 <div class="func-item" onclick="selectFunc(this, 'Mirim', event)">Mirim</div>
+                <div class="func-item" onclick="selectFunc(this, 'Junior', event)">Junior</div>
+                 <div class="func-item" onclick="selectFunc(this, 'Elio', event)">Elio</div>
+                <div class="func-item" onclick="selectFunc(this, 'Vicente', event)">Vicente</div>
+                <div class="func-item" onclick="selectFunc(this, 'Paulo', event)">Paulo</div>
+               <div class="func-item" onclick="selectFunc(this, 'Enc-Daniel', event)">Enc-Daniel</div>
+               <div class="func-item" onclick="selectFunc(this, 'Enc-Ajoildo', event)">Enc-Ajoildo</div>
+              <div class="func-item" onclick="selectFunc(this, 'Enc-Rafael', event)">Enc-Rafael</div>
+                <div class="func-item" onclick="selectFunc(this, 'Enc-Fabio', event)">Enc-Fabio</div>
+              <div class="func-item" onclick="selectFunc(this, 'Enc-Marco', event)">Enc-Marco</div>
+                               
 
             </div>
-        </div>
+</div>
 
+<!-- Local de opcoes de funcoes -->
         <label>Serviço</label>
         <select id="fAtividade">
             <option value="Pintura">Pintura</option>
             <option value="Eletrica">Eletrica</option>
             <option value="Hidraulica">Hidraulica</option>
-            <option value="Civil">Civil</option>
+            <option value="Pedreiro">Pedreiro</option>
+                      <option value="Marcenaria">Marcenaria</option>
         </select>
 
-        <label>Local</label>
-        <select id="fTipoLocal" onchange="atualizarLocais()">
-            <option value="" disabled selected>Selecionar</option>
-            <option value="Setor">Setor</option>
-            <option value="Regional">Regional</option>
-        </select>
-        <div id="areaSubLocal" class="hidden">
-            <label>Ponto Específico</label>
-            <select id="fSubLocal"></select>
-        </div>
 
+<!-- Local de opcoes de locais para trabalho -->
+
+<label>Local</label>
+<select id="fLocal">
+    <option value="" disabled selected>Selecionar</option>
+    <option value="Cam">Cam</option>
+    <option value="Fazenda-SMF">Fazenda-SMF</option>
+    <option value="Seplag">Seplag</option>
+    <option value="Caminho Niemeyer">Caminho Niemeyer</option>
+    <option value="Bicicletario">Bicicletario</option>
+</select>
+<!-- Local de opcoes de Ci -->
         <label>Número da CI</label>
-        <input type="text" id="fCI" placeholder="Ex: 001/2024">
+ <input type="text"
+       id="fCI"
+      placeholder="Ex: 0001/2026"
+       maxlength="9"
+       onkeydown="ciKeyDown(event,this)"
+       oninput="formatarCI(this)">
 
         <button class="btn-acao" onclick="iniciarAtividade()">Confirmar Início</button>
     </div>
@@ -223,10 +1092,11 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
 <div id="modalEquipe" class="modal">
     <div class="container-modal">
         <span class="btn-fechar" onclick="fecharModal('modalEquipe')">&times;</span>
-        <h2 style="color:var(--primary)">Equipe em Campo</h2>
+        <h2 style="color:var(--primary)">Equipe em Atividade</h2>
         <div id="listaAndamento"></div>
     </div>
 </div>
+
 <!-- MODAL ALMOXARIFADO -->
 <div id="modalAlmoxarifado" class="modal">
     <div class="container-modal">
@@ -239,13 +1109,16 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
         <label>Quantidade</label>
         <input type="number" id="itemQuantidade" placeholder="Ex: 10">
 
-        <label>Setor</label>
+        <label>
+            
+        </label>
         <select id="itemSetor">
             <option value="" disabled selected>Selecionar Setor</option>
             <option value="Pintura">Pintura</option>
             <option value="Elétrica">Elétrica</option>
             <option value="Hidráulica">Hidráulica</option>
-            <option value="Civil">Civil</option>
+            <option value="Pedreiro">Pedreiro</option>
+               <option value="Marcenaria">Marcenaria</option>
         </select>
 
         <button class="btn-acao" onclick="registrarItem()">Registrar Item</button>
@@ -263,6 +1136,7 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
                 <option value="Elétrica">Elétrica</option>
                 <option value="Hidráulica">Hidráulica</option>
                 <option value="Pedreiro">Pedreiro</option>
+                      <option value="Marcenaria">Marcenaria</option>
             </select>
         </div>
         <div style="max-height:300px; overflow-y:auto; border:1px solid #444; border-radius:12px;">
@@ -301,7 +1175,8 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
             <option value="Pintura">Pintura</option>
             <option value="Elétrica">Elétrica</option>
             <option value="Hidráulica">Hidráulica</option>
-            <option value="Civil">Civil</option>
+            <option value="Pedreiro">Pedreiro</option>
+              <option value="Marcenaria">Marcenaria</option>
         </select>
 
         <button class="btn-acao" onclick="confirmarEdicaoItem()">Salvar Alterações</button>
@@ -322,7 +1197,7 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
 <div id="modalHistorico" class="modal">
     <div class="container-modal">
         <span class="btn-fechar" onclick="fecharModal('modalHistorico')">&times;</span>
-        <h2 style="color:var(--success)">CIs Registradas</h2>
+        <h2 style="color:var(--success)">Cis Concluidas</h2>
 
       <!-- FILTROS CIs REGISTRADAS -->
 <div id="filtrosHistorico" style="display:flex; gap:15px; margin-bottom:15px; align-items:center; flex-wrap:wrap;">
@@ -415,34 +1290,147 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
         </div>
     </div>
 
+
+<div>
+    <label style="color:var(--text); font-weight:bold; font-size:13px;">
+        Buscar por CI:
+    </label>
+
+    <input type="text"
+           id="filtroCIHistorico"
+           placeholder="Ex: 0123/2026"
+           oninput="atualizarHistorico()"
+           style="padding:5px; border-radius:6px; border:1px solid #444;">
+</div>
+
+
     <!-- Filtro por função/serviço -->
+    <div style="display:flex;align-items:end;gap:10px">
+
     <div>
-        <label style="color:var(--text); font-weight:bold; font-size:13px;">Filtrar por Serviço:</label>
+        <label style="color:var(--text); font-weight:bold; font-size:13px;">
+            Filtrar por Serviço:
+        </label>
+
         <select id="filtroServicoHistorico" onchange="atualizarHistorico()">
             <option value="">Todos</option>
             <option value="Pintura">Pintura</option>
             <option value="Elétrica">Elétrica</option>
             <option value="Hidráulica">Hidráulica</option>
-            <option value="Civil">Pedreiro</option>
+            <option value="Pedreiro">Pedreiro</option>
+            <option value="Marcenaria">Marcenaria</option>
         </select>
     </div>
-</div>
 
+    <button onclick="mostrarMediaMes()"
+        style="
+        height:36px;
+        padding:0 14px;
+        border-radius:8px;
+        background:#0d6efd;
+        color:white;
+        border:none;
+        cursor:pointer;
+        ">
+        📊 Média
+    </button>
+
+</div>
+</div>
+ <!-- BOTÕES DE BACKUP E RESTORE -->
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:15px;">
+          <button class="btn-acao" style="background:#0d6efd;" onclick="abrirModalConfirmarBackup()">💾 Backup CIs</button>
+
+            <button class="btn-acao" style="background:#16a34a;" onclick="restaurarCIs()">📂 Restaurar CIs</button>
+        </div>
 
         <div id="listaHistorico"></div>
     </div>
 </div>
+
+<!--Modal Media do Mes-->
+<div id="modalMedia" class="modal">
+<div class="container-modal media-modal">
+
+<span class="btn-fechar" onclick="fecharModal('modalMedia')">&times;</span>
+
+<h3>Média mensal por funcionário</h3>
+
+<canvas id="graficoMedia" style="width:100%;height:100%"></canvas>
+
+</div>
+</div>
+
+<!-- MODAL CONFIRMAR BACKUP CI -->
+<div id="modalConfirmarBackup" class="modal">
+    <div class="container-modal">
+
+        <span class="btn-fechar" onclick="fecharModalConfirmarBackup()">&times;</span>
+
+        <h2 style="color:var(--primary)">Confirmar Backup</h2>
+
+        <p>Deseja realizar o backup das CIs?</p>
+
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">
+
+            <button class="btn-acao" onclick="fecharModalConfirmarBackup()">
+                Não
+            </button>
+
+            <button class="btn-acao" style="background:#dc2626" onclick="confirmarBackupCI()">
+                Sim
+            </button>
+
+        </div>
+
+    </div>
+</div>
+
+
+<!-- MODAL EDITAR ATIVIDADE -->
+<div id="modalEditarAtividade" class="modal">
+    <div class="container-modal">
+        <span class="btn-fechar" onclick="fecharModal('modalEditarAtividade')">&times;</span>
+        <h2 style="color:#f59e0b">Editar Atividade</h2>
+
+        <label>CI:</label>
+        <input type="text" id="editCi">
+
+        <label>Serviço:</label>
+        <input type="text" id="editServico">
+
+        <label>Local:</label>
+        <input type="text" id="editLocal">
+
+        <label>Equipe (separado por vírgula):</label>
+        <input type="text" id="editEquipe">
+
+        <button onclick="salvarEdicaoAtividade()" 
+                style="background:#0d6efd; color:white; border:none; padding:6px 12px; border-radius:6px; margin-top:10px; cursor:pointer;">
+            Salvar Edição
+        </button>
+    </div>
+</div>
+
+
+<!-- MODAL FINALIZAR -->
 <!-- MODAL FINALIZAR -->
 <div id="modalFinalizar" class="modal">
     <div class="container-modal">
         <span class="btn-fechar" onclick="fecharModal('modalFinalizar')">&times;</span>
         <h2 style="color:var(--success)">Concluir Trabalho</h2>
+
         <div id="detalhesServico" style="padding:10px; background:#16191f; border-radius:10px; margin-bottom:15px; font-size:13px;"></div>
-        
+
+        <!-- BOTÃO EDITAR CI -->
+        <button id="btnEditarCi" 
+                style="background:#f59e0b; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; margin-bottom:10px;"
+                onclick="abrirModalEdicao()">✏️ Editar CI</button>
+
         <label>Fotos da Conclusão</label>
         <input type="file" id="fFotos" multiple accept="image/*" onchange="previewImages(this)">
         <div id="previewFotos"></div>
-        
+
         <label>Descrição / Observações</label>
         <textarea id="fRelato" rows="3" placeholder="Relate o que foi feito..."></textarea>
 
@@ -453,16 +1441,17 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
 
 
 
-
 <!-- MODAL IMAGEM -->
 <div id="modalImagem" class="img-modal">
     <img id="imgGrande" src="">
     <div class="modal-btns">
-        <button class="btn-download" onclick="baixarImagem()">⬇️ Download</button>
+        
         <button class="btn-fechar-img" onclick="fecharModal('modalImagem')">✖ Fechar</button>
     </div>
 </div>
 
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 let selecionados = [];
 let atividadesAtivas = [];
@@ -472,13 +1461,603 @@ let imagemAtual = "";
 let itensRegistrados = [];
 let itemAtualEditar = null;
 let itemAtualExcluir = null;
+let ciCompleta = false;
+let chartMedia = null;
+let graficoMedia = null;
+let rankingAnterior = [];
+let registrando = false;
+let finalizando = false;
 // URL base da API
-const API_BASE = "http://localhost:3000";
+const API_BASE = "https://bancokf.onrender.com";
 // MODAIS
 // ======================= MODAIS =======================
+
+
+
+const loginOverlay = document.getElementById("loginOverlay");
+const loginBtn = document.getElementById("loginBtn");
+const loginError = document.getElementById("loginError");
+const mobile = window.innerWidth < 768;
+
+
+async function mostrarMediaMes(){
+
+abrirModal('modalMedia');
+
+const mes = document.getElementById('filtroMesHistorico').value;
+const ano = document.getElementById('filtroAnoHistorico').value;
+
+if(!mes || !ano){
+mostrarToastErro("Selecione mês e ano");
+return;
+}
+
+// 🔥 atualiza backend sem refresh
+const r = await fetch(`${API_BASE}/atividades`);
+atividadesConcluidas = await r.json();
+
+const MEDIA = 5;
+const LIMITE = 30;
+
+// NOMES FIXOS
+const nomes = Array.from(document.querySelectorAll('#fOptions .func-item'))
+.map(el=>el.textContent.trim());
+
+// inicia zerado
+const contagem = {};
+nomes.forEach(n=>contagem[n]=0);
+
+// conta CIs
+atividadesConcluidas.forEach(a => {
+
+    const d = new Date(a.fim);
+
+    if (
+        (d.getMonth() + 1) === parseInt(mes) &&
+        d.getFullYear() === parseInt(ano)
+    ) {
+
+        const equipeArray = Array.isArray(a.equipe)
+            ? a.equipe
+            : String(a.equipe).split(",");
+
+        equipeArray.forEach(nome => {
+            const nomeLimpo = nome.trim();
+            if (contagem[nomeLimpo] !== undefined) {
+                contagem[nomeLimpo]++;
+            }
+        });
+    }
+});
+
+// ranking
+const rankingAtual=[...nomes].sort((a,b)=>contagem[b]-contagem[a]);
+
+// labels com medalha + seta
+const labels=rankingAtual.map((nome,i)=>{
+
+let medalha="";
+if(i==0) medalha="🥇 ";
+if(i==1) medalha="🥈 ";
+if(i==2) medalha="🥉 ";
+
+let movimento="";
+const ant=rankingAnterior.indexOf(nome);
+
+if(ant!=-1){
+if(ant>i) movimento=" ↑";
+if(ant<i) movimento=" ↓";
+}
+
+return medalha+nome+movimento;
+});
+
+rankingAnterior=[...rankingAtual];
+
+const valores=rankingAtual.map(n=>contagem[n]);
+
+const cores=valores.map(v=>v>=MEDIA?"#16a34a":"#dc2626");
+
+const mobile=window.innerWidth<768;
+
+if(graficoMedia) graficoMedia.destroy();
+
+graficoMedia=new Chart(document.getElementById("graficoMedia"),{
+type:'bar',
+data:{
+labels,
+datasets:[
+{
+data:valores,
+backgroundColor:cores,
+borderRadius:8
+},
+{
+type:'line',
+data:rankingAtual.map(()=>MEDIA),
+borderColor:'orange',
+borderWidth:2,
+pointRadius:0
+}
+]
+},
+options:{
+indexAxis:mobile?'y':'x',
+responsive:true,
+maintainAspectRatio:false,
+
+animation:{duration:1200},
+plugins:{legend:{display:false}},
+scales: mobile ? {
+
+    x:{
+        beginAtZero:true,
+        max:LIMITE,
+        ticks:{
+            padding:0.5   // <<< diminui espaço dos números
+        },
+        grid:{
+            drawTicks:false
+        }
+    }
+
+} : {
+
+    y:{
+        beginAtZero:true,
+        max:LIMITE,
+        ticks:{
+            padding:0.5   // <<< cola números no gráfico
+        },
+        grid:{
+            drawTicks:false
+        }
+    }
+
+}
+
+}
+});
+}
+
+setInterval(async ()=>{
+
+    try{
+
+        const r = await fetch(`${API_BASE}/atividades`);
+        atividadesConcluidas = await r.json();
+
+        // se modal estiver aberto, atualiza gráfico
+        const modal = document.getElementById("modalMedia");
+
+        if(modal && modal.style.display==="flex"){
+            mostrarMediaMes();
+        }
+
+        // atualiza histórico se estiver visível
+        if(document.getElementById("modalHistorico")?.style.display==="flex"){
+            atualizarHistorico();
+        }
+
+    }catch(e){
+        console.log("sync fail",e);
+    }
+
+},3000); // a cada 3 segundos
+
+
+
+function ciKeyDown(e,input){
+
+    // se já estava completa e apertar backspace → limpa tudo
+    if(ciCompleta && e.key === "Backspace"){
+        e.preventDefault();
+        input.value = "";
+        ciCompleta = false;
+    }
+}
+
+function formatarCI(input){
+
+    let raw = input.value.replace(/\D/g,"");
+
+    // 🔹 agora permite 4 números
+    if(raw.length > 4) raw = raw.slice(0,4);
+
+    if(raw.length === 4){
+        const ano = new Date().getFullYear();
+        input.value = `${raw}/${ano}`;
+        ciCompleta = true;
+    } else {
+        input.value = raw;
+        ciCompleta = false;
+    }
+}
+
+loginBtn.addEventListener("click", async () => {
+  const usuario = document.getElementById("username").value;
+  const senha = document.getElementById("password").value;
+
+  if(!usuario || !senha){
+    loginError.style.display = "block";
+    loginError.innerText = "Preencha usuário e senha";
+    return;
+  }
+
+  try {
+    // Chama a rota do seu backend que valida no PostgreSQL/Supabase
+   // 🔹 URL do backend Render (onde seu app Node.js está hospedado)
+const BACKEND_URL = "https://bancokf.onrender.com"; // <- não é SUPABASE_URL
+
+const res = await fetch(`${BACKEND_URL}/login`, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ usuario, senha })
+});
+
+    const data = await res.json();
+if (data.ok) {
+
+    // 🔴 LIMPA QUALQUER SESSÃO ANTERIOR
+    localStorage.removeItem('usuarioNome');
+    localStorage.removeItem('permissao');
+
+    // 🔹 SALVA NOVA SESSÃO
+    localStorage.setItem('usuarioNome', data.usuario);
+    localStorage.setItem('permissao', data.permissao);
+
+     loginOverlay.style.display = "none";
+
+    const nome = data.usuario || usuario;
+    document.getElementById("usuarioLogado").innerText = `👤 Olá, ${nome}`;
+
+    // 🔹 SALVAR LOGIN SE MARCADO
+    const lembrar = document.getElementById("lembrarLogin").checked;
+
+    if (lembrar) {
+        localStorage.setItem("loginSalvoUsuario", usuario);
+        localStorage.setItem("loginSalvoSenha", senha);
+        localStorage.setItem("loginLembrar", "true");
+    } else {
+        localStorage.removeItem("loginSalvoUsuario");
+        localStorage.removeItem("loginSalvoSenha");
+        localStorage.removeItem("loginLembrar");
+    }
+
+    atualizarUsuarioLogado();
+
+    // 🔴 APLICA CONTROLE VISUAL DE PERMISSÃO
+    aplicarControleVisualPermissao();
+}
+  else {
+      loginError.style.display = "block";
+       mostrarToastErro(data.error || "Usuário ou senha incorretos");
+     
+    }
+
+  } catch(err) {
+    console.error(err);
+    loginError.style.display = "block";
+      mostrarToastErro("Erro de conexão com o servidor");
+    
+  }
+});
+
 function abrirModal(id){ document.getElementById(id).style.display='block'; }
 function fecharModal(id){ document.getElementById(id).style.display='none'; }
 
+
+function atualizarUsuarioLogado() {
+    const nome = localStorage.getItem('usuarioNome') || 'Visitante';
+    const elemento = document.querySelector('.usuario-logado');
+    if(elemento) elemento.textContent = `Olá, ${nome}`;
+}
+
+
+
+
+
+
+
+
+
+
+function aplicarControleVisualPermissao() {
+
+    const permissao = localStorage.getItem('permissao');
+
+    const cardHistorico = document.getElementById('cardHistorico');
+    const cardAlmoxarifado = document.getElementById('cardAlmoxarifado');
+
+    // 🔴 Se não houver permissão salva, bloqueia tudo
+    if (!permissao) {
+        cardHistorico?.classList.add('card-desativado');
+        cardAlmoxarifado?.classList.add('card-desativado');
+        return;
+    }
+
+    // 🔵 Se for almoxarifado → libera
+    if (permissao === 'almoxarifado') {
+        cardHistorico?.classList.remove('card-desativado');
+        cardAlmoxarifado?.classList.remove('card-desativado');
+    } 
+    // 🟡 Qualquer outro tipo → bloqueia
+    else {
+        cardHistorico?.classList.add('card-desativado');
+        cardAlmoxarifado?.classList.add('card-desativado');
+    }
+}
+
+
+function abrirModalConfirmarBackup(){
+    abrirModal("modalConfirmarBackup");
+}
+
+function fecharModalConfirmarBackup(){
+    fecharModal("modalConfirmarBackup");
+}
+
+// SIM
+async function confirmarBackupCI(){
+
+    fecharModalConfirmarBackup();
+
+    const sucesso = await backupCIsDoMes();
+
+    if(sucesso){
+        fecharModal("modalHistorico"); // só fecha se deu certo
+    }
+
+}
+
+
+
+
+// ------------------- BACKUP CIs -------------------
+// ------------------- BACKUP CIs -------------------
+async function backupCIsDoMes() {
+    try {
+        const month = document.getElementById('filtroMesHistorico').value;
+        const year = document.getElementById('filtroAnoHistorico').value;
+if (!month || !year) {
+    mostrarToastErro("Selecione mês e ano para o backup");
+    return false;
+}
+
+        const res = await fetch(`${API_BASE}/atividades/backup?mes=${month}&ano=${year}`);
+        if (!res.ok) throw "Erro ao buscar CIs";
+
+        const data = await res.json();
+
+if (!Array.isArray(data) || data.length === 0) {
+    mostrarToastErro("Não há CIs nesse período");
+    return false;
+}
+
+        const zip = new JSZip();
+
+        for (const ci of data) {
+
+            // TXT da CI
+            zip.file(`${ci.id}-${ci.inicio}.txt`, JSON.stringify(ci, null, 2));
+
+            // ===============================
+            // GARANTE ARRAY REAL DE FOTOS
+            // ===============================
+            let fotos = [];
+
+            try {
+                fotos = Array.isArray(ci.fotos) ? ci.fotos : JSON.parse(ci.fotos || "[]");
+            } catch {
+                fotos = [];
+            }
+
+            // ===============================
+            // BAIXA FOTOS COM BLINDAGEM
+            // ===============================
+            if (fotos.length > 0) {
+
+                const folder = zip.folder(`${ci.id}-${ci.inicio}/fotos`);
+
+                for (let i = 0; i < fotos.length; i++) {
+
+                    let foto = String(fotos[i])
+                        .replace("[", "")
+                        .replace("]", "")
+                        .replace(/"/g, "")
+                        .trim();
+
+                    if (!foto.startsWith("http")) {
+                        console.warn("Foto ignorada:", foto);
+                        continue;
+                    }
+
+                    try {
+                        const fotoBlob = await fetch(foto).then(r => r.blob());
+                        folder.file(`foto${i + 1}.jpg`, fotoBlob);
+                    } catch (e) {
+                        console.warn("Erro ao baixar:", foto);
+                        continue;
+                    }
+                }
+            }
+        }
+
+        // ===============================
+        // GERA ZIP
+        // ===============================
+        const content = await zip.generateAsync({ type: "blob" });
+        saveAs(content, `backup_CI_${month}-${year}.zip`);
+
+        // ===============================
+        // APAGA DO SERVIDOR
+        // ===============================
+ const ids = data.map(c => c.id);
+
+await fetch(`${API_BASE}/atividades/apagar`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ids })
+});
+atividadesConcluidas = [];
+document.getElementById("listaHistorico").innerHTML =
+"<p style='opacity:.6'>Nenhuma CI registrada</p>";
+
+mostrarToast("CIs apagadas do servidor!");
+atualizarHistorico();
+
+return true;
+
+    } catch (err) {
+       console.error(err);
+    mostrarToastErro("Erro no backup: " + err);
+    return false;
+    }
+}
+
+// ------------------- RESTORE CIs TEMPORÁRIO -------------------
+async function restaurarCIs() {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".zip";
+    input.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const zip = await JSZip.loadAsync(file);
+        const restoredData = [];
+
+        for (const filename of Object.keys(zip.files)) {
+            if (filename.endsWith(".txt")) {
+                const text = await zip.file(filename).async("string");
+                restoredData.push(JSON.parse(text));
+            }
+        }
+
+        abrirModalRestore(restoredData, zip);
+    };
+    input.click();
+}
+
+// ------------------- MODAL TEMPORÁRIO DE RESTORE -------------------
+function abrirModalRestore(cis, zip) {
+
+    // overlay
+    const overlay = document.createElement("div");
+    overlay.className = "modal";
+    overlay.style.display = "flex";
+    overlay.style.alignItems = "center";
+    overlay.style.justifyContent = "center";
+    overlay.style.zIndex = 3000;
+
+    // container padrão do sistema
+    const box = document.createElement("div");
+    box.className = "container-modal";
+    box.style.maxHeight = "80vh";
+    box.style.overflowY = "auto";
+    box.style.width = "95%";
+    box.style.maxWidth = "700px";
+
+    overlay.appendChild(box);
+
+    // fechar
+    const fechar = document.createElement("span");
+    fechar.className = "btn-fechar";
+    fechar.innerHTML = "&times;";
+    fechar.onclick = () => document.body.removeChild(overlay);
+
+    box.appendChild(fechar);
+
+    // titulo
+    const titulo = document.createElement("h2");
+    titulo.innerText = "Restaurar CIs";
+    titulo.style.color = "var(--primary)";
+    box.appendChild(titulo);
+
+    cis.forEach(async ci => {
+
+        const card = document.createElement("div");
+        card.style.background = "#252a33";
+        card.style.padding = "12px";
+        card.style.borderRadius = "12px";
+        card.style.marginBottom = "15px";
+
+        card.innerHTML = `
+            <strong>CI ${ci.ci || ci.id}</strong><br>
+            Serviço: ${ci.servico}<br>
+            Local: ${ci.local}<br>
+            Equipe: ${Array.isArray(ci.equipe) ? ci.equipe.join(", ") : ci.equipe}<br>
+            Início: ${ci.inicio}
+        `;
+
+        // ========= fotos =========
+        let fotos = [];
+
+        try {
+            fotos = Array.isArray(ci.fotos) ? ci.fotos : JSON.parse(ci.fotos || "[]");
+        } catch {
+            fotos = [];
+        }
+
+        if (fotos.length) {
+
+            const fotosDiv = document.createElement("div");
+            fotosDiv.style.display = "flex";
+            fotosDiv.style.flexWrap = "wrap";
+            fotosDiv.style.gap = "10px";
+            fotosDiv.style.marginTop = "10px";
+
+            for (let i = 0; i < fotos.length; i++) {
+
+                try {
+
+                    const blob = await zip.file(`${ci.id}-${ci.inicio}/fotos/foto${i+1}.jpg`).async("blob");
+
+                    const img = document.createElement("img");
+                    img.src = URL.createObjectURL(blob);
+                    img.style.width = "90px";
+                    img.style.height = "90px";
+                    img.style.objectFit = "cover";
+                    img.style.borderRadius = "8px";
+                    
+
+             const url = URL.createObjectURL(blob);
+// efeito hover
+img.style.transition = "0.2s";
+img.onmouseenter = () => img.style.transform = "scale(1.05)";
+img.onmouseleave = () => img.style.transform = "scale(1)";
+img.src = url;
+img.style.cursor = "zoom-in";
+
+img.onclick = () => abrirImagemModal(
+    url,
+    `CI-${ci.ci || ci.id}-foto${i+1}.jpg`
+);
+
+fotosDiv.appendChild(img);
+
+                } catch(e) {
+                    console.warn("Foto ignorada");
+                }
+            }
+
+            card.appendChild(fotosDiv);
+        }
+
+        box.appendChild(card);
+    });
+
+    document.body.appendChild(overlay);
+}
+
+
+function normalizar(texto) {
+    return texto
+        ?.normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim()
+        .toLowerCase();
+}
 
 
 function agoraISO(){
@@ -490,49 +2069,82 @@ function formatarBR(dataISO){
 }
 // Abrir modal já existente
 function abrirAlmoxarifado() {
-    abrirModal('modalAlmoxarifado');
-carregarItens();
-}// Registrar novo item
-function registrarItem() {
-    const nome = document.getElementById('itemNome').value.trim();
-    const quantidade = parseInt(document.getElementById('itemQuantidade').value);
-    const setor = document.getElementById('itemSetor').value;
+    const permissao = localStorage.getItem('permissao');
 
-    if (!nome || !quantidade || !setor) {
-        alert("Preencha todos os campos!");
+    if (permissao !== 'almoxarifado') {
+        mostrarToastErro("Acesso negado!");
         return;
     }
 
-    fetch("http://localhost:3000/itens", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nome, quantidade, setor })
-    })
-    .then(() => {
+    abrirModal('modalAlmoxarifado');
+    carregarItens();
+}
+
+// Registrar novo item
+async function registrarItem() {
+    const nome = document.getElementById('itemNome').value.trim();
+    const quantidade = parseInt(document.getElementById('itemQuantidade').value);
+    const setor = document.getElementById('itemSetor').value;
+ 
+    if (!nome || !quantidade || !setor) {
+        mostrarToastErro("Preencha todos os campos!");
+        return;
+    }
+ 
+    try {
+        const res = await fetch(`${API_BASE}/itens`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                nome,
+                quantidade,
+                setor,
+                usuario: localStorage.getItem('usuarioNome') // ← ADICIONADO
+            })
+        });
+ 
+        const contentType = res.headers.get("content-type") || "";
+        if (!contentType.includes("application/json")) {
+            const text = await res.text();
+            console.error("Resposta inesperada do backend:", text);
+            throw "Resposta do servidor não é JSON. Verifique a URL/API_BASE.";
+        }
+ 
+        await res.json();
+ 
         document.getElementById('itemNome').value = "";
         document.getElementById('itemQuantidade').value = "";
         document.getElementById('itemSetor').value = "";
-
+ 
         mostrarToast("Item salvo no banco!");
-        carregarItens();   // recarrega direto do SQLite
-    });
-}function carregarItens() {
-    fetch("http://localhost:3000/itens")
-        .then(res => res.json())
-        .then(data => {
-            itensRegistrados = data;
-            atualizarListaItens();
-        });
+        carregarItens();
+ 
+    } catch (err) {
+        mostrarToastErro("Falha ao salvar item: " + err);
+        console.error(err);
+    }
 }
+// 2️⃣ Carregar itens do backend
+async function carregarItens() {
+    try {
+        const res = await fetch(`${API_BASE}/itens`);
+        const data = await res.json();
+        itensRegistrados = data;
+        atualizarListaItens();
+    } catch (err) {
+        console.error("Erro ao carregar itens:", err);
+    }
+}
+// 3️⃣ Atualizar lista HTML
 function atualizarListaItens() {
     const tbody = document.getElementById('listaItens');
     tbody.innerHTML = "";
 
     const filtroSetor = document.getElementById('filtroSetorItens').value;
-
     let itensFiltrados = itensRegistrados;
+
     if(filtroSetor) {
-        itensFiltrados = itensRegistrados.filter(item => item.setor === filtroSetor);
+        itensFiltrados = itensRegistrados.filter(item => normalizar(item.setor) === normalizar(filtroSetor));
     }
 
     if (itensFiltrados.length === 0) {
@@ -542,21 +2154,23 @@ function atualizarListaItens() {
         return;
     }
 
-    // Mapa de cores por setor
     const corSetor = {
-        "Pintura": "#ef4444",     // vermelho
-        "Elétrica": "#facc15",    // amarelo
-        "Hidráulica": "#0d6efd",  // azul
-        "Civil": "#a855f7"        // roxo
+        pintura: "#ef4444",
+        eletrica: "#facc15",
+        hidraulica: "#0d6efd",
+        pedreiro: "#7A7878",
+        marcenaria: "#3C2A0D"
     };
 
     itensFiltrados.forEach(item => {
         const tr = document.createElement('tr');
+        const setorKey = normalizar(item.setor);
 
-        // Adiciona a cor do setor como borda esquerda
-        tr.style.borderLeft = `5px solid ${corSetor[item.setor] || '#fff'}`;
-        tr.style.background = "#252a33"; // mantém fundo escuro padrão
-        tr.style.color = "#fff";
+       const cor = corSetor[setorKey] || "#0d6efd";
+
+tr.style.borderLeft = `5px solid ${cor}`;
+tr.style.background = cor + "22"; // fundo translúcido
+tr.style.color = "#fff";
 
         tr.innerHTML = `
             <td style="padding:10px; border:1px solid #444;">${item.nome}</td>
@@ -567,22 +2181,67 @@ function atualizarListaItens() {
                 <span style="cursor:pointer; color:#ef4444; font-weight:bold;" onclick="excluirItem(${item.id})">🗑️</span>
             </td>
         `;
-
         tbody.appendChild(tr);
     });
-}// Substitui confirm antigo
-function excluirItem(id) {
+}
+// 4️⃣ Editar Item
+function editarItem(id) {
     const item = itensRegistrados.find(i => i.id === id);
     if (!item) return;
 
-    itemAtualExcluir = item;
-    abrirModal('modalExcluirItem');
-}function confirmarExclusaoItem() {
+    itemAtualEditar = item;
+    document.getElementById('editItemNome').value = item.nome;
+    document.getElementById('editItemQuantidade').value = item.quantidade;
+    document.getElementById('editItemSetor').value = item.setor;
+
+    abrirModal('modalEditarItem');
+}
+
+// Função auxiliar para normalizar texto
+function normalizar(texto) {
+    return texto
+        ?.normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim()
+        .toLowerCase();
+}
+// Substitui confirm antigo
+// 6️⃣ Excluir Item
+async function excluirItem(id) {
+    if (!confirm("Deseja realmente excluir este item?")) return;
+ 
+    try {
+        const res = await fetch(`${API_BASE}/itens/${id}`, {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                usuario: localStorage.getItem('usuarioNome') // ← ADICIONADO
+            })
+        });
+ 
+        const contentType = res.headers.get("content-type") || "";
+        if (!contentType.includes("application/json")) {
+            const text = await res.text();
+            console.error("Resposta inesperada do backend:", text);
+            throw "Resposta do servidor não é JSON. Verifique a URL/API_BASE.";
+        }
+ 
+        const data = await res.json();
+        if (!data.ok) throw data.error || "Erro ao excluir item";
+ 
+        itensRegistrados = itensRegistrados.filter(i => i.id !== id);
+        atualizarListaItens();
+        mostrarToast("Item excluído!");
+ 
+    } catch (err) {
+        mostrarToastErro("Falha ao excluir item: " + err);
+        console.error(err);
+    }
+}
+function confirmarExclusaoItem() {
     if (!itemAtualExcluir) return;
 
-    fetch(`http://localhost:3000/itens/${itemAtualExcluir.id}`, {
-        method: "DELETE"
-    })
+    fetch(`${API_BASE}/itens/${itemAtualExcluir.id}`, { method: "DELETE" })
     .then(() => {
         mostrarToast("Item excluído do banco!");
         fecharModal('modalExcluirItem');
@@ -592,45 +2251,77 @@ function excluirItem(id) {
     .catch(err => console.error(err));
 }
 
-// Substitui prompt antigo
-function editarItem(id) {
-    const item = itensRegistrados.find(i => i.id === id);
-    if (!item) return;
 
-    itemAtualEditar = item;
-
-    document.getElementById('editItemNome').value = item.nome;
-    document.getElementById('editItemQuantidade').value = item.quantidade;
-    document.getElementById('editItemSetor').value = item.setor;
-
-    abrirModal('modalEditarItem');
-}function confirmarEdicaoItem() {
+// 5️⃣ Confirmar edição (versão final)
+async function confirmarEdicaoItem() {
     if (!itemAtualEditar) return;
-
+ 
     const novoNome = document.getElementById('editItemNome').value.trim();
     const novaQuantidade = parseInt(document.getElementById('editItemQuantidade').value);
     const novoSetor = document.getElementById('editItemSetor').value;
-
+ 
     if (!novoNome || !novaQuantidade || !novoSetor) {
-        alert("Preencha todos os campos!");
+        mostrarToastErro("Preencha todos os campos!");
         return;
     }
-
-    itemAtualEditar.nome = novoNome;
-    itemAtualEditar.quantidade = novaQuantidade;
-    itemAtualEditar.setor = novoSetor;
-
-    mostrarToast("Item editado!");
-    atualizarListaItens();
-    fecharModal('modalEditarItem');
-    itemAtualEditar = null;
+ 
+    try {
+        const res = await fetch(`${API_BASE}/itens/${itemAtualEditar.id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                nome: novoNome,
+                quantidade: novaQuantidade,
+                setor: novoSetor,
+                usuario: localStorage.getItem('usuarioNome') // ← ADICIONADO
+            })
+        });
+ 
+        const contentType = res.headers.get("content-type") || "";
+        if (!contentType.includes("application/json")) {
+            const text = await res.text();
+            console.error("Resposta inesperada do backend:", text);
+            throw "Resposta do servidor não é JSON. Verifique a URL/API_BASE.";
+        }
+ 
+        const data = await res.json();
+        if (!data.ok) throw data.error || "Erro ao atualizar item";
+ 
+        itemAtualEditar.nome = novoNome;
+        itemAtualEditar.quantidade = novaQuantidade;
+        itemAtualEditar.setor = novoSetor;
+ 
+        mostrarToast("Item editado!");
+        atualizarListaItens();
+        fecharModal('modalEditarItem');
+        itemAtualEditar = null;
+ 
+    } catch (err) {
+        mostrarToastErro("Falha ao editar item: " + err);
+        console.error(err);
+    }
 }
 
 
 
-
 // ======================= EQUIPES =======================
-function toggleFuncs(e){ e.stopPropagation(); document.getElementById('fOptions').classList.toggle('hidden'); }
+function toggleFuncs(e){
+    e.stopPropagation(); 
+    const fOptions = document.getElementById('fOptions');
+    if(fOptions.style.display === 'block'){
+        fOptions.style.display = 'none'; // fecha
+    } else {
+        fOptions.style.display = 'block'; // abre
+    }
+}
+
+// Fecha o dropdown se clicar fora
+// Fecha o dropdown se clicar fora
+document.addEventListener('click', () => {
+    const fOptions = document.getElementById('fOptions');
+    fOptions.style.display = 'none';
+});
+
 function selectFunc(el,nome,e){
     e.stopPropagation();
     el.classList.toggle('active');
@@ -641,16 +2332,42 @@ function selectFunc(el,nome,e){
 
 // ======================= LOCAIS =======================
 function atualizarLocais(){
-    const sub=document.getElementById('fSubLocal');
-    document.getElementById('areaSubLocal').classList.remove('hidden');
-    const opts=document.getElementById('fTipoLocal').value==="Setor" ? ["Cam","Seplag"] : ["Itaipu","Centro"];
-    sub.innerHTML = opts.map(x=>`<option value="${x}">${x}</option>`).join('');
-}// ======================= TOAST =======================
+
+    const selectLocal = document.getElementById('fLocal');
+    const tipo = document.getElementById('fTipoLocal').value;
+
+    const mapaLocais = {
+        Principais: ["Cam","Fazenda-SMF","Seplag","Caminho Niemeyer","Bicicletario"],
+        
+    };
+
+    const opts = mapaLocais[tipo] || [];
+
+    selectLocal.innerHTML = opts
+        .map(x => `<option value="${x}">${x}</option>`)
+        .join('');
+}
+// ======================= TOAST =======================
 function mostrarToast(msg){
     const t=document.getElementById('toastSucesso');
     document.getElementById('toastTexto').textContent=msg;
     t.style.display='block';
     t.classList.add('animar-entrada');
+    setTimeout(()=>t.style.display='none',2000);
+}
+function mostrarToastErro(msg){
+
+    const t=document.getElementById('toastErro');
+    document.getElementById('toastErroTexto').textContent=msg;
+
+    t.style.display='flex';
+
+    t.classList.remove('animar-entrada');
+    void t.offsetWidth;
+    t.classList.add('animar-entrada');
+
+    if(navigator.vibrate) navigator.vibrate(200);
+
     setTimeout(()=>t.style.display='none',2000);
 }
 
@@ -665,7 +2382,7 @@ function carregarAtividades() {
     // =====================
     // ATIVAS
     // =====================
-    fetch("http://localhost:3000/atividades/ativas")
+ fetch(`${API_BASE}/atividades/ativas`)
         .then(res => res.json())
         .then(data => {
             atividadesAtivas = data;
@@ -676,7 +2393,7 @@ function carregarAtividades() {
     // =====================
     // CONCLUÍDAS
     // =====================
-    fetch("http://localhost:3000/atividades")
+  fetch(`${API_BASE}/atividades`)
         .then(res => res.json())
         .then(data => {
             atividadesConcluidas = data;
@@ -684,47 +2401,100 @@ function carregarAtividades() {
         })
         .catch(err => console.error("Erro concluídas:", err));
 
+        
+
 }
-function iniciarAtividade(){
+async function iniciarAtividade() {
 
-    const ci = document.getElementById('fCI').value;
+    if (registrando) return;
+
+    const botao = document.querySelector("#btnIniciarAtividade");
+
+    const ci = document.getElementById('fCI').value.trim().toUpperCase();
     const servico = document.getElementById('fAtividade').value;
-    const local = document.getElementById('fSubLocal').value;
+    const local = document.getElementById('fLocal').value; // ✅ corrigido
 
-    if(!selecionados.length || !ci || !servico || !local){ 
-        alert("Preencha tudo!"); 
-        return; 
+    // 🔐 valida formato
+    if (!/^\d{4}\/\d{4}$/.test(ci)) {
+        mostrarToastErro("CI inválida (use 0000/0000)");
+        return;
     }
 
-    const atividade = { 
-        ci, 
-        servico, 
-        local, 
-        equipe: selecionados, 
-inicio: agoraISO(),
-        relato:"",
-        fotos:[],
-        fim:""
-    };
+    // 🔒 verifica duplicidade
+    const ciJaExiste =
+        atividadesAtivas.some(a => String(a.ci).toUpperCase() === ci) ||
+        atividadesConcluidas.some(a => String(a.ci).toUpperCase() === ci);
 
-   fetch("http://localhost:3000/atividades/inicio",{
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body:JSON.stringify(atividade)
-})
-.then(res => res.json())
-.then(data => {
-    // salva o id retornado
-    atividade.id = data.id;
+    if (ciJaExiste) {
+        mostrarToastErro("Essa CI já está registrada!");
+        return;
+    }
 
-    atividadesAtivas.push(atividade);
+    if (!selecionados.length || !servico || !local) {
+        mostrarToastErro("Preencha todos os campos!");
+        return;
+    }
 
-    limparForm();
-    atualizarEquipeCampo();
-    mostrarToast("Atividade registrada!");
-});
+    registrando = true;
+
+    if (botao) {
+        botao.disabled = true;
+        botao.innerText = "Registrando...";
+    }
+
+    try {
+
+        const atividade = {
+            ci,
+            servico,
+            local,
+            equipe: [...selecionados].join(","),
+            inicio: agoraISO()
+        };
+
+        const res = await fetch(`${API_BASE}/atividades/inicio`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(atividade)
+        });
+
+        if (!res.ok) {
+            if (res.status === 409) {
+                throw "Essa CI já existe no banco!";
+            }
+            throw await res.text();
+        }
+
+        const data = await res.json();
+
+        atividadesAtivas.push({
+            ...atividade,
+            id: data.id,
+            equipe: [...selecionados],
+            relato: "",
+            fotos: [],
+            fim: ""
+        });
+
+        limparForm();
+        atualizarEquipeCampo();
+        mostrarToast("Atividade iniciada!");
+
+    } catch (err) {
+
+        console.error("INICIAR ERRO:", err);
+        mostrarToastErro(err);
+
+    } finally {
+        // 🔓 SEMPRE libera
+        registrando = false;
+
+        if (botao) {
+            botao.disabled = false;
+            botao.innerText = "Confirmar Início";
+        }
+    }
 }
-
 function dataAgoraBR(){
     return new Date().toLocaleString("pt-BR", {
         day: "2-digit",
@@ -734,25 +2504,99 @@ function dataAgoraBR(){
         minute: "2-digit"
     });
 }
-function limparForm(){
-    // Limpa o array de selecionados
+function limparForm() {
+
     selecionados = [];
 
-    // Reseta o texto do display
-    document.getElementById('fDisplay').textContent = "Selecionar Equipe";
+    const display = document.getElementById('fDisplay');
+    if (display) display.textContent = "Selecionar Equipe";
 
-    // Remove a classe 'active' de todos os itens
+    document
+        .querySelectorAll('#fOptions .func-item')
+        .forEach(el => el.classList.remove('active'));
+
+    const ci = document.getElementById('fCI');
+    if (ci) ci.value = "";
+
+    const atividade = document.getElementById('fAtividade');
+    if (atividade) atividade.selectedIndex = 0;
+
+    const tipoLocal = document.getElementById('fTipoLocal');
+    if (tipoLocal) tipoLocal.selectedIndex = 0;
+
+    const local = document.getElementById('fLocal');
+if (local) local.selectedIndex = 0;
+}
+
+// MODAL EQUIPEEDICAO
+
+function abrirModalEdicao() {
+    if (!atividadeAtual) return;
+
+    // Fecha modal de finalizar
+    fecharModal('modalFinalizar');
+
+    document.getElementById('editCi').value = atividadeAtual.ci;
+    document.getElementById('editServico').value = atividadeAtual.servico;
+    document.getElementById('editLocal').value = atividadeAtual.local;
+    document.getElementById('editEquipe').value = atividadeAtual.equipe.join(", ");
+
+    abrirModal('modalEditarAtividade');
+}
+function salvarEdicaoAtividade() {
+    if (!atividadeAtual) return;
+
+    const novaCi = document.getElementById('editCi').value.trim();
+    const novoServico = document.getElementById('editServico').value.trim();
+    const novoLocal = document.getElementById('editLocal').value.trim();
+    const novaEquipe = document.getElementById('editEquipe').value
+                        .split(",")
+                        .map(e => e.trim())
+                        .filter(e => e);
+
+    if (!novaCi || !novoServico || !novoLocal || !novaEquipe.length) {
+        mostrarToastErro("Preencha todos os campos!");
+        return;
+    }
+
+    // Atualiza atividadeAtual
+    atividadeAtual.ci = novaCi;
+    atividadeAtual.servico = novoServico;
+    atividadeAtual.local = novoLocal;
+    atividadeAtual.equipe = novaEquipe;
+
+    fecharModal('modalEditarAtividade');
+
+    // Atualiza modal de finalizar com os novos dados
+    document.getElementById('detalhesServico').innerHTML =
+        `CI: ${atividadeAtual.ci} | Serviço: ${atividadeAtual.servico} | Local: ${atividadeAtual.local}<br>
+         Equipe: ${atividadeAtual.equipe.join(", ")}`;
+
+    // Reabre modal de finalizar
+    abrirModal('modalFinalizar');
+
+    mostrarToast("Atividade atualizada! Agora finalize o trabalho.");
+}
+
+// MODAL EQUIPE
+function abrirEquipe() {
+    abrirModal('modalEquipe'); // abre o modal
+    atualizarEquipeCampo();    // atualiza a lista de atividades em andamento
+
+    // FORÇA o dropdown fechado
+    const fOptions = document.getElementById('fOptions');
+    fOptions.style.display = 'none';
+
+    // Remove destaque de itens
     document.querySelectorAll('#fOptions .func-item').forEach(el => el.classList.remove('active'));
 
-    // Limpa campos adicionais
-    document.getElementById('fCI').value = "";
-    document.getElementById('fSubLocal').innerHTML = "";
-    document.getElementById('areaSubLocal').classList.add('hidden');
-    document.getElementById('fAtividade').selectedIndex = 0;
-    document.getElementById('fTipoLocal').selectedIndex = 0;
+    // Reseta o texto do botão
+    document.getElementById('fDisplay').textContent = "Selecionar Equipe";
+
+    // Limpa array selecionados
+    selecionados = [];
 }
-// MODAL EQUIPE
-function abrirEquipe(){ abrirModal('modalEquipe'); atualizarEquipeCampo(); }
+
 function atualizarEquipeCampo(){
     const lista = document.getElementById('listaAndamento');
     lista.innerHTML = atividadesAtivas.length ? "" : "Nenhuma atividade em andamento.";
@@ -765,14 +2609,30 @@ function atualizarEquipeCampo(){
         a.equipe.forEach(nome => funcionariosUnicos.add(nome));
 
         // COR POR SERVIÇO
-        let classeServico = "", iconeServico = "";
-        switch(a.servico){
-            case "Pintura": classeServico="card-pintura"; iconeServico="🎨"; break;
-            case "Elétrica": classeServico="card-eletrica"; iconeServico="💡"; break;
-            case "Hidráulica": classeServico="card-hidraulica"; iconeServico="🚰"; break;
-            case "Civil": classeServico="card-civil"; iconeServico="🔨"; break;
-        }
+       const serv = normalizar(a.servico);
+// Atualiza o badge com número de CIs registradas
+const badgeCIs = document.getElementById('badgeCIs');
+if (atividadesAtivas.length > 0) {
+    badgeCIs.textContent = atividadesAtivas.length + " CI(s) em andamento";
+    badgeCIs.style.display = 'block';
+} else {
+    badgeCIs.style.display = 'none';
+}
+const mapa = {
+   pintura: { classe: "card-pintura", icone: "🖌️" },
+    eletrica: { classe: "card-eletrica", icone: "💡" },
+    hidraulica: { classe: "card-hidraulica", icone: "🚰" },
+    pedreiro: { classe: "card-pedreiro", icone: "🔨" },
+     marcenaria: { classe: "card-marcenaria", icone: "🪚" }
 
+
+     
+};
+
+const cfg = mapa[serv] || { classe: "", icone: "🛠️" };
+
+let classeServico = cfg.classe;
+let iconeServico = cfg.icone;
         // Cria card da atividade
         const card = document.createElement('div');
         card.className = `card-lista ${classeServico}`;
@@ -783,13 +2643,13 @@ function atualizarEquipeCampo(){
     });
 
     // Atualiza o badge com número de funcionários únicos
-    const badge = document.getElementById('badgeFuncionarios');
-    if(funcionariosUnicos.size > 0){
-        badge.textContent = funcionariosUnicos.size + " Funcionário(s)";
-        badge.style.display = 'block';
-    } else {
-        badge.style.display = 'none';
-    }
+ const badge = document.getElementById('badgeFuncionarios');
+if(funcionariosUnicos.size > 0){
+    badge.textContent = funcionariosUnicos.size + " Funcionário(s)";
+    badge.style.display = 'block';
+} else {
+    badge.style.display = 'none';
+}
 }
 
 // FINALIZAR
@@ -803,38 +2663,56 @@ function prepararFinalizacao(idx){
          Equipe: ${atividadeAtual.equipe.join(", ")}`;
 }
 // FINALIZAR ATIVIDADE
-function finalizarAtividade() {
+async function finalizarAtividade() {
+
+    if (finalizando) return; // 🔒 trava duplo clique
     if (!atividadeAtual) return;
 
-    const fotosInput = document.getElementById('fFotos');
-    if (fotosInput.files.length === 0) {
-        alert("É obrigatório enviar pelo menos 1 foto!");
-        return;
+    const botao = document.querySelector("#modalFinalizar .btn-finalizar");
+
+    finalizando = true;
+
+    if (botao) {
+        botao.disabled = true;
+        botao.innerText = "Finalizando...";
     }
 
-    const fim = agoraISO();
-    const relato = document.getElementById('fRelato').value || "-";
+    try {
 
-    const formData = new FormData();
-    formData.append("idAtiva", atividadeAtual.id);
-    formData.append("ci", atividadeAtual.ci);
-    formData.append("servico", atividadeAtual.servico);
-    formData.append("local", atividadeAtual.local);
-    formData.append("equipe", atividadeAtual.equipe.join(",")); // string
-    formData.append("inicio", atividadeAtual.inicio);
-    formData.append("relato", relato);
-    formData.append("fim", fim);
+        const fotosInput = document.getElementById('fFotos');
 
-    // Adiciona arquivos
-    Array.from(fotosInput.files).forEach(file => formData.append("fotos", file));
+        if (fotosInput.files.length === 0) {
+            throw "É obrigatório enviar pelo menos 1 foto!";
+        }
 
-    fetch("http://localhost:3000/atividades/finalizar", {
-        method: "POST",
-        body: formData
-    })
-    .then(res => res.json())
-    .then(data => {
-        // Atualiza frontend
+        const fim = agoraISO();
+        const relato = document.getElementById('fRelato').value || "-";
+
+        const formData = new FormData();
+        formData.append("idAtiva", atividadeAtual.id);
+        formData.append("ci", atividadeAtual.ci);
+        formData.append("servico", atividadeAtual.servico);
+        formData.append("local", atividadeAtual.local);
+        formData.append("equipe", atividadeAtual.equipe.join(","));
+        formData.append("inicio", atividadeAtual.inicio);
+        formData.append("relato", relato);
+        formData.append("fim", fim);
+
+        Array.from(fotosInput.files)
+            .forEach(file => formData.append("fotos", file));
+
+        const res = await fetch(`${API_BASE}/atividades/finalizar`, {
+            method: "POST",
+            body: formData
+        });
+
+        const data = await res.json();
+
+        if (!data.ok) {
+            throw data.error || "Erro backend";
+        }
+
+        // ✅ Atualiza frontend
         atividadeAtual.fim = fim;
         atividadeAtual.relato = relato;
         atividadeAtual.fotos = data.fotos;
@@ -843,10 +2721,12 @@ function finalizarAtividade() {
         atividadesAtivas = atividadesAtivas.filter(a => a !== atividadeAtual);
 
         fecharModal('modalFinalizar');
+
         mostrarToast("CI salva no banco!");
 
         document.getElementById('fRelato').value = "";
         document.getElementById('previewFotos').innerHTML = "";
+        document.getElementById('fFotos').value = "";
 
         atualizarEquipeCampo();
         atualizarHistorico();
@@ -856,18 +2736,40 @@ function finalizarAtividade() {
         }
 
         atividadeAtual = null;
-    })
-    .catch(err => {
-        console.error(err);
-        alert("Erro ao salvar atividade!");
-    });
+
+    } catch (err) {
+
+        console.error("FINALIZAR ERRO:", err);
+        mostrarToastErro(err);
+
+    } finally {
+
+        // 🔓 SEMPRE libera botão e trava
+        finalizando = false;
+
+        if (botao) {
+            botao.disabled = false;
+            botao.innerText = "Finalizar e Sincronizar";
+        }
+    }
 }
-//Historico
+
+//Historico Ci Registradas
 function abrirHistorico(){
+
+    const permissao = localStorage.getItem('permissao');
+
+    // Permissões permitidas
+    const permissoesPermitidas = ['almoxarifado'];
+
+    if (!permissoesPermitidas.includes(permissao)) {
+        mostrarToastErro("Acesso negado!");
+        return;
+    }
 
     abrirModal('modalHistorico');
 
-    fetch("http://localhost:3000/atividades")
+    fetch(`${API_BASE}/atividades`)
         .then(r=>r.json())
         .then(data=>{
             atividadesConcluidas = data;
@@ -885,8 +2787,14 @@ function atualizarHistorico() {
     const filtroAno = document.getElementById('filtroAnoHistorico').value;
     const filtroServico = document.getElementById('filtroServicoHistorico').value;
 
+    // 🔎 NOVO FILTRO CI
+    const filtroCI = document.getElementById('filtroCIHistorico').value
+                        .trim()
+                        .toUpperCase();
+
     // Filtra atividades concluídas
-    const filtradas = atividadesConcluidas.filter(a => {
+    let filtradas = atividadesConcluidas.filter(a => {
+
         let dataOk = true;
         const dataFim = new Date(a.fim);
 
@@ -894,30 +2802,52 @@ function atualizarHistorico() {
         if (filtroMes) dataOk = dataOk && (dataFim.getMonth() + 1 == parseInt(filtroMes));
         if (filtroAno) dataOk = dataOk && (dataFim.getFullYear() == parseInt(filtroAno));
 
+        const filtroServicoNormalizado = normalizar(filtroServico);
         let servicoOk = true;
         if (filtroServico) {
-            // Tratamento do Pedreiro -> Civil
-            const serv = a.servico === "Civil" ? "Pedreiro" : a.servico;
-            servicoOk = serv === filtroServico;
+            servicoOk = normalizar(a.servico) === filtroServicoNormalizado;
         }
 
-        return dataOk && servicoOk;
+        // 🔎 FILTRO POR CI
+        let ciOk = true;
+        if (filtroCI) {
+            ciOk = String(a.ci).toUpperCase().includes(filtroCI);
+        }
+
+        return dataOk && servicoOk && ciOk;
     });
 
+    // ✅ Ordena do mais recente para o mais antigo
+    filtradas.sort((a, b) => new Date(b.fim) - new Date(a.fim));
+
     if (filtradas.length === 0) {
-        lista.innerHTML = "Nenhuma CI finalizada.";
+        lista.innerHTML = "Nenhuma CI encontrada.";
         return;
     }
 
     filtradas.forEach(a => {
-        const card = document.createElement('div');
-        card.className = "card-lista card-concluido";
+        const serv = normalizar(a.servico);
 
-        // Adiciona fotos
+        const mapa = {
+            pintura: "card-pintura",
+            eletrica: "card-eletrica",
+            hidraulica: "card-hidraulica",
+            pedreiro: "card-pedreiro",
+            marcenaria: "card-marcenaria"
+        };
+
+        const classeServico = mapa[serv] || "";
+
+        const card = document.createElement('div');
+        card.className = `card-lista card-concluido ${classeServico}`;
+
         let fotosHTML = '';
         if (a.fotos.length) {
             fotosHTML = `<div class="img-container">` + 
-                a.fotos.map((f,i) => `<img src="${f}" class="img-preview" onclick="abrirImagemModal('${f}','CI-${a.ci}-foto${i+1}.jpg')">`).join('') + 
+                a.fotos.map((f,i) => 
+                    `<img src="${f}" class="img-preview"
+                     onclick="abrirImagemModal('${f}','CI-${a.ci}-foto${i+1}.jpg')">`
+                ).join('') + 
                 `</div>`;
         }
 
@@ -926,15 +2856,16 @@ function atualizarHistorico() {
             Serviço: ${a.servico}<br>
             Local: ${a.local}<br>
             Equipe: ${a.equipe.join(", ")}<br>
-         Início: ${formatarBR(a.inicio)}<br>
-       Fim: ${formatarBR(a.fim)}<br>
+            Início: ${formatarBR(a.inicio)}<br>
+            Fim: ${formatarBR(a.fim)}<br>
             Descrição: ${a.relato}<br>
             ${fotosHTML}
         `;
 
         lista.appendChild(card);
     });
-}// PREVIEW DE IMAGENS
+}
+// PREVIEW DE IMAGENS
 function previewImages(input){
     const preview=document.getElementById('previewFotos'); preview.innerHTML="";
     Array.from(input.files).forEach(file=>{
@@ -964,7 +2895,119 @@ function baixarImagem(){
     link.download = imagemAtual || 'imagem.jpg';
     link.click();
 }
+
+
 carregarAtividades();
+window.addEventListener("DOMContentLoaded", () => {
+
+    // 🔴 SEMPRE começa bloqueado até novo login
+    localStorage.removeItem('permissao');
+
+    aplicarControleVisualPermissao();
+
+    // 🔹 Recuperar login salvo
+    const lembrar = localStorage.getItem("loginLembrar");
+
+    if (lembrar === "true") {
+        document.getElementById("username").value =
+            localStorage.getItem("loginSalvoUsuario") || "";
+
+        document.getElementById("password").value =
+            localStorage.getItem("loginSalvoSenha") || "";
+
+        document.getElementById("lembrarLogin").checked = true;
+    }
+
+});
+
+
+/* ========================= */
+/* GERAR PARTICULAS */
+/* ========================= */
+
+document.querySelectorAll(".particles").forEach(container => {
+
+    for (let i = 0; i < 25; i++) {
+        const particle = document.createElement("span");
+
+        particle.style.left = Math.random() * 100 + "%";
+        particle.style.animationDuration = (3 + Math.random() * 4) + "s";
+        particle.style.animationDelay = Math.random() * 5 + "s";
+
+        container.appendChild(particle);
+    }
+
+});
+
+document.addEventListener("click", criarOndaLiquida);
+document.addEventListener("touchstart", criarOndaLiquida);
+
+function criarOndaLiquida(e) {
+
+    let x, y;
+
+    if (e.touches) {
+        x = e.touches[0].clientX;
+        y = e.touches[0].clientY;
+    } else {
+        x = e.clientX;
+        y = e.clientY;
+    }
+
+    const onda = document.createElement("span");
+    onda.classList.add("onda-liquida");
+
+    onda.style.left = x + "px";
+    onda.style.top = y + "px";
+
+    document.body.appendChild(onda);
+
+    setTimeout(() => {
+        onda.remove();
+    }, 800);
+}
+
+
+document.addEventListener("DOMContentLoaded", () => {
+    const nomeUsuario = localStorage.getItem("loginSalvoUsuario") || "Usuário";
+    const usuarioDiv = document.getElementById("usuarioLogado");
+    if (!usuarioDiv) return;
+
+    // Atualiza só o texto do usuário
+    const nomeSpan = usuarioDiv.querySelector(".nome-usuario");
+    if (nomeSpan) nomeSpan.textContent = `Olá, ${nomeUsuario}`;
+});
+
+
+
+function atualizarDataHora() {
+    const textoData = document.getElementById("textoData");
+    const data = new Date();
+
+    const diasSemana = [
+        "Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira",
+        "Quinta-feira", "Sexta-feira", "Sábado"
+    ];
+    const meses = [
+        "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+        "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+    ];
+
+    const diaSemana = diasSemana[data.getDay()];
+    const dia = data.getDate();
+    const mes = meses[data.getMonth()];
+    const horas = String(data.getHours()).padStart(2,"0");
+    const minutos = String(data.getMinutes()).padStart(2,"0");
+
+    textoData.textContent = `${diaSemana}, ${dia} de ${mes}, ${horas}:${minutos}`;
+}
+
+// Atualiza imediatamente e depois a cada segundo
+atualizarDataHora();
+setInterval(atualizarDataHora, 1000);
+
 </script>
+
+   
 </body>
 </html>
