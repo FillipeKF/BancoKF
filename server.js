@@ -110,6 +110,10 @@ initDB();
 // =======================
 async function checkAlmoxarifado(req, res, next) {
   const usuario = req.body?.usuario || req.query?.usuario;
+  
+  console.log("checkAlmoxarifado usuario recebido:", usuario); // ← LOG
+  console.log("body:", req.body);                               // ← LOG
+  
   if (!usuario) return res.status(400).json({ ok: false, error: "Usuário não informado" });
 
   try {
@@ -220,9 +224,11 @@ app.post("/atividades/inicio", async (req, res) => {
 // Finalizar atividade
 app.post("/atividades/finalizar", upload.array("fotos"), async (req, res) => {
   try {
-   const idAtiva = parseInt(req.body.idAtiva, 10);
-if (!idAtiva || isNaN(idAtiva)) throw "ID ATIVA NÃO RECEBIDO OU INVÁLIDO";
-    
+    const idAtiva = parseInt(req.body.idAtiva, 10);
+    if (!idAtiva || isNaN(idAtiva)) throw "ID ATIVA NÃO RECEBIDO OU INVÁLIDO";
+
+    console.log("FINALIZAR RECEBIDO:", req.body); // ← ADICIONE ISSO
+    console.log("ARQUIVOS:", req.files?.length);   // ← E ISSO
 
     const { ci, servico, local, equipe, inicio, relato, fim } = req.body;
 
@@ -230,9 +236,12 @@ if (!idAtiva || isNaN(idAtiva)) throw "ID ATIVA NÃO RECEBIDO OU INVÁLIDO";
     if (req.files && req.files.length > 0) {
       for (const file of req.files) {
         const fileName = `${Date.now()}-${file.originalname}`;
+        console.log("UPLOADING:", fileName); // ← E ISSO
         const { error } = await supabase.storage.from("uploads").upload(fileName, file.buffer, { contentType: file.mimetype });
-        if (error) throw error;
-
+        if (error) {
+          console.error("SUPABASE ERROR:", error); // ← E ISSO
+          throw error;
+        }
         const { data } = supabase.storage.from("uploads").getPublicUrl(fileName);
         fotosURLs.push(data.publicUrl);
       }
@@ -247,7 +256,7 @@ if (!idAtiva || isNaN(idAtiva)) throw "ID ATIVA NÃO RECEBIDO OU INVÁLIDO";
 
     res.json({ ok: true, fotos: fotosURLs });
   } catch (err) {
-    console.error("FINALIZAR ERRO REAL:", err);
+    console.error("FINALIZAR ERRO REAL:", err); // já existe
     res.status(500).json({ error: "Falha ao finalizar atividade", detalhe: String(err) });
   }
 });
