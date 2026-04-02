@@ -227,25 +227,38 @@ app.post("/atividades/finalizar", upload.array("fotos"), async (req, res) => {
     const idAtiva = parseInt(req.body.idAtiva, 10);
     if (!idAtiva || isNaN(idAtiva)) throw "ID ATIVA NÃO RECEBIDO OU INVÁLIDO";
 
-    console.log("FINALIZAR RECEBIDO:", req.body); // ← ADICIONE ISSO
-    console.log("ARQUIVOS:", req.files?.length);   // ← E ISSO
-
     const { ci, servico, local, equipe, inicio, relato, fim } = req.body;
+
+    // ✅ Valida campos obrigatórios
+    if (!ci || !servico || !local || !equipe || !inicio || !fim) {
+      return res.status(400).json({ error: "Campos obrigatórios faltando", detalhe: { ci, servico, local, equipe, inicio, fim } });
+    }
 
     let fotosURLs = [];
     if (req.files && req.files.length > 0) {
       for (const file of req.files) {
-        const fileName = `${Date.now()}-${file.originalname}`;
-        console.log("UPLOADING:", fileName); // ← E ISSO
-        const { error } = await supabase.storage.from("uploads").upload(fileName, file.buffer, { contentType: file.mimetype });
-        if (error) {
-          console.error("SUPABASE ERROR:", error); // ← E ISSO
-          throw error;
+
+        // ✅ Nome do arquivo sem caracteres especiais
+        const ext = file.originalname.split('.').pop().toLowerCase() || 'jpg';
+        const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+
+        console.log("UPLOADING:", fileName, "size:", file.buffer.length);
+
+        const { error: uploadError } = await supabase.storage
+          .from("uploads")
+          .upload(fileName, file.buffer, { contentType: file.mimetype });
+
+        if (uploadError) {
+          console.error("SUPABASE UPLOAD ERROR:", JSON.stringify(uploadError));
+          throw `Supabase erro: ${uploadError.message}`;
         }
+
         const { data } = supabase.storage.from("uploads").getPublicUrl(fileName);
         fotosURLs.push(data.publicUrl);
       }
     }
+
+    console.log("INSERINDO NO BANCO:", { ci, servico, local, equipe, inicio, relato, fim, fotos: fotosURLs.length });
 
     await pool.query(`
       INSERT INTO atividades(ci, servico, local, equipe, inicio, relato, fotos, fim)
@@ -254,9 +267,12 @@ app.post("/atividades/finalizar", upload.array("fotos"), async (req, res) => {
 
     await pool.query("DELETE FROM atividades_ativas WHERE id = $1", [idAtiva]);
 
+    console.log("FINALIZAR OK — id ativa deletada:", idAtiva);
+
     res.json({ ok: true, fotos: fotosURLs });
+
   } catch (err) {
-    console.error("FINALIZAR ERRO REAL:", err); // já existe
+    console.error("FINALIZAR ERRO REAL:", err);
     res.status(500).json({ error: "Falha ao finalizar atividade", detalhe: String(err) });
   }
 });
