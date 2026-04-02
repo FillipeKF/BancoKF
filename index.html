@@ -49,28 +49,9 @@ body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin:0; pad
 }
 
 
-.card-acao {
-    background: #1b1e24 !important;
-    padding: 20px;
-    border-radius: 16px;
-    text-align: center;
-    cursor: pointer;
-    transition: 0.3s;
-    border: 1px solid #333 !important;
-    position: relative;
-    font-size: 14px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-}
-.card-acao:hover {
-    border-color: #0d6efd !important;
-    transform: translateY(-3px);
-
-    .card-acao h3 {
-    color: #fff;
-    font-size: 15px;
-    margin: 10px 0 0;
-}
-}.badge-funcionarios { position:absolute; top:10px; left:10px; background:var(--success); color:white; font-weight:bold; padding:5px 10px; border-radius:12px; font-size:12px; display:none; }
+.card-acao { background: var(--card); padding: 20px; border-radius: 16px; text-align: center; cursor: pointer; transition: 0.3s; border: 1px solid var(--border); position: relative; font-size:14px; }
+.card-acao:hover { border-color: var(--primary); transform: translateY(-3px); }
+.badge-funcionarios { position:absolute; top:10px; left:10px; background:var(--success); color:white; font-weight:bold; padding:5px 10px; border-radius:12px; font-size:12px; display:none; }
 
 .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 1000; overflow-y: auto; padding: 20px; backdrop-filter: blur(5px); }
 .container-modal { max-width: 500px; background: var(--card); padding: 25px; border-radius: 18px; margin: 20px auto; position: relative; border: 1px solid #444; }
@@ -252,26 +233,25 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
 <div class="desenvolvido">Desenvolvido por Fillipe Leal</div>
 <div class="dashboard-grid">
     <div class="card-acao" onclick="abrirModal('modalCadastro')">
-        <div style="font-size:40px; line-height:1.2">📝</div>
-        <h3 style="margin:10px 0 0; font-size:15px;">Registrar Atividade</h3>
+        <div style="font-size:40px">📝</div>
+        <h3>Registrar Atividade</h3>
     </div>
 
-    <div class="card-acao" onclick="abrirEquipe()" style="position:relative;">
-        <div id="badgeFuncionarios" class="badge-funcionarios" style="display:none;">0 Funcionários</div>
-        <div id="badgeCIsAndamento" style="display:none; position:absolute; top:10px; right:10px; background:#0d6efd; color:white; font-weight:bold; padding:5px 10px; border-radius:12px; font-size:12px;"></div>
-        <div style="font-size:40px; line-height:1.2">👷</div>
-        <h3 style="margin:10px 0 0; font-size:15px;">Equipe em Campo</h3>
+    <div class="card-acao" onclick="abrirEquipe()">
+        <div id="badgeFuncionarios" class="badge-funcionarios hidden">0 Funcionários</div>
+        <div style="font-size:40px">👷</div>
+        <h3>Equipe em Campo</h3>
     </div>
 
     <div class="card-acao" onclick="abrirHistorico()">
-        <div style="font-size:40px; line-height:1.2">🗄️</div>
-        <h3 style="margin:10px 0 0; font-size:15px;">CIs Registradas</h3>
+        <div style="font-size:40px">🗄️</div>
+        <h3>CIs Registradas</h3>
     </div>
 
-    <div class="card-acao" onclick="abrirAlmoxarifado()">
-        <div style="font-size:40px; line-height:1.2">📦</div>
-        <h3 style="margin:10px 0 0; font-size:15px;">Almoxarifado</h3>
-    </div>
+  <div class="card-acao" onclick="abrirAlmoxarifado()">
+    <div style="font-size:40px">📦</div>
+    <h3>Almoxarifado</h3>
+</div>
 </div>
 
 <!-- MODAL CADASTRO -->
