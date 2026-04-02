@@ -52,7 +52,26 @@ body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin:0; pad
 
 
 .card-acao {
-    position: relative; /* importante para que os badges fiquem relativos a este container */
+    background: var(--card);
+    padding: 20px;
+    border-radius: 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.3s;
+    border: 1px solid var(--border);
+    position: relative;
+    font-size: 14px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+}
+.card-acao h3 {
+    color: #fff;
+    margin: 10px 0 0;
+    font-size: 15px;
+}
+.card-acao:hover {
+    border-color: var(--primary);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(13,110,253,0.2);
 }
 /* badges base */
 .badge {
