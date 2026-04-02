@@ -109,7 +109,7 @@ initDB();
 // Espera { usuario } no body e consulta o banco
 // =======================
 async function checkAlmoxarifado(req, res, next) {
-  const { usuario } = req.body;
+  const usuario = req.body?.usuario || req.query?.usuario;
   if (!usuario) return res.status(400).json({ ok: false, error: "Usuário não informado" });
 
   try {
@@ -220,8 +220,9 @@ app.post("/atividades/inicio", async (req, res) => {
 // Finalizar atividade
 app.post("/atividades/finalizar", upload.array("fotos"), async (req, res) => {
   try {
-    const idAtiva = Number(req.body.idAtiva);
-    if (!idAtiva) throw "ID ATIVA NÃO RECEBIDO";
+   const idAtiva = parseInt(req.body.idAtiva, 10);
+if (!idAtiva || isNaN(idAtiva)) throw "ID ATIVA NÃO RECEBIDO OU INVÁLIDO";
+    
 
     const { ci, servico, local, equipe, inicio, relato, fim } = req.body;
 
