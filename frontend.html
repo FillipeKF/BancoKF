@@ -2251,9 +2251,17 @@ async function confirmarEdicaoItem() {
     const novoNome = document.getElementById('editItemNome').value.trim();
     const novaQuantidade = parseInt(document.getElementById('editItemQuantidade').value);
     const novoSetor = document.getElementById('editItemSetor').value;
+    const usuario = localStorage.getItem('usuarioNome');
+
+    console.log("USUARIO ENVIADO:", usuario); // ← LOG para checar
  
     if (!novoNome || !novaQuantidade || !novoSetor) {
         mostrarToastErro("Preencha todos os campos!");
+        return;
+    }
+
+    if (!usuario) {
+        mostrarToastErro("Sessão expirada. Faça login novamente.");
         return;
     }
  
@@ -2265,15 +2273,15 @@ async function confirmarEdicaoItem() {
                 nome: novoNome,
                 quantidade: novaQuantidade,
                 setor: novoSetor,
-                usuario: localStorage.getItem('usuarioNome') // ← ADICIONADO
+                usuario: usuario  // ← garante que não é null
             })
         });
  
         const contentType = res.headers.get("content-type") || "";
         if (!contentType.includes("application/json")) {
             const text = await res.text();
-            console.error("Resposta inesperada do backend:", text);
-            throw "Resposta do servidor não é JSON. Verifique a URL/API_BASE.";
+            console.error("Resposta inesperada:", text);
+            throw "Resposta do servidor não é JSON";
         }
  
         const data = await res.json();
