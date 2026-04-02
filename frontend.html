@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-    
 <head>
 
 <meta charset="UTF-8">
@@ -8,7 +7,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KF Engenharia - Gestor de Campo</title>
+
 <style>
 :root { 
     --bg: #0f1115; 
@@ -30,7 +29,6 @@
 body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin:0; padding:20px; color:#fff; }
 .header-main { background: linear-gradient(90deg,#0b2b6f,#0f4cb8); text-align:center; padding:20px; font-size:24px; font-weight:bold; border-radius:12px; margin-bottom:30px; border-bottom: 4px solid var(--primary); }
 
-
 .dashboard-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -51,47 +49,9 @@ body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin:0; pad
 }
 
 
-.card-acao {
-    position: relative; /* importante para que os badges fiquem relativos a este container */
-}
-/* badges base */
-.badge {
-    background: var(--success);
-    color: white;
-    font-weight: bold;
-    padding: 5px 10px;
-    border-radius: 12px;
-    font-size: 12px;
-    display: none;
-}
-
-/* badge de CI */
-.badge-cis {
-    background: var(--primary);
-}
-
-/* container dos badges */
-.badge-container {
-    position: absolute; /* badges ficam sobre o card */
-    top: 10px;
-    left: 10px;
-    display: flex;
-    flex-direction: column; /* empilha verticalmente */
-    gap: 5px; /* espaço entre badges */
-    align-items: flex-start; /* alinha à esquerda */
-    z-index: 10; /* garante que fique acima do conteúdo */
-}
+.card-acao { background: var(--card); padding: 20px; border-radius: 16px; text-align: center; cursor: pointer; transition: 0.3s; border: 1px solid var(--border); position: relative; font-size:14px; }
 .card-acao:hover { border-color: var(--primary); transform: translateY(-3px); }
-.badge-funcionarios {
-    position: absolute;
-    background: var(--success);
-    color: white;
-    font-weight: bold;
-    padding: 5px 10px;
-    border-radius: 12px;
-    font-size: 12px;
-    display: none;
-}
+.badge-funcionarios { position:absolute; top:10px; left:10px; background:var(--success); color:white; font-weight:bold; padding:5px 10px; border-radius:12px; font-size:12px; display:none; }
 
 .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 1000; overflow-y: auto; padding: 20px; backdrop-filter: blur(5px); }
 .container-modal { max-width: 500px; background: var(--card); padding: 25px; border-radius: 18px; margin: 20px auto; position: relative; border: 1px solid #444; }
@@ -113,25 +73,6 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
 .img-preview:hover { transform: scale(1.1); }
 
 .toast-container { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--success); color: white; padding: 25px 40px; border-radius: 20px; z-index: 10001; text-align: center; border: 2px solid #22c55e; }
-.toast-erro{
-    position:fixed;
-    top:50%;
-    left:50%;
-    transform:translate(-50%, -50%);
-    background:#dc2626;
-    border:2px solid #dc2626;
-    color:white;
-
-    padding:20px 30px;
-    border-radius:12px;
-
-    display:none;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-
-    z-index:9999;
-}
 @keyframes zoomIn { from { transform: translate(-50%, -50%) scale(0.7); opacity: 0; } to { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
 .animar-entrada { animation: zoomIn 0.3s ease-out forwards; }
 
@@ -148,159 +89,46 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
 
 #listaAndamento, #listaHistorico { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; max-height: 600px; overflow-y: auto; padding: 10px; }
 
-.card-pintura { border-left: 5px solid #ef4444; background:#4625257e; }
-.card-eletrica { border-left: 5px solid #facc15; background:#b78e3b8e; }
-.card-hidraulica { border-left: 5px solid #0d6efd; background:#43527a62; }
-.card-pedreiro { border-left: 5px solid #7A7878; background:#68676986; }
-.card-marcenaria { border-left: 5px solid #3C2A0D ; background:#3f35337e; }
+.card-pintura { border-left: 5px solid #ef4444; background:#331b1b; }
+.card-eletrica { border-left: 5px solid #facc15; background:#332b1b; }
+.card-hidraulica { border-left: 5px solid #0d6efd; background:#1b2233; }
+.card-civil { border-left: 5px solid #a855f7; background:#2a1b33; }
 
+.desenvolvido { text-align: right; font-size: 14px; color: var(--text); margin-top: 5px; font-weight: normal; }
 
-
-/* Tablet / laptops menores */
+/* MEDIA QUERIES */
 @media (max-width: 1024px) {
-    .dashboard-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); margin: 15px; }
-    .card-lista { min-width: 140px; }
-    .header-main { font-size: 20px; padding: 12px; }
+    .dashboard-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); margin: 20px; }
+    .card-lista { min-width: 160px; max-width: 200px; }
+    .header-main { font-size: 22px; padding: 15px; }
 }
 
-/* Tablets menores e smartphones médios */
 @media (max-width: 768px) {
-    .dashboard-grid { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin: 10px; }
-    .card-lista { min-width: 120px; font-size: 11px; padding: 8px; }
+    body { padding:10px; }
+    .dashboard-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin: 10px; }
+    .card-lista { min-width: 140px; max-width: 180px; font-size: 12px; padding: 10px; }
+    #listaAndamento, #listaHistorico { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+    .header-main { font-size: 20px; padding: 12px; }
+    input, select, textarea, .btn-acao { padding: 10px; font-size: 13px; }
+    .img-preview { width: 60px; height: 60px; }
+}
+
+@media (max-width: 480px) {
+    .dashboard-grid { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin: 5px; }
+    .card-lista { min-width: 120px; max-width: 160px; font-size: 11px; padding: 8px; }
     .header-main { font-size: 18px; padding: 10px; }
     .img-preview { width: 50px; height: 50px; }
-    input, select, textarea, .btn-acao { padding: 8px; font-size: 12px; }
 }
 
-/* Mobile extremo */
-@media (max-width: 480px) {
-    .dashboard-grid { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 8px; margin: 5px; }
-    .card-lista { min-width: 100px; font-size: 10px; padding: 6px; }
-    .header-main { font-size: 16px; padding: 8px; }
-    .img-preview { width: 40px; height: 40px; }
-    input, select, textarea, .btn-acao { padding: 6px; font-size: 11px; }
-     .btn-finalizar {
-        padding: 12px 18px;
-        font-size: 14px;
-    }
-      .btnEditarCi {
-        padding: 15px 25px;
-        font-size: 14px;
-    }
-   
-}
-
-/* Mobile extremo 300px */
-@media (max-width: 300px) {
-    #modalMedia .container-modal {
-        width: 100vw !important;
-        border-radius: 0 !important;
-        padding: 5px !important;
-    }
-    .dashboard-grid { grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: 5px; }
-    .card-lista { min-width: 90px; font-size: 9px; padding: 4px; }
-    .img-preview { width: 30px; height: 30px; }
-    .header-main { font-size: 14px; padding: 6px; }
-}
-.topo-info {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 18px 20px;   /* aumenta altura */
-    margin-top: 20px;
-    margin-bottom: 10px;
-}
-
-
-
-/* novo estilo do usuário */
-/* container para empilhar usuário + data */
-/* container do usuário + data */
-/* container do usuário + data */
-.usuario-container {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px; /* espaço entre usuário e data */
-}
-
-/* ícones */
-.icon {
-    display: inline-flex;
-    align-items: center;
-    margin-right: 6px;
-    color: #26f32d; /* mesma cor do glow da data */
-}
-/* usuário com glow (já existente) */
-.usuario-logado {
-    display: flex;
-    align-items: center;
-    padding: 8px 14px;
-    border-radius: 14px;
-    background: rgba(87, 197, 13, 0.419);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(34, 235, 23, 0.426);
-    box-shadow: 0 0 15px rgba(0, 150, 255, 0.15);
+.desenvolvido {
+    text-align: right;
     font-size: 14px;
-    font-weight: 600;
-    color: #ffffff;
-    position: relative;
-    overflow: hidden;
-    gap: 6px;
-    z-index: 0; /* conteúdo acima do pseudo-elemento */
+    color: var(--text);
+    margin-top: 5px;  /* Pequeno espaçamento em relação ao título */
+    font-weight: normal;
 }
 
-.usuario-logado::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at top left,
-        rgba(64, 252, 12, 0.675),
-        transparent 60%);
-    pointer-events: none;
-    z-index: -1; /* pseudo-elemento atrás do conteúdo */
-}
 
-/* garante que ícones e texto fiquem na mesma linha */
-.usuario-logado .icon {
-    display: inline-flex;
-    align-items: center;
-    margin-right: 6px;
-    color: #33ff55; /* cor do ícone */
-}
-
-/* garante que ícones e texto fiquem na mesma linha */
-.usuario-logado, .data-atual {
-    display: flex;
-    align-items: center;
-}
-
-/* animação glow da data continua */
-.data-atual {
-    font-size: 13px;
-    font-weight: 500;
-    font-family: 'Segoe UI', sans-serif;
-    color: #ffffff;
-    text-shadow: 0 0 8px rgba(42, 254, 84, 0.529);
-    animation: glowPulse 2.5s ease-in-out infinite alternate;
-}
-/* animação de brilho suave */
-/* animação glow pulsante */
-@keyframes glowPulse {
-    0% {
-        text-shadow: 0 0 4px rgba(51, 255, 234, 0.4),
-                     0 0 8px rgba(51, 255, 234, 0.3);
-    }
-    50% {
-        text-shadow: 0 0 8px rgba(51, 255, 234, 0.7),
-                     0 0 16px rgba(51, 255, 234, 0.5);
-    }
-    100% {
-        text-shadow: 0 0 4px rgba(51, 255, 234, 0.4),
-                     0 0 8px rgba(51, 255, 234, 0.3);
-    }
-}
 .modal *:focus {
     outline: none;  /* remove contorno azul ao focar */
     box-shadow: none; /* remove sombra de foco */
@@ -310,7 +138,6 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
         transform: none; /* remove hover no touch */
     }
 }
-
 
 /* ------------------- CAMADA DE LOGIN ------------------- */
 #loginOverlay {
@@ -362,569 +189,22 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
   font-size: 14px;
 }
 
-
-@keyframes shake {
-    0% { transform:translate(-50%,-50%) translateX(0); }
-    25% { transform:translate(-50%,-50%) translateX(-6px); }
-    50% { transform:translate(-50%,-50%) translateX(6px); }
-    75% { transform:translate(-50%,-50%) translateX(-6px); }
-    100% { transform:translate(-50%,-50%) translateX(0); }
-}
-
-
-.item-pintura { background:#8d171722; }
-.item-eletrica { background:#92400e22; }
-.item-hidraulica { background:#065f4622; }
-.item-pedreiro { background:#37415122; }
-.item-marcenaria { background:#713f1222; }
-
-#listaItens tr{
-    transition:.2s;
-}
-
-#listaItens tr:hover{
-    filter:brightness(1.2);
-}
-
-
-.toast-erro.animar-entrada{
-    animation:shake .4s;
-}
-
-
-
-.modal{
-   align-items:flex-start !important;
-   padding-top:20px;
-}
-
-.modal{
-    overflow-y:auto;
-    padding:20px 0;
-}
-
-
-
-
-/* ===== MODAL MEDIA RESPONSIVO ===== */
-
-#modalMedia{
-    align-items:flex-start !important;
-}
-
-#modalMedia .container-modal {
-    width: 95vw !important;
-    max-width: 900px !important;
-    max-height: 90vh !important;
-    overflow-y: auto !important;
-    overflow-x: auto !important;
-    padding: 15px;
-    box-sizing: border-box;
-    border-radius: 12px;
-}
-
-
-/* canvas nunca pode estourar */
-/* Canvas gráfico */
-  #graficoMedia {
-      width:100% !important;
-      height:450px !important; /* altura menor em mobile extremo */
-}
-/* MOBILE */
-#modalMedia .container-modal {
-    width: 95vw;
-    max-width: 900px;
-    max-height: 90vh;       /* scroll interno se necessário */
-    overflow-y: auto;       /* scroll dentro do container */
-    overflow-x: hidden;
-    padding: 15px;
-    box-sizing: border-box;
-    border-radius: 12px;
-    background: var(--card);
-}
-
-/* ============================= */
-/* PADRÃO CAMPOS NOVA ATIVIDADE */
-/* ============================= */
-
-#modalCadastro select,
-#modalCadastro input,
-#modalCadastro textarea,
-#modalCadastro .multi-display,
-#modalCadastro .btn-acao {
+#modalRestore .container-modal img,
+#modalFotos .container-modal img {
     width: 100%;
-    padding: 10px;
-    font-size: 14px;
+    max-width: 90px;
+    height: auto;
+    object-fit: cover;
     border-radius: 8px;
-    box-sizing: border-box;
-}
-
-/* Corrige diferença específica do campo Equipe */
-#modalCadastro .multi-display {
-    display: flex;
-    align-items: center;
-    min-height: 42px;
-}
-
-/* Garante que todos os labels fiquem iguais */
-#modalCadastro label {
-    font-size: 14px;
-    margin-top: 10px;
-    display: block;
-}
-
-/* ============================= */
-/* PADRÃO CAMPO EQUIPE - ATIVIDADE */
-/* ============================= */
-
-#modalEquipe .multi-display,
-#modalEquipe select,
-#modalEquipe input,
-#modalEquipe textarea,
-#modalEquipe .btn-acao {
-    width: 100%;
-    padding: 10px;
-    font-size: 14px;
-    border-radius: 8px;
-    box-sizing: border-box;
-}
-
-/* Altura igual ao padrão do cadastro */
-#modalEquipe .multi-display {
-    display: flex;
-    align-items: center;
-    min-height: 42px;
-}
-
-/* Labels padronizados */
-#modalEquipe label {
-    font-size: 14px;
-    margin-top: 10px;
-    display: block;
 }
 
 
-#modalFinalizar .container-modal {
-    min-height: 75vh;      /* altura maior */
-    max-height: 90vh;      /* limite máximo */
-    display: flex;
-    flex-direction: column;
-}
-#modalFinalizar textarea {
-    min-height: 120px;
-    resize: vertical;
-}
-
-/* ============================= */
-/* CI maior em Equipe Ativa */
-/* ============================= */
-
-.card-lista strong {
-    font-size: 22px;
-    color: var(--text);
-}
-.card-lista {
-    font-size: 15px;
-    padding: 18px;
-    line-height: 1.6;
-}
-
-#modalHistorico .container-modal {
-    overflow-x: hidden !important;
-}
-@media (min-width: 1200px) {
-    /* Containers maiores */
-    .modal .container-modal {
-        width: 90%;
-        max-width: 1400px;
-        padding: 35px 40px;
-        border-radius: 18px;
-        margin: 40px auto;
-        font-size: 18px; /* fonte base */
-    }
-
-    /* Força todos os textos dentro do modal a herdar a fonte */
-    .modal .container-modal * {
-        font-size: 23px !important;
-    }
-
-    /* Inputs, selects, textareas, multi-display */
-    .modal input,
-    .modal select,
-    .modal textarea,
-    .modal .multi-display {
-        font-size: 23px !important;
-        padding: 14px !important;
-    }
-
-    /* Botões */
-    .modal .btn-acao,
-    .modal .btn-finalizar {
-        font-size: 18px !important;
-        padding: 16px !important;
-    }
-
-    /* Labels */
-    .modal label {
-        font-size: 18px !important;
-    }
-
-    /* Modal específico: modalMedia */
-    #modalMedia .container-modal {
-        max-width: 1400px;
-        width: 90%;
-        padding: 35px 40px;
-        font-size: 18px !important;
-        max-height: 90vh;
-        overflow-y: auto;
-    }
-
-    /* Canvas gráfico maior */
-    #graficoMedia {
-        height: 600px !important;
-    }
-}
-#listaHistorico {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 28px;
-    width: 100%;
-}
-
-#listaHistorico .card-lista {
-    padding: 20px;
-    border-radius: 14px;
-    transition: all 0.25s ease;
-    box-shadow: 0 4px 18px rgba(0,0,0,0.3);
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-#listaHistorico .card-lista strong {
-    font-size: 22px;
-    color: #ffffff !important;
-    letter-spacing: 0.5px;
-}
-#listaHistorico .card-lista span,
-#listaHistorico .card-lista p {
-    font-size: 15px;
-    color: #d1d5db;
-}
-
-
-
-/* ===== ALMOXARIFADO - CAMPOS MAIORES ===== */
-
-#modalAlmoxarifado .container-modal {
-    width: 95vw;
-    max-width: 1000px;
-    padding: 30px;
-}
-
-/* Labels maiores */
-#modalAlmoxarifado label {
-    font-size: 15px;
-    font-weight: 600;
-    margin-top: 12px;
-    display: block;
-}
-
-/* Inputs e Select maiores */
-#modalAlmoxarifado input,
-#modalAlmoxarifado select {
-    width: 100%;
-    padding: 12px;
-    font-size: 15px;
-    border-radius: 10px;
-    margin-top: 6px;
-}
-
-/* Botão maior */
-#modalAlmoxarifado .btn-acao {
-    margin-top: 18px;
-    padding: 14px;
-    font-size: 16px;
-    font-weight: bold;
-}
-
-/* Filtro maior */
-#modalAlmoxarifado #filtroSetorItens {
-    padding: 10px !important;
-    font-size: 15px !important;
-    border-radius: 10px !important;
-}
-
-
-@media (min-width: 1024px) {
-
-    #modalAlmoxarifado .container-modal {
-        max-width: 1100px;
-    }
-
-    #modalAlmoxarifado input,
-    #modalAlmoxarifado select {
-        font-size: 16px;
-        padding: 14px;
-    }
-
-    #modalAlmoxarifado .btn-acao {
-        font-size: 17px;
-        padding: 16px;
-    }
-}
-
-/* ===== ALMOXARIFADO RESPONSIVO SEM SCROLL ===== */
-
-/* MOBILE */
-@media (max-width: 768px) {
-
-    #modalAlmoxarifado .container-modal {
-        width: 92vw !important;
-        max-width: 92vw !important;
-        padding: 18px !important;
-        box-sizing: border-box;
-        overflow-x: hidden;
-    }
-
-    #modalAlmoxarifado input,
-    #modalAlmoxarifado select {
-        font-size: 14px;
-        padding: 10px;
-    }
-
-    #modalAlmoxarifado .btn-acao {
-        font-size: 15px;
-        padding: 12px;
-    }
-}
-
-/* Remove qualquer overflow lateral */
-#modalAlmoxarifado {
-    overflow-x: hidden;
-}
-
-
-
-/* ===== CARD DESATIVADO VISUAL ===== */
-.card-desativado {
- 
-    pointer-events: none; /* impede clique */
-    position: relative;
-    transition: 0.3s ease;
-}
-
-.card-desativado::after {
-    content: "🔒 Acesso Restrito";
-    position: absolute;
-    inset: 0;
-    background: rgba(0,0,0,0.55);
-    backdrop-filter: blur(2px);
-    color: #fff;
-    font-size: 16px;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 12px;
-}
-
-
-
-/* ===== CORREÇÃO MOBILE - ALMOXARIFADO ===== */
-@media (max-width: 768px) {
-
-    #tabelaItens {
-        font-size: 11px;
-    }
-
-    #tabelaItens th,
-    #tabelaItens td {
-        padding: 6px !important;
-    }
-
-    /* Diminuir largura da coluna Quantidade */
-    #tabelaItens th:nth-child(2),
-    #tabelaItens td:nth-child(2) {
-        width: 35px !important;
-    }
-
-}
-
-
-.lembrar-container {
-    display: flex;
-    align-items: center;
-    gap: 6px; /* distância pequena entre checkbox e texto */
-    font-size: 14px;
-    margin-top: 8px;
-    cursor: pointer;
-}
-
-.lembrar-container input[type="checkbox"] {
-    width: auto !important;
-    margin: 0;
-}
-
-
-
-
-
-
-
-
-
-/* ========================= */
-/* PADRÃO = DESKTOP PRIMEIRO */
-/* ========================= */
-
-/* Esconde o rodapé mobile no desktop */
-.rodape-mobile {
-    display: none;
-}
-
-/* ========================= */
-/* ESTILO PREMIUM DESENVOLVIDO - AZUL NEON */
-/* ========================= */
-
-.desenvolvido-topo,
-.rodape-mobile {
-    position: fixed;
-       overflow: hidden;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-
-    text-align: center;
-    padding: 14px 0;
-    font-size: 14px;
-    letter-spacing: 1.5px;
-    font-weight: 500;
-
-    background: rgba(10, 15, 25, 0.85);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-
-    border-top: 1px solid rgba(0, 200, 255, 0);
-
-    z-index: 999;
-    overflow: hidden;
-
-    transition: 0.3s ease;
-}
-
-/* Glow radial fixo de fundo */
-.desenvolvido-topo::after,
-.rodape-mobile::after {
-    content: "";  
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at center,
-        rgba(0, 200, 255, 0.08),
-        transparent 70%);
-    pointer-events: none;
-}
-
-/* Texto com glow fixo elegante */
-.desenvolvido-topo span,
-.rodape-mobile span {
-      position: relative;
-    z-index: 2;
-    color: #e5e8e8;
-    font-weight: 600;
-    letter-spacing: 1px;
-
-  
-}
-
-/* Hover leve */
-.desenvolvido-topo:hover span,
-.rodape-mobile:hover span {
-    text-shadow:
-        0 0 2px #0d6efd,
-        0 0 4px #0099ff,
-        0 0 6px #0066ff;
-}
-
-
-
-/* ========================= */
-/* MOBILE */
-/* ========================= */
-
-@media (max-width: 768px) {
-
-    .desenvolvido-topo {
-        display: none;
-    }
-
-    .rodape-mobile {
-        display: block;
-    }
-
-}
-
-
-
-/* ===== ONDA VIDRO LÍQUIDO DISCRETA ===== */
-
-.onda-liquida {
-    position: fixed;
-    pointer-events: none;
-    border-radius: 50%;
-    transform: translate(-50%, -50%) scale(0);
-    
-    width: 12px;
-    height: 12px;
-
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-
-    background: radial-gradient(circle at center,
-        rgba(255, 255, 255, 0.25) 0%,
-        rgba(255, 255, 255, 0.15) 40%,
-        rgba(255, 255, 255, 0.1) 60%,
-        transparent 80%);
-
-    border: 1px solid rgba(255,255,255,0.25);
-
-    animation: expandirLiquido 800ms ease-out forwards;
-    z-index: 99999;
-}
-
-@keyframes expandirLiquido {
-    0% {
-        transform: translate(-50%, -50%) scale(0.3);
-        opacity: 0.8;
-    }
-    60% {
-        opacity: 0.4;
-    }
-    100% {
-        transform: translate(-50%, -50%) scale(3);
-        opacity: 0;
-    }
-}
-
-
-.badge-cis {
-    position: absolute;
-    bottom: 10px;  /* fica na parte inferior */
-    left: 10px;
-    background: var(--primary);
-    color: white;
-    font-weight: bold;
-    padding: 5px 10px;
-    border-radius: 12px;
-    font-size: 12px;
-    display: none;
-}
 /* Conteúdo principal (inicialmente acessível, overlay bloqueia visual) */
 #mainContent { display: block; }
 
 
 </style>
 </head>
-
 <body>
 
     <!-- ------------------- LOGIN OVERLAY ------------------- -->
@@ -933,10 +213,6 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
     <h2>Login</h2>
     <input type="text" id="username" placeholder="Usuário">
     <input type="password" id="password" placeholder="Senha">
-   <label class="lembrar-container">
-    <input type="checkbox" id="lembrarLogin">
-    <span>Lembrar login</span>
-</label>
     <button id="loginBtn">Entrar</button>
     <p id="loginError"></p>
   </div>
@@ -946,10 +222,6 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
     <span style="font-size:50px">✅</span>
     <div id="toastTexto" style="font-size:18px; font-weight:bold; margin-top:10px">Sucesso!</div>
 </div>
-<div id="toastErro" class="toast-container toast-erro">
-    <div id="toastErroTexto" style="font-size:18px; font-weight:bold; margin-bottom:10px"></div>
- <span style="font-size:18px;color:white;">❌</span>
-</div>
 
 <!-- TOAST GENÉRICO PARA ALMOXARIFADO -->
 <div id="toastAlmoxarifado" class="toast-container" style="background:#16a34a;">
@@ -958,62 +230,25 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
 </div>
 
 <div class="header-main">KF ENGENHARIA - CAMPO</div>
-<div class="topo-info">
-    <div class="usuario-container">
-        <!-- Usuário com ícone -->
-        <div id="usuarioLogado" class="usuario-logado">
-            <span class="icon usuario-icon">
-                <!-- Ícone de usuário (pode trocar por outro SVG) -->
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                    <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
-                </svg>
-            </span>
-       
-        </div>
-
-        <!-- Data com ícone -->
-       <div class="data-atual">
-    <span class="icon data-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-            <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1.5A1.5 1.5 0 0 1 16 2.5v11A1.5 1.5 0 0 1 14.5 15h-13A1.5 1.5 0 0 1 0 13.5v-11A1.5 1.5 0 0 1 1.5 1H3V.5a.5.5 0 0 1 .5-.5zM1 4v9.5a.5.5 0 0 0 .5.5H14.5a.5.5 0 0 0 .5-.5V4H1z"/>
-        </svg>
-    </span>
-    <span id="textoData"></span>
-</div>
-    </div>
-</div>
-
-<div class="desenvolvido-topo">
-    Desenvolvido por <span id="devName">Fillipe Leal</span>
-    <div class="particles"></div>
-</div>
-
-<footer class="rodape-mobile">
-    Desenvolvido por <span id="devNameMobile">Fillipe Leal</span>
-    <div class="particles"></div>
-</footer>
+<div class="desenvolvido">Desenvolvido por Fillipe Leal</div>
 <div class="dashboard-grid">
     <div class="card-acao" onclick="abrirModal('modalCadastro')">
         <div style="font-size:40px">📝</div>
         <h3>Registrar Atividade</h3>
     </div>
-    
-<div class="card-acao" onclick="abrirEquipe()">
-    <!-- Container para badges -->
-    <div class="badge-container">
-        <div id="badgeCIs" class="badge badge-cis hidden">0 CI(s)</div>
-        <div id="badgeFuncionarios" class="badge badge-funcionarios hidden">0 Funcionário(s)</div>
+
+    <div class="card-acao" onclick="abrirEquipe()">
+        <div id="badgeFuncionarios" class="badge-funcionarios hidden">0 Funcionários</div>
+        <div style="font-size:40px">👷</div>
+        <h3>Equipe em Campo</h3>
     </div>
 
-    <div style="font-size:40px">👷</div>
-    <h3>Equipe em Campo</h3>
-</div>
-<div id="cardHistorico" class="card-acao" onclick="abrirHistorico()">
-    <div style="font-size:40px">🗄️</div>
-    <h3>CIs Registradas</h3>
-</div>
+    <div class="card-acao" onclick="abrirHistorico()">
+        <div style="font-size:40px">🗄️</div>
+        <h3>CIs Registradas</h3>
+    </div>
 
- <div id="cardAlmoxarifado" class="card-acao" onclick="abrirAlmoxarifado()">
+  <div class="card-acao" onclick="abrirAlmoxarifado()">
     <div style="font-size:40px">📦</div>
     <h3>Almoxarifado</h3>
 </div>
@@ -1036,53 +271,42 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
                  <div class="func-item" onclick="selectFunc(this, 'Rogerio', event)">Rogerio</div>
                   <div class="func-item" onclick="selectFunc(this, 'Wiliam', event)">Wiliam</div>
                 <div class="func-item" onclick="selectFunc(this, 'Nadao', event)">Nadao</div>
-                <div class="func-item" onclick="selectFunc(this, 'Lorao', event)">Lorao</div>
-                  <div class="func-item" onclick="selectFunc(this, 'Soneca', event)">Soneca</div>
-                 <div class="func-item" onclick="selectFunc(this, 'Mirim', event)">Mirim</div>
-                <div class="func-item" onclick="selectFunc(this, 'Junior', event)">Junior</div>
-                 <div class="func-item" onclick="selectFunc(this, 'Elio', event)">Elio</div>
-                <div class="func-item" onclick="selectFunc(this, 'Vicente', event)">Vicente</div>
-                <div class="func-item" onclick="selectFunc(this, 'Paulo', event)">Paulo</div>
-               <div class="func-item" onclick="selectFunc(this, 'Enc-Daniel', event)">Enc-Daniel</div>
-               <div class="func-item" onclick="selectFunc(this, 'Enc-Ajoildo', event)">Enc-Ajoildo</div>
-              <div class="func-item" onclick="selectFunc(this, 'Enc-Rafael', event)">Enc-Rafael</div>
-                <div class="func-item" onclick="selectFunc(this, 'Enc-Fabio', event)">Enc-Fabio</div>
-              <div class="func-item" onclick="selectFunc(this, 'Enc-Marco', event)">Enc-Marco</div>
-                               
+                   <div class="func-item" onclick="selectFunc(this, 'Lorao', event)">Lorao</div>
+                      <div class="func-item" onclick="selectFunc(this, 'Soneca', event)">Soneca</div>
+                         <div class="func-item" onclick="selectFunc(this, 'Mirim', event)">Mirim</div>
+                               <div class="func-item" onclick="selectFunc(this, 'Junior', event)">Junior</div>
+                            <div class="func-item" onclick="selectFunc(this, 'Elio', event)">Elio</div>
+                                  <div class="func-item" onclick="selectFunc(this, 'Vicente', event)">Vicente</div>
+                                     <div class="func-item" onclick="selectFunc(this, 'Paulo', event)">Paulo</div>
+                                      <div class="func-item" onclick="selectFunc(this, 'DanielEnc', event)">DanielEnc</div>
+                                       <div class="func-item" onclick="selectFunc(this, 'AmareloEnc', event)">AmareloEnc</div>
+                                        <div class="func-item" onclick="selectFunc(this, 'RafaelEnc', event)">RafaelEnc</div>
+                                         <div class="func-item" onclick="selectFunc(this, 'MarcoEnc', event)">MarcoEnc</div>
 
             </div>
-</div>
+        </div>
 
-<!-- Local de opcoes de funcoes -->
         <label>Serviço</label>
         <select id="fAtividade">
             <option value="Pintura">Pintura</option>
             <option value="Eletrica">Eletrica</option>
             <option value="Hidraulica">Hidraulica</option>
-            <option value="Pedreiro">Pedreiro</option>
-                      <option value="Marcenaria">Marcenaria</option>
+            <option value="Civil">Civil</option>
         </select>
 
+        <label>Local</label>
+        <select id="fTipoLocal" onchange="atualizarLocais()">
+            <option value="" disabled selected>Selecionar</option>
+            <option value="Setor">Setor</option>
+            <option value="Regional">Regional</option>
+        </select>
+        <div id="areaSubLocal" class="hidden">
+            <label>Ponto Específico</label>
+            <select id="fSubLocal"></select>
+        </div>
 
-<!-- Local de opcoes de locais para trabalho -->
-
-<label>Local</label>
-<select id="fLocal">
-    <option value="" disabled selected>Selecionar</option>
-    <option value="Cam">Cam</option>
-    <option value="Fazenda-SMF">Fazenda-SMF</option>
-    <option value="Seplag">Seplag</option>
-    <option value="Caminho Niemeyer">Caminho Niemeyer</option>
-    <option value="Bicicletario">Bicicletario</option>
-</select>
-<!-- Local de opcoes de Ci -->
         <label>Número da CI</label>
- <input type="text"
-       id="fCI"
-      placeholder="Ex: 0001/2026"
-       maxlength="9"
-       onkeydown="ciKeyDown(event,this)"
-       oninput="formatarCI(this)">
+        <input type="text" id="fCI" placeholder="Ex: 001/2024">
 
         <button class="btn-acao" onclick="iniciarAtividade()">Confirmar Início</button>
     </div>
@@ -1092,7 +316,7 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
 <div id="modalEquipe" class="modal">
     <div class="container-modal">
         <span class="btn-fechar" onclick="fecharModal('modalEquipe')">&times;</span>
-        <h2 style="color:var(--primary)">Equipe em Atividade</h2>
+        <h2 style="color:var(--primary)">Equipe em Campo</h2>
         <div id="listaAndamento"></div>
     </div>
 </div>
@@ -1109,21 +333,18 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
         <label>Quantidade</label>
         <input type="number" id="itemQuantidade" placeholder="Ex: 10">
 
-        <label>
-            
-        </label>
+        <label>Setor</label>
         <select id="itemSetor">
             <option value="" disabled selected>Selecionar Setor</option>
             <option value="Pintura">Pintura</option>
             <option value="Elétrica">Elétrica</option>
             <option value="Hidráulica">Hidráulica</option>
-            <option value="Pedreiro">Pedreiro</option>
-               <option value="Marcenaria">Marcenaria</option>
+            <option value="Civil">Civil</option>
         </select>
 
         <button class="btn-acao" onclick="registrarItem()">Registrar Item</button>
 
-      
+
 
         <h3 style="margin-top:20px; color:var(--text)">Itens Registrados</h3>
           <!-- FILTRO ACIMA DA TABELA -->
@@ -1136,7 +357,6 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
                 <option value="Elétrica">Elétrica</option>
                 <option value="Hidráulica">Hidráulica</option>
                 <option value="Pedreiro">Pedreiro</option>
-                      <option value="Marcenaria">Marcenaria</option>
             </select>
         </div>
         <div style="max-height:300px; overflow-y:auto; border:1px solid #444; border-radius:12px;">
@@ -1175,8 +395,7 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
             <option value="Pintura">Pintura</option>
             <option value="Elétrica">Elétrica</option>
             <option value="Hidráulica">Hidráulica</option>
-            <option value="Pedreiro">Pedreiro</option>
-              <option value="Marcenaria">Marcenaria</option>
+            <option value="Civil">Civil</option>
         </select>
 
         <button class="btn-acao" onclick="confirmarEdicaoItem()">Salvar Alterações</button>
@@ -1197,7 +416,7 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
 <div id="modalHistorico" class="modal">
     <div class="container-modal">
         <span class="btn-fechar" onclick="fecharModal('modalHistorico')">&times;</span>
-        <h2 style="color:var(--success)">Cis Concluidas</h2>
+        <h2 style="color:var(--success)">CIs Registradas</h2>
 
       <!-- FILTROS CIs REGISTRADAS -->
 <div id="filtrosHistorico" style="display:flex; gap:15px; margin-bottom:15px; align-items:center; flex-wrap:wrap;">
@@ -1290,103 +509,27 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
         </div>
     </div>
 
-
-<div>
-    <label style="color:var(--text); font-weight:bold; font-size:13px;">
-        Buscar por CI:
-    </label>
-
-    <input type="text"
-           id="filtroCIHistorico"
-           placeholder="Ex: 0123/2026"
-           oninput="atualizarHistorico()"
-           style="padding:5px; border-radius:6px; border:1px solid #444;">
-</div>
-
-
     <!-- Filtro por função/serviço -->
-    <div style="display:flex;align-items:end;gap:10px">
-
     <div>
-        <label style="color:var(--text); font-weight:bold; font-size:13px;">
-            Filtrar por Serviço:
-        </label>
-
+        <label style="color:var(--text); font-weight:bold; font-size:13px;">Filtrar por Serviço:</label>
         <select id="filtroServicoHistorico" onchange="atualizarHistorico()">
             <option value="">Todos</option>
             <option value="Pintura">Pintura</option>
             <option value="Elétrica">Elétrica</option>
             <option value="Hidráulica">Hidráulica</option>
-            <option value="Pedreiro">Pedreiro</option>
-            <option value="Marcenaria">Marcenaria</option>
+            <option value="Civil">Pedreiro</option>
         </select>
     </div>
-
-    <button onclick="mostrarMediaMes()"
-        style="
-        height:36px;
-        padding:0 14px;
-        border-radius:8px;
-        background:#0d6efd;
-        color:white;
-        border:none;
-        cursor:pointer;
-        ">
-        📊 Média
-    </button>
-
-</div>
 </div>
  <!-- BOTÕES DE BACKUP E RESTORE -->
         <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:15px;">
-          <button class="btn-acao" style="background:#0d6efd;" onclick="abrirModalConfirmarBackup()">💾 Backup CIs</button>
-
+            <button class="btn-acao" style="background:#0d6efd;" onclick="backupCIsDoMes()">💾 Backup CIs</button>
             <button class="btn-acao" style="background:#16a34a;" onclick="restaurarCIs()">📂 Restaurar CIs</button>
         </div>
 
         <div id="listaHistorico"></div>
     </div>
 </div>
-
-<!--Modal Media do Mes-->
-<div id="modalMedia" class="modal">
-<div class="container-modal media-modal">
-
-<span class="btn-fechar" onclick="fecharModal('modalMedia')">&times;</span>
-
-<h3>Média mensal por funcionário</h3>
-
-<canvas id="graficoMedia" style="width:100%;height:100%"></canvas>
-
-</div>
-</div>
-
-<!-- MODAL CONFIRMAR BACKUP CI -->
-<div id="modalConfirmarBackup" class="modal">
-    <div class="container-modal">
-
-        <span class="btn-fechar" onclick="fecharModalConfirmarBackup()">&times;</span>
-
-        <h2 style="color:var(--primary)">Confirmar Backup</h2>
-
-        <p>Deseja realizar o backup das CIs?</p>
-
-        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">
-
-            <button class="btn-acao" onclick="fecharModalConfirmarBackup()">
-                Não
-            </button>
-
-            <button class="btn-acao" style="background:#dc2626" onclick="confirmarBackupCI()">
-                Sim
-            </button>
-
-        </div>
-
-    </div>
-</div>
-
-
 <!-- MODAL EDITAR ATIVIDADE -->
 <div id="modalEditarAtividade" class="modal">
     <div class="container-modal">
@@ -1438,20 +581,62 @@ input, select, .btn-acao, .multi-display, textarea { width:100%; padding:12px; m
     </div>
 </div>
 
+<!-- MODAL RESTORE -->
+<div id="modalRestore" class="modal" style="display:none;">
+    <div class="container-modal" style="max-width:800px; width:90%; max-height:85vh; overflow-y:auto;">
+        <span class="btn-fechar" onclick="fecharModal('modalRestore')">&times;</span>
+        <h2 style="color:var(--success); margin-bottom:15px;">Restaurar CIs do Backup</h2>
+        <div id="listaCIs"></div>
+    </div>
+</div>
 
+<!-- MODAL FOTOS -->
+<div id="modalFotos" class="modal" style="display:none;">
+    <div class="container-modal" style="max-width:600px; width:90%; max-height:70vh; overflow-y:auto; text-align:center;">
+        <span class="btn-fechar" onclick="fecharModal('modalFotos')">&times;</span>
+        <h2 style="color:var(--primary); margin-bottom:15px;">Fotos da CI</h2>
+        <div id="listaFotos" style="display:flex; flex-direction:column; align-items:center; gap:10px;"></div>
+    </div>
+</div>
+
+<!-- MODAL DE FOTO GRANDE AJUSTADO -->
+<div id="modalFotoGrande" class="modal" 
+     style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); justify-content:center; align-items:center; z-index:9999;">
+    
+    <!-- Container da imagem -->
+    <div style="position:relative; background:#1b1e24; border-radius:15px; padding:10px; max-width:90%; max-height:90%; display:flex; justify-content:center; align-items:center; flex-direction:column;">
+        <span id="btnFecharFotoGrande" 
+              style="position:absolute; top:5px; right:10px; font-size:25px; color:white; cursor:pointer;">&times;</span>
+        <img id="fotoGrande" src="" style="max-width:90%; max-height:80vh; border-radius:10px; object-fit:contain;">
+    </div>
+</div>
 
 
 <!-- MODAL IMAGEM -->
 <div id="modalImagem" class="img-modal">
     <img id="imgGrande" src="">
     <div class="modal-btns">
-        
+        <button class="btn-download" onclick="baixarImagem()">⬇️ Download</button>
         <button class="btn-fechar-img" onclick="fecharModal('modalImagem')">✖ Fechar</button>
     </div>
 </div>
 
+<!-- Modal de confirmação de apagar CIs -->
+<div id="modalConfirmarBackup" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); justify-content:center; align-items:center; z-index:9999;">
+    <div style="background:#1b1e24; border-radius:15px; padding:20px; max-width:400px; width:90%; text-align:center; color:white;">
+        <h3 style="margin-bottom:15px;">Backup concluído!<br>Deseja apagar essas CIs do servidor?</h3>
+        <div style="display:flex; justify-content:center; gap:15px;">
+            <button id="btnSimBackup" style="padding:8px 16px; background:#16a34a; color:white; border:none; border-radius:6px; cursor:pointer;">Sim</button>
+            <button id="btnNaoBackup" style="padding:8px 16px; background:#dc2626; color:white; border:none; border-radius:6px; cursor:pointer;">Não</button>
+        </div>
+    </div>
+</div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Notificação verde -->
+<div id="notificacaoBackup" style="display:none; position:fixed; top:20px; left:50%; transform:translateX(-50%); background:#16a34a; color:white; padding:10px 20px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.5); z-index:9999;">
+    CIs apagadas do servidor!
+</div>
+
 <script>
 let selecionados = [];
 let atividadesAtivas = [];
@@ -1461,12 +646,10 @@ let imagemAtual = "";
 let itensRegistrados = [];
 let itemAtualEditar = null;
 let itemAtualExcluir = null;
-let ciCompleta = false;
-let chartMedia = null;
-let graficoMedia = null;
-let rankingAnterior = [];
-let registrando = false;
-let finalizando = false;
+// ======================= BLOQUEIO DE ABERTURA =======================
+let bloquearRestore = false; // impede que modalRestore abra quando necessário
+
+
 // URL base da API
 const API_BASE = "https://bancokf.onrender.com";
 // MODAIS
@@ -1477,202 +660,10 @@ const API_BASE = "https://bancokf.onrender.com";
 const loginOverlay = document.getElementById("loginOverlay");
 const loginBtn = document.getElementById("loginBtn");
 const loginError = document.getElementById("loginError");
-const mobile = window.innerWidth < 768;
-
-
-async function mostrarMediaMes(){
-
-abrirModal('modalMedia');
-
-const mes = document.getElementById('filtroMesHistorico').value;
-const ano = document.getElementById('filtroAnoHistorico').value;
-
-if(!mes || !ano){
-mostrarToastErro("Selecione mês e ano");
-return;
-}
-
-// 🔥 atualiza backend sem refresh
-const r = await fetch(`${API_BASE}/atividades`);
-atividadesConcluidas = await r.json();
-
-const MEDIA = 5;
-const LIMITE = 30;
-
-// NOMES FIXOS
-const nomes = Array.from(document.querySelectorAll('#fOptions .func-item'))
-.map(el=>el.textContent.trim());
-
-// inicia zerado
-const contagem = {};
-nomes.forEach(n=>contagem[n]=0);
-
-// conta CIs
-atividadesConcluidas.forEach(a => {
-
-    const d = new Date(a.fim);
-
-    if (
-        (d.getMonth() + 1) === parseInt(mes) &&
-        d.getFullYear() === parseInt(ano)
-    ) {
-
-        const equipeArray = Array.isArray(a.equipe)
-            ? a.equipe
-            : String(a.equipe).split(",");
-
-        equipeArray.forEach(nome => {
-            const nomeLimpo = nome.trim();
-            if (contagem[nomeLimpo] !== undefined) {
-                contagem[nomeLimpo]++;
-            }
-        });
-    }
-});
-
-// ranking
-const rankingAtual=[...nomes].sort((a,b)=>contagem[b]-contagem[a]);
-
-// labels com medalha + seta
-const labels=rankingAtual.map((nome,i)=>{
-
-let medalha="";
-if(i==0) medalha="🥇 ";
-if(i==1) medalha="🥈 ";
-if(i==2) medalha="🥉 ";
-
-let movimento="";
-const ant=rankingAnterior.indexOf(nome);
-
-if(ant!=-1){
-if(ant>i) movimento=" ↑";
-if(ant<i) movimento=" ↓";
-}
-
-return medalha+nome+movimento;
-});
-
-rankingAnterior=[...rankingAtual];
-
-const valores=rankingAtual.map(n=>contagem[n]);
-
-const cores=valores.map(v=>v>=MEDIA?"#16a34a":"#dc2626");
-
-const mobile=window.innerWidth<768;
-
-if(graficoMedia) graficoMedia.destroy();
-
-graficoMedia=new Chart(document.getElementById("graficoMedia"),{
-type:'bar',
-data:{
-labels,
-datasets:[
-{
-data:valores,
-backgroundColor:cores,
-borderRadius:8
-},
-{
-type:'line',
-data:rankingAtual.map(()=>MEDIA),
-borderColor:'orange',
-borderWidth:2,
-pointRadius:0
-}
-]
-},
-options:{
-indexAxis:mobile?'y':'x',
-responsive:true,
-maintainAspectRatio:false,
-
-animation:{duration:1200},
-plugins:{legend:{display:false}},
-scales: mobile ? {
-
-    x:{
-        beginAtZero:true,
-        max:LIMITE,
-        ticks:{
-            padding:0.5   // <<< diminui espaço dos números
-        },
-        grid:{
-            drawTicks:false
-        }
-    }
-
-} : {
-
-    y:{
-        beginAtZero:true,
-        max:LIMITE,
-        ticks:{
-            padding:0.5   // <<< cola números no gráfico
-        },
-        grid:{
-            drawTicks:false
-        }
-    }
-
-}
-
-}
-});
-}
-
-setInterval(async ()=>{
-
-    try{
-
-        const r = await fetch(`${API_BASE}/atividades`);
-        atividadesConcluidas = await r.json();
-
-        // se modal estiver aberto, atualiza gráfico
-        const modal = document.getElementById("modalMedia");
-
-        if(modal && modal.style.display==="flex"){
-            mostrarMediaMes();
-        }
-
-        // atualiza histórico se estiver visível
-        if(document.getElementById("modalHistorico")?.style.display==="flex"){
-            atualizarHistorico();
-        }
-
-    }catch(e){
-        console.log("sync fail",e);
-    }
-
-},3000); // a cada 3 segundos
 
 
 
-function ciKeyDown(e,input){
 
-    // se já estava completa e apertar backspace → limpa tudo
-    if(ciCompleta && e.key === "Backspace"){
-        e.preventDefault();
-        input.value = "";
-        ciCompleta = false;
-    }
-}
-
-function formatarCI(input){
-
-    let raw = input.value.replace(/\D/g,"");
-
-    // 🔹 agora permite 4 números
-    if(raw.length > 4) raw = raw.slice(0,4);
-
-    if(raw.length === 4){
-        const ano = new Date().getFullYear();
-        input.value = `${raw}/${ano}`;
-        ciCompleta = true;
-    } else {
-        input.value = raw;
-        ciCompleta = false;
-    }
-}
 
 loginBtn.addEventListener("click", async () => {
   const usuario = document.getElementById("username").value;
@@ -1696,120 +687,27 @@ const res = await fetch(`${BACKEND_URL}/login`, {
 });
 
     const data = await res.json();
-if (data.ok) {
 
-    // 🔴 LIMPA QUALQUER SESSÃO ANTERIOR
-    localStorage.removeItem('usuarioNome');
-    localStorage.removeItem('permissao');
-
-    // 🔹 SALVA NOVA SESSÃO
-    localStorage.setItem('usuarioNome', data.usuario);
-    localStorage.setItem('permissao', data.permissao);
-
-     loginOverlay.style.display = "none";
-
-    const nome = data.usuario || usuario;
-    document.getElementById("usuarioLogado").innerText = `👤 Olá, ${nome}`;
-
-    // 🔹 SALVAR LOGIN SE MARCADO
-    const lembrar = document.getElementById("lembrarLogin").checked;
-
-    if (lembrar) {
-        localStorage.setItem("loginSalvoUsuario", usuario);
-        localStorage.setItem("loginSalvoSenha", senha);
-        localStorage.setItem("loginLembrar", "true");
+    if (data.ok) {
+      loginOverlay.style.display = "none"; // remove overlay
     } else {
-        localStorage.removeItem("loginSalvoUsuario");
-        localStorage.removeItem("loginSalvoSenha");
-        localStorage.removeItem("loginLembrar");
-    }
-
-    atualizarUsuarioLogado();
-
-    // 🔴 APLICA CONTROLE VISUAL DE PERMISSÃO
-    aplicarControleVisualPermissao();
-}
-  else {
       loginError.style.display = "block";
-       mostrarToastErro(data.error || "Usuário ou senha incorretos");
-     
+      loginError.innerText = data.error || "Usuário ou senha incorretos";
     }
 
   } catch(err) {
     console.error(err);
     loginError.style.display = "block";
-      mostrarToastErro("Erro de conexão com o servidor");
-    
+    loginError.innerText = "Erro de conexão com o servidor";
   }
 });
 
 function abrirModal(id){ document.getElementById(id).style.display='block'; }
-function fecharModal(id){ document.getElementById(id).style.display='none'; }
-
-
-function atualizarUsuarioLogado() {
-    const nome = localStorage.getItem('usuarioNome') || 'Visitante';
-    const elemento = document.querySelector('.usuario-logado');
-    if(elemento) elemento.textContent = `Olá, ${nome}`;
+// ======================= FUNÇÃO FECHAR MODAL =======================
+function fecharModal(id) {
+    const modal = document.getElementById(id);
+    if (modal) modal.style.display = "none";
 }
-
-
-
-
-
-
-
-
-
-
-function aplicarControleVisualPermissao() {
-
-    const permissao = localStorage.getItem('permissao');
-
-    const cardHistorico = document.getElementById('cardHistorico');
-    const cardAlmoxarifado = document.getElementById('cardAlmoxarifado');
-
-    // 🔴 Se não houver permissão salva, bloqueia tudo
-    if (!permissao) {
-        cardHistorico?.classList.add('card-desativado');
-        cardAlmoxarifado?.classList.add('card-desativado');
-        return;
-    }
-
-    // 🔵 Se for almoxarifado → libera
-    if (permissao === 'almoxarifado') {
-        cardHistorico?.classList.remove('card-desativado');
-        cardAlmoxarifado?.classList.remove('card-desativado');
-    } 
-    // 🟡 Qualquer outro tipo → bloqueia
-    else {
-        cardHistorico?.classList.add('card-desativado');
-        cardAlmoxarifado?.classList.add('card-desativado');
-    }
-}
-
-
-function abrirModalConfirmarBackup(){
-    abrirModal("modalConfirmarBackup");
-}
-
-function fecharModalConfirmarBackup(){
-    fecharModal("modalConfirmarBackup");
-}
-
-// SIM
-async function confirmarBackupCI(){
-
-    fecharModalConfirmarBackup();
-
-    const sucesso = await backupCIsDoMes();
-
-    if(sucesso){
-        fecharModal("modalHistorico"); // só fecha se deu certo
-    }
-
-}
-
 
 
 
@@ -1819,235 +717,263 @@ async function backupCIsDoMes() {
     try {
         const month = document.getElementById('filtroMesHistorico').value;
         const year = document.getElementById('filtroAnoHistorico').value;
-if (!month || !year) {
-    mostrarToastErro("Selecione mês e ano para o backup");
-    return false;
-}
+
+        if (!month || !year) {
+            alert("Selecione mês e ano para o backup");
+            return;
+        }
 
         const res = await fetch(`${API_BASE}/atividades/backup?mes=${month}&ano=${year}`);
         if (!res.ok) throw "Erro ao buscar CIs";
 
         const data = await res.json();
-
-if (!Array.isArray(data) || data.length === 0) {
-    mostrarToastErro("Não há CIs nesse período");
-    return false;
-}
+        if (!Array.isArray(data) || data.length === 0) {
+            alert("Não há CIs nesse período");
+            return;
+        }
 
         const zip = new JSZip();
 
         for (const ci of data) {
+            const pastaCI = zip.folder(`CI_${ci.id}_${ci.inicio}`);
+            pastaCI.file("dados.txt", JSON.stringify(ci, null, 2));
 
-            // TXT da CI
-            zip.file(`${ci.id}-${ci.inicio}.txt`, JSON.stringify(ci, null, 2));
-
-            // ===============================
-            // GARANTE ARRAY REAL DE FOTOS
-            // ===============================
             let fotos = [];
-
             try {
                 fotos = Array.isArray(ci.fotos) ? ci.fotos : JSON.parse(ci.fotos || "[]");
-            } catch {
-                fotos = [];
-            }
+            } catch { fotos = []; }
 
-            // ===============================
-            // BAIXA FOTOS COM BLINDAGEM
-            // ===============================
             if (fotos.length > 0) {
-
-                const folder = zip.folder(`${ci.id}-${ci.inicio}/fotos`);
-
                 for (let i = 0; i < fotos.length; i++) {
-
-                    let foto = String(fotos[i])
-                        .replace("[", "")
-                        .replace("]", "")
-                        .replace(/"/g, "")
-                        .trim();
-
-                    if (!foto.startsWith("http")) {
-                        console.warn("Foto ignorada:", foto);
-                        continue;
-                    }
+                    let foto = String(fotos[i]).replace("[","").replace("]","").replace(/"/g,"").trim();
+                    if (!foto.startsWith("http")) continue;
 
                     try {
                         const fotoBlob = await fetch(foto).then(r => r.blob());
-                        folder.file(`foto${i + 1}.jpg`, fotoBlob);
-                    } catch (e) {
-                        console.warn("Erro ao baixar:", foto);
-                        continue;
-                    }
+                        pastaCI.file(`foto${i+1}.jpg`, fotoBlob);
+                    } catch (e) { console.warn("Erro ao baixar:", foto); continue; }
                 }
             }
         }
 
-        // ===============================
-        // GERA ZIP
-        // ===============================
         const content = await zip.generateAsync({ type: "blob" });
         saveAs(content, `backup_CI_${month}-${year}.zip`);
 
         // ===============================
-        // APAGA DO SERVIDOR
+        // Modal de confirmação para apagar
         // ===============================
- const ids = data.map(c => c.id);
+        const modalConfirm = document.getElementById("modalConfirmarBackup");
+        modalConfirm.style.display = "flex";
 
-await fetch(`${API_BASE}/atividades/apagar`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ ids })
-});
-atividadesConcluidas = [];
-document.getElementById("listaHistorico").innerHTML =
-"<p style='opacity:.6'>Nenhuma CI registrada</p>";
+        const btnSim = document.getElementById("btnSimBackup");
+        const btnNao = document.getElementById("btnNaoBackup");
 
-mostrarToast("CIs apagadas do servidor!");
-atualizarHistorico();
+        btnNao.onclick = () => { modalConfirm.style.display = "none"; };
 
-return true;
+// ======================= BOTÃO SIM DO BACKUP =======================
+btnSim.onclick = async () => {
+    bloquearRestore = true; // bloqueia qualquer reabertura automática
+    fecharModal("modalConfirmarBackup");
+    fecharModal("modalRestore"); // fecha o modal de CIs registradas
+
+    const ids = data.map(c => c.id);
+
+    try {
+        await fetch(`${API_BASE}/atividades/apagar`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ids })
+        });
+
+        // Remove blocos do DOM
+        const listaCIs = document.getElementById("listaCIs");
+        if (listaCIs) {
+            ids.forEach(id => {
+                const bloco = listaCIs.querySelector(`div[data-ci-id='${id}']`);
+                if (bloco) bloco.remove();
+            });
+        }
+
+        // Mostra notificação
+        const notif = document.getElementById("notificacaoBackup");
+        if (notif) {
+            notif.style.display = "block";
+            setTimeout(() => { notif.style.display = "none"; }, 3000);
+        }
+
+        // Atualiza histórico sem reabrir modal
+        if (typeof atualizarHistorico === "function") {
+            atualizarHistorico(); 
+        }
 
     } catch (err) {
-       console.error(err);
-    mostrarToastErro("Erro no backup: " + err);
-    return false;
+        console.error(err);
+        alert("Falha ao apagar CIs do servidor!");
+    } finally {
+        // Libera bloqueio depois de 500ms (ou depois que modal terminar animação)
+        setTimeout(() => { bloquearRestore = false; }, 500);
+    }
+};
+// ======================= FUNÇÃO PARA FECHAR MODAL DE CIs =======================
+function fecharModalCIsRegistradas() {
+    const modals = ["modalCIsRegistradas", "modalRestore"];
+    modals.forEach(id => fecharModal(id));
+}
+
+    } catch (err) {
+        console.error(err);
+        alert("Erro no backup: " + err);
     }
 }
 
-// ------------------- RESTORE CIs TEMPORÁRIO -------------------
+// ------------------- RESTORE CIs -------------------
 async function restaurarCIs() {
     const input = document.createElement("input");
     input.type = "file";
     input.accept = ".zip";
+
     input.onchange = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
 
         const zip = await JSZip.loadAsync(file);
-        const restoredData = [];
+        const cis = [];
 
-        for (const filename of Object.keys(zip.files)) {
-            if (filename.endsWith(".txt")) {
-                const text = await zip.file(filename).async("string");
-                restoredData.push(JSON.parse(text));
+        for (const path in zip.files) {
+            if (path.endsWith("dados.txt")) {
+                const pasta = path.replace("/dados.txt", "");
+                const text = await zip.file(path).async("string");
+                const ci = JSON.parse(text);
+                ci.__pasta = pasta; // pasta do CI no zip
+                cis.push(ci);
             }
         }
 
-        abrirModalRestore(restoredData, zip);
+        abrirModalRestore(cis, zip);
     };
+
     input.click();
 }
 
-// ------------------- MODAL TEMPORÁRIO DE RESTORE -------------------
+// ======================= FUNÇÃO ABRIR MODAL RESTORE =======================
 function abrirModalRestore(cis, zip) {
+    if (bloquearRestore) return; // evita abrir modal se bloqueado
 
-    // overlay
-    const overlay = document.createElement("div");
-    overlay.className = "modal";
-    overlay.style.display = "flex";
-    overlay.style.alignItems = "center";
-    overlay.style.justifyContent = "center";
-    overlay.style.zIndex = 3000;
+    const listaCIs = document.getElementById("listaCIs");
+    if (!listaCIs) return console.error("Elemento listaCIs não encontrado");
+    listaCIs.innerHTML = "";
 
-    // container padrão do sistema
-    const box = document.createElement("div");
-    box.className = "container-modal";
-    box.style.maxHeight = "80vh";
-    box.style.overflowY = "auto";
-    box.style.width = "95%";
-    box.style.maxWidth = "700px";
+    cis.forEach(ci => {
+        const bloco = document.createElement("div");
+        bloco.style.background = "#252a33";
+        bloco.style.borderRadius = "10px";
+        bloco.style.padding = "12px";
+        bloco.style.marginBottom = "15px";
+        bloco.style.cursor = "pointer";
 
-    overlay.appendChild(box);
+        bloco.dataset.ciId = ci.id; // importante para remover depois
 
-    // fechar
-    const fechar = document.createElement("span");
-    fechar.className = "btn-fechar";
-    fechar.innerHTML = "&times;";
-    fechar.onclick = () => document.body.removeChild(overlay);
+        const h = document.createElement("h3");
+        h.style.color = "var(--success)";
+        h.textContent = `CI ${ci.ci} — ${new Date(ci.inicio).toLocaleDateString()}`;
+        bloco.appendChild(h);
 
-    box.appendChild(fechar);
-
-    // titulo
-    const titulo = document.createElement("h2");
-    titulo.innerText = "Restaurar CIs";
-    titulo.style.color = "var(--primary)";
-    box.appendChild(titulo);
-
-    cis.forEach(async ci => {
-
-        const card = document.createElement("div");
-        card.style.background = "#252a33";
-        card.style.padding = "12px";
-        card.style.borderRadius = "12px";
-        card.style.marginBottom = "15px";
-
-        card.innerHTML = `
-            <strong>CI ${ci.ci || ci.id}</strong><br>
-            Serviço: ${ci.servico}<br>
-            Local: ${ci.local}<br>
-            Equipe: ${Array.isArray(ci.equipe) ? ci.equipe.join(", ") : ci.equipe}<br>
-            Início: ${ci.inicio}
+        const detalhes = document.createElement("div");
+        detalhes.style.background = "#16191f";
+        detalhes.style.borderRadius = "10px";
+        detalhes.style.padding = "10px";
+        detalhes.style.fontSize = "13px";
+        detalhes.style.marginTop = "5px";
+        detalhes.innerHTML = `
+<b>Serviço:</b> ${ci.servico}<br>
+<b>Equipe:</b> ${ci.equipe}<br>
+<b>Início:</b> ${new Date(ci.inicio).toLocaleString()}<br>
+<b>Fim:</b> ${ci.fim ? new Date(ci.fim).toLocaleString() : "-"}<br>
+<b>Relato:</b> ${ci.relato || "-"}
         `;
+        bloco.appendChild(detalhes);
 
-        // ========= fotos =========
-        let fotos = [];
+        // Ao clicar no CI, abre modal de fotos
+        bloco.onclick = () => abrirModalFotos(ci, zip);
 
-        try {
-            fotos = Array.isArray(ci.fotos) ? ci.fotos : JSON.parse(ci.fotos || "[]");
-        } catch {
-            fotos = [];
-        }
-
-        if (fotos.length) {
-
-            const fotosDiv = document.createElement("div");
-            fotosDiv.style.display = "flex";
-            fotosDiv.style.flexWrap = "wrap";
-            fotosDiv.style.gap = "10px";
-            fotosDiv.style.marginTop = "10px";
-
-            for (let i = 0; i < fotos.length; i++) {
-
-                try {
-
-                    const blob = await zip.file(`${ci.id}-${ci.inicio}/fotos/foto${i+1}.jpg`).async("blob");
-
-                    const img = document.createElement("img");
-                    img.src = URL.createObjectURL(blob);
-                    img.style.width = "90px";
-                    img.style.height = "90px";
-                    img.style.objectFit = "cover";
-                    img.style.borderRadius = "8px";
-                    
-
-             const url = URL.createObjectURL(blob);
-// efeito hover
-img.style.transition = "0.2s";
-img.onmouseenter = () => img.style.transform = "scale(1.05)";
-img.onmouseleave = () => img.style.transform = "scale(1)";
-img.src = url;
-img.style.cursor = "zoom-in";
-
-img.onclick = () => abrirImagemModal(
-    url,
-    `CI-${ci.ci || ci.id}-foto${i+1}.jpg`
-);
-
-fotosDiv.appendChild(img);
-
-                } catch(e) {
-                    console.warn("Foto ignorada");
-                }
-            }
-
-            card.appendChild(fotosDiv);
-        }
-
-        box.appendChild(card);
+        listaCIs.appendChild(bloco);
     });
 
-    document.body.appendChild(overlay);
+    const modal = document.getElementById("modalRestore");
+    if (modal) modal.style.display = "flex";
+}
+
+// ------------------- MODAL FOTOS -------------------
+// ------------------- ABRIR FOTO GRANDE -------------------
+function abrirFotoGrande(src) {
+    const modal = document.getElementById("modalFotoGrande");
+    const img = document.getElementById("fotoGrande");
+
+    img.src = src;
+    modal.style.display = "flex";
+}
+
+// ------------------- FECHAR FOTO GRANDE -------------------
+document.getElementById("btnFecharFotoGrande").onclick = () => {
+    document.getElementById("modalFotoGrande").style.display = "none";
+};
+
+// fecha ao clicar na sombra fora do container
+document.getElementById("modalFotoGrande").onclick = (e) => {
+    const container = e.currentTarget.querySelector('div');
+    if (e.target === e.currentTarget) {
+        e.currentTarget.style.display = "none";
+    }
+};
+
+// ------------------- ALTERAÇÃO NO MODAL RESTORE -------------------
+async function abrirModalFotos(ci, zip) {
+    const listaFotos = document.getElementById("listaFotos");
+    if (!listaFotos) return console.error("Elemento listaFotos não encontrado");
+
+    listaFotos.innerHTML = "";
+
+    const fotosDiv = document.createElement("div");
+    fotosDiv.style.display = "flex";
+    fotosDiv.style.flexDirection = "column"; // uma abaixo da outra
+    fotosDiv.style.alignItems = "center";
+    fotosDiv.style.gap = "10px";
+
+    for (const filePath of Object.keys(zip.files)) {
+        if (filePath.startsWith(ci.__pasta + "/") && filePath.endsWith(".jpg")) {
+            const file = zip.file(filePath);
+            if (!file) continue;
+
+            try {
+                const blob = await file.async("blob");
+                const img = document.createElement("img");
+                img.src = URL.createObjectURL(blob);
+                img.style.width = "200px";  // miniatura
+                img.style.height = "auto";
+                img.style.objectFit = "cover";
+                img.style.borderRadius = "8px";
+                img.style.cursor = "pointer";
+
+                // adiciona evento de clique para abrir maior
+                img.onclick = () => abrirFotoGrande(img.src);
+
+                fotosDiv.appendChild(img);
+            } catch (err) {
+                console.error("Erro ao ler a foto do zip:", filePath, err);
+            }
+        }
+    }
+
+    listaFotos.appendChild(fotosDiv);
+
+    const modal = document.getElementById("modalFotos");
+    if (modal) modal.style.display = "flex";
+}
+
+// ------------------- FUNÇÃO FECHAR -------------------
+function fecharModal(id) {
+    const modal = document.getElementById(id);
+    if (modal) modal.style.display = "none";
 }
 
 
@@ -2069,58 +995,45 @@ function formatarBR(dataISO){
 }
 // Abrir modal já existente
 function abrirAlmoxarifado() {
-    const permissao = localStorage.getItem('permissao');
-
-    if (permissao !== 'almoxarifado') {
-        mostrarToastErro("Acesso negado!");
-        return;
-    }
-
     abrirModal('modalAlmoxarifado');
-    carregarItens();
-}
-
-// Registrar novo item
+carregarItens();
+}// Registrar novo item
 async function registrarItem() {
     const nome = document.getElementById('itemNome').value.trim();
     const quantidade = parseInt(document.getElementById('itemQuantidade').value);
     const setor = document.getElementById('itemSetor').value;
- 
+
     if (!nome || !quantidade || !setor) {
-        mostrarToastErro("Preencha todos os campos!");
+        alert("Preencha todos os campos!");
         return;
     }
- 
+
     try {
         const res = await fetch(`${API_BASE}/itens`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                nome,
-                quantidade,
-                setor,
-                usuario: localStorage.getItem('usuarioNome') // ← ADICIONADO
-            })
+            body: JSON.stringify({ nome, quantidade, setor })
         });
- 
+
         const contentType = res.headers.get("content-type") || "";
         if (!contentType.includes("application/json")) {
             const text = await res.text();
             console.error("Resposta inesperada do backend:", text);
             throw "Resposta do servidor não é JSON. Verifique a URL/API_BASE.";
         }
- 
+
         await res.json();
- 
+
+        // Limpa inputs
         document.getElementById('itemNome').value = "";
         document.getElementById('itemQuantidade').value = "";
         document.getElementById('itemSetor').value = "";
- 
+
         mostrarToast("Item salvo no banco!");
         carregarItens();
- 
+
     } catch (err) {
-        mostrarToastErro("Falha ao salvar item: " + err);
+        alert("Falha ao salvar item: " + err);
         console.error(err);
     }
 }
@@ -2158,19 +1071,16 @@ function atualizarListaItens() {
         pintura: "#ef4444",
         eletrica: "#facc15",
         hidraulica: "#0d6efd",
-        pedreiro: "#7A7878",
-        marcenaria: "#3C2A0D"
+        civil: "#a855f7"
     };
 
     itensFiltrados.forEach(item => {
         const tr = document.createElement('tr');
         const setorKey = normalizar(item.setor);
 
-       const cor = corSetor[setorKey] || "#0d6efd";
-
-tr.style.borderLeft = `5px solid ${cor}`;
-tr.style.background = cor + "22"; // fundo translúcido
-tr.style.color = "#fff";
+        tr.style.borderLeft = `5px solid ${corSetor[setorKey] || '#0d6efd'}`;
+        tr.style.background = "#252a33";
+        tr.style.color = "#fff";
 
         tr.innerHTML = `
             <td style="padding:10px; border:1px solid #444;">${item.nome}</td>
@@ -2207,100 +1117,91 @@ function normalizar(texto) {
 }
 // Substitui confirm antigo
 // 6️⃣ Excluir Item
-function excluirItem(id) {
-    itemAtualExcluir = itensRegistrados.find(i => i.id === id);
-    if (!itemAtualExcluir) return;
-    abrirModal('modalExcluirItem');
-}
-async function confirmarExclusaoItem() {
-    if (!itemAtualExcluir) return;
+async function excluirItem(id) {
+    if (!confirm("Deseja realmente excluir este item?")) return;
 
     try {
-        const usuario = encodeURIComponent(localStorage.getItem('usuarioNome') || '');
-        const res = await fetch(`${API_BASE}/itens/${itemAtualExcluir.id}?usuario=${usuario}`, {
-            method: "DELETE"
-        });
+        const res = await fetch(`${API_BASE}/itens/${id}`, { method: "DELETE" });
 
         const contentType = res.headers.get("content-type") || "";
         if (!contentType.includes("application/json")) {
             const text = await res.text();
-            console.error("Resposta inesperada:", text);
-            throw "Resposta do servidor não é JSON";
+            console.error("Resposta inesperada do backend:", text);
+            throw "Resposta do servidor não é JSON. Verifique a URL/API_BASE.";
         }
 
         const data = await res.json();
-        if (!data.ok) throw data.error || "Erro ao excluir";
+        if (!data.ok) throw data.error || "Erro ao excluir item";
 
-        itensRegistrados = itensRegistrados.filter(i => i.id !== itemAtualExcluir.id);
+        itensRegistrados = itensRegistrados.filter(i => i.id !== id);
         atualizarListaItens();
         mostrarToast("Item excluído!");
-        fecharModal('modalExcluirItem');
-        itemAtualExcluir = null;
 
     } catch (err) {
-        mostrarToastErro("Falha ao excluir: " + err);
+        alert("Falha ao excluir item: " + err);
         console.error(err);
     }
+}
+function confirmarExclusaoItem() {
+    if (!itemAtualExcluir) return;
+
+    fetch(`${API_BASE}/itens/${itemAtualExcluir.id}`, { method: "DELETE" })
+    .then(() => {
+        mostrarToast("Item excluído do banco!");
+        fecharModal('modalExcluirItem');
+        carregarItens();   // recarrega direto do SQLite
+        itemAtualExcluir = null;
+    })
+    .catch(err => console.error(err));
 }
 
 
 // 5️⃣ Confirmar edição (versão final)
 async function confirmarEdicaoItem() {
     if (!itemAtualEditar) return;
- 
+
     const novoNome = document.getElementById('editItemNome').value.trim();
     const novaQuantidade = parseInt(document.getElementById('editItemQuantidade').value);
     const novoSetor = document.getElementById('editItemSetor').value;
-    const usuario = localStorage.getItem('usuarioNome');
 
-    console.log("USUARIO ENVIADO:", usuario); // ← LOG para checar
- 
     if (!novoNome || !novaQuantidade || !novoSetor) {
-        mostrarToastErro("Preencha todos os campos!");
+        alert("Preencha todos os campos!");
         return;
     }
 
-    if (!usuario) {
-        mostrarToastErro("Sessão expirada. Faça login novamente.");
-        return;
-    }
- 
     try {
         const res = await fetch(`${API_BASE}/itens/${itemAtualEditar.id}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                nome: novoNome,
-                quantidade: novaQuantidade,
-                setor: novoSetor,
-                usuario: usuario  // ← garante que não é null
-            })
+            body: JSON.stringify({ nome: novoNome, quantidade: novaQuantidade, setor: novoSetor })
         });
- 
+
         const contentType = res.headers.get("content-type") || "";
         if (!contentType.includes("application/json")) {
             const text = await res.text();
-            console.error("Resposta inesperada:", text);
-            throw "Resposta do servidor não é JSON";
+            console.error("Resposta inesperada do backend:", text);
+            throw "Resposta do servidor não é JSON. Verifique a URL/API_BASE.";
         }
- 
+
         const data = await res.json();
         if (!data.ok) throw data.error || "Erro ao atualizar item";
- 
+
+        // Atualiza local e HTML
         itemAtualEditar.nome = novoNome;
         itemAtualEditar.quantidade = novaQuantidade;
         itemAtualEditar.setor = novoSetor;
- 
+
         mostrarToast("Item editado!");
         atualizarListaItens();
         fecharModal('modalEditarItem');
         itemAtualEditar = null;
- 
+
     } catch (err) {
-        mostrarToastErro("Falha ao editar item: " + err);
+        alert("Falha ao editar item: " + err);
         console.error(err);
     }
 }
+
 
 
 
@@ -2332,42 +1233,16 @@ function selectFunc(el,nome,e){
 
 // ======================= LOCAIS =======================
 function atualizarLocais(){
-
-    const selectLocal = document.getElementById('fLocal');
-    const tipo = document.getElementById('fTipoLocal').value;
-
-    const mapaLocais = {
-        Principais: ["Cam","Fazenda-SMF","Seplag","Caminho Niemeyer","Bicicletario"],
-        
-    };
-
-    const opts = mapaLocais[tipo] || [];
-
-    selectLocal.innerHTML = opts
-        .map(x => `<option value="${x}">${x}</option>`)
-        .join('');
-}
-// ======================= TOAST =======================
+    const sub=document.getElementById('fSubLocal');
+    document.getElementById('areaSubLocal').classList.remove('hidden');
+    const opts=document.getElementById('fTipoLocal').value==="Setor" ? ["Cam","Seplag"] : ["Itaipu","Centro"];
+    sub.innerHTML = opts.map(x=>`<option value="${x}">${x}</option>`).join('');
+}// ======================= TOAST =======================
 function mostrarToast(msg){
     const t=document.getElementById('toastSucesso');
     document.getElementById('toastTexto').textContent=msg;
     t.style.display='block';
     t.classList.add('animar-entrada');
-    setTimeout(()=>t.style.display='none',2000);
-}
-function mostrarToastErro(msg){
-
-    const t=document.getElementById('toastErro');
-    document.getElementById('toastErroTexto').textContent=msg;
-
-    t.style.display='flex';
-
-    t.classList.remove('animar-entrada');
-    void t.offsetWidth;
-    t.classList.add('animar-entrada');
-
-    if(navigator.vibrate) navigator.vibrate(200);
-
     setTimeout(()=>t.style.display='none',2000);
 }
 
@@ -2401,99 +1276,66 @@ function carregarAtividades() {
         })
         .catch(err => console.error("Erro concluídas:", err));
 
-        
-
 }
-async function iniciarAtividade() {
+function iniciarAtividade() {
 
-    if (registrando) return;
-
-    const botao = document.querySelector("#btnIniciarAtividade");
-
-    const ci = document.getElementById('fCI').value.trim().toUpperCase();
+    const ci = document.getElementById('fCI').value.trim();
     const servico = document.getElementById('fAtividade').value;
-    const local = document.getElementById('fLocal').value; // ✅ corrigido
+    const local = document.getElementById('fSubLocal').value;
 
-    // 🔐 valida formato
-    if (!/^\d{4}\/\d{4}$/.test(ci)) {
-        mostrarToastErro("CI inválida (use 0000/0000)");
+    if (!selecionados.length || !ci || !servico || !local) {
+        alert("Preencha todos os campos!");
         return;
     }
 
-    // 🔒 verifica duplicidade
-    const ciJaExiste =
-        atividadesAtivas.some(a => String(a.ci).toUpperCase() === ci) ||
-        atividadesConcluidas.some(a => String(a.ci).toUpperCase() === ci);
+    const atividade = {
+        ci,
+        servico,
+        local,
+        equipe: selecionados.join(","), // backend espera string
+        inicio: agoraISO()
+    };
 
-    if (ciJaExiste) {
-        mostrarToastErro("Essa CI já está registrada!");
-        return;
-    }
-
-    if (!selecionados.length || !servico || !local) {
-        mostrarToastErro("Preencha todos os campos!");
-        return;
-    }
-
-    registrando = true;
-
-    if (botao) {
-        botao.disabled = true;
-        botao.innerText = "Registrando...";
-    }
-
-    try {
-
-        const atividade = {
-            ci,
-            servico,
-            local,
-            equipe: [...selecionados].join(","),
-            inicio: agoraISO()
-        };
-
-        const res = await fetch(`${API_BASE}/atividades/inicio`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(atividade)
-        });
+    fetch(`${API_BASE}/atividades/inicio`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(atividade)
+    })
+    .then(async res => {
 
         if (!res.ok) {
-            if (res.status === 409) {
-                throw "Essa CI já existe no banco!";
-            }
-            throw await res.text();
+            const t = await res.text();
+            throw new Error(t);
         }
 
-        const data = await res.json();
+        return res.json();
+    })
+    .then(data => {
+
+        if (!data.id) throw new Error("Backend não retornou ID");
+
+        atividade.id = data.id;
+        atividade.relato = "";
+        atividade.fotos = [];
+        atividade.fim = "";
 
         atividadesAtivas.push({
             ...atividade,
-            id: data.id,
-            equipe: [...selecionados],
-            relato: "",
-            fotos: [],
-            fim: ""
+            equipe: selecionados // volta array no frontend
         });
 
         limparForm();
         atualizarEquipeCampo();
         mostrarToast("Atividade iniciada!");
 
-    } catch (err) {
-
+    })
+    .catch(err => {
         console.error("INICIAR ERRO:", err);
-        mostrarToastErro(err);
+        alert("Falha ao iniciar atividade (veja console)");
+    });
 
-    } finally {
-        // 🔓 SEMPRE libera
-        registrando = false;
-
-        if (botao) {
-            botao.disabled = false;
-            botao.innerText = "Confirmar Início";
-        }
-    }
 }
 function dataAgoraBR(){
     return new Date().toLocaleString("pt-BR", {
@@ -2504,28 +1346,22 @@ function dataAgoraBR(){
         minute: "2-digit"
     });
 }
-function limparForm() {
-
+function limparForm(){
+    // Limpa o array de selecionados
     selecionados = [];
 
-    const display = document.getElementById('fDisplay');
-    if (display) display.textContent = "Selecionar Equipe";
+    // Reseta o texto do display
+    document.getElementById('fDisplay').textContent = "Selecionar Equipe";
 
-    document
-        .querySelectorAll('#fOptions .func-item')
-        .forEach(el => el.classList.remove('active'));
+    // Remove a classe 'active' de todos os itens
+    document.querySelectorAll('#fOptions .func-item').forEach(el => el.classList.remove('active'));
 
-    const ci = document.getElementById('fCI');
-    if (ci) ci.value = "";
-
-    const atividade = document.getElementById('fAtividade');
-    if (atividade) atividade.selectedIndex = 0;
-
-    const tipoLocal = document.getElementById('fTipoLocal');
-    if (tipoLocal) tipoLocal.selectedIndex = 0;
-
-    const local = document.getElementById('fLocal');
-if (local) local.selectedIndex = 0;
+    // Limpa campos adicionais
+    document.getElementById('fCI').value = "";
+    document.getElementById('fSubLocal').innerHTML = "";
+    document.getElementById('areaSubLocal').classList.add('hidden');
+    document.getElementById('fAtividade').selectedIndex = 0;
+    document.getElementById('fTipoLocal').selectedIndex = 0;
 }
 
 // MODAL EQUIPEEDICAO
@@ -2555,7 +1391,7 @@ function salvarEdicaoAtividade() {
                         .filter(e => e);
 
     if (!novaCi || !novoServico || !novoLocal || !novaEquipe.length) {
-        mostrarToastErro("Preencha todos os campos!");
+        alert("Preencha todos os campos!");
         return;
     }
 
@@ -2610,23 +1446,12 @@ function atualizarEquipeCampo(){
 
         // COR POR SERVIÇO
        const serv = normalizar(a.servico);
-// Atualiza o badge com número de CIs registradas
-const badgeCIs = document.getElementById('badgeCIs');
-if (atividadesAtivas.length > 0) {
-    badgeCIs.textContent = atividadesAtivas.length + " CI(s) em andamento";
-    badgeCIs.style.display = 'block';
-} else {
-    badgeCIs.style.display = 'none';
-}
+
 const mapa = {
-   pintura: { classe: "card-pintura", icone: "🖌️" },
+    pintura: { classe: "card-pintura", icone: "🎨" },
     eletrica: { classe: "card-eletrica", icone: "💡" },
     hidraulica: { classe: "card-hidraulica", icone: "🚰" },
-    pedreiro: { classe: "card-pedreiro", icone: "🔨" },
-     marcenaria: { classe: "card-marcenaria", icone: "🪚" }
-
-
-     
+    civil: { classe: "card-civil", icone: "🔨" }
 };
 
 const cfg = mapa[serv] || { classe: "", icone: "🛠️" };
@@ -2643,13 +1468,13 @@ let iconeServico = cfg.icone;
     });
 
     // Atualiza o badge com número de funcionários únicos
- const badge = document.getElementById('badgeFuncionarios');
-if(funcionariosUnicos.size > 0){
-    badge.textContent = funcionariosUnicos.size + " Funcionário(s)";
-    badge.style.display = 'block';
-} else {
-    badge.style.display = 'none';
-}
+    const badge = document.getElementById('badgeFuncionarios');
+    if(funcionariosUnicos.size > 0){
+        badge.textContent = funcionariosUnicos.size + " Funcionário(s)";
+        badge.style.display = 'block';
+    } else {
+        badge.style.display = 'none';
+    }
 }
 
 // FINALIZAR
@@ -2663,56 +1488,38 @@ function prepararFinalizacao(idx){
          Equipe: ${atividadeAtual.equipe.join(", ")}`;
 }
 // FINALIZAR ATIVIDADE
-async function finalizarAtividade() {
-
-    if (finalizando) return; // 🔒 trava duplo clique
+function finalizarAtividade() {
     if (!atividadeAtual) return;
 
-    const botao = document.querySelector("#modalFinalizar .btn-finalizar");
-
-    finalizando = true;
-
-    if (botao) {
-        botao.disabled = true;
-        botao.innerText = "Finalizando...";
+    const fotosInput = document.getElementById('fFotos');
+    if (fotosInput.files.length === 0) {
+        alert("É obrigatório enviar pelo menos 1 foto!");
+        return;
     }
 
-    try {
+    const fim = agoraISO();
+    const relato = document.getElementById('fRelato').value || "-";
 
-        const fotosInput = document.getElementById('fFotos');
+    const formData = new FormData();
+    formData.append("idAtiva", atividadeAtual.id);
+    formData.append("ci", atividadeAtual.ci);
+    formData.append("servico", atividadeAtual.servico);
+    formData.append("local", atividadeAtual.local);
+    formData.append("equipe", atividadeAtual.equipe.join(",")); // string
+    formData.append("inicio", atividadeAtual.inicio);
+    formData.append("relato", relato);
+    formData.append("fim", fim);
 
-        if (fotosInput.files.length === 0) {
-            throw "É obrigatório enviar pelo menos 1 foto!";
-        }
+    // Adiciona arquivos
+    Array.from(fotosInput.files).forEach(file => formData.append("fotos", file));
 
-        const fim = agoraISO();
-        const relato = document.getElementById('fRelato').value || "-";
 
-        const formData = new FormData();
-        formData.append("idAtiva", atividadeAtual.id);
-        formData.append("ci", atividadeAtual.ci);
-        formData.append("servico", atividadeAtual.servico);
-        formData.append("local", atividadeAtual.local);
-        formData.append("equipe", atividadeAtual.equipe.join(","));
-        formData.append("inicio", atividadeAtual.inicio);
-        formData.append("relato", relato);
-        formData.append("fim", fim);
+fetch(`${API_BASE}/atividades/finalizar`, { method: "POST", body: formData })
+   .then(res => res.json())
+.then(data => {
 
-        Array.from(fotosInput.files)
-            .forEach(file => formData.append("fotos", file));
-
-        const res = await fetch(`${API_BASE}/atividades/finalizar`, {
-            method: "POST",
-            body: formData
-        });
-
-        const data = await res.json();
-
-        if (!data.ok) {
-            throw data.error || "Erro backend";
-        }
-
-        // ✅ Atualiza frontend
+    if (!data.ok) throw new Error(data.error || "Erro backend");
+        // Atualiza frontend
         atividadeAtual.fim = fim;
         atividadeAtual.relato = relato;
         atividadeAtual.fotos = data.fotos;
@@ -2721,12 +1528,10 @@ async function finalizarAtividade() {
         atividadesAtivas = atividadesAtivas.filter(a => a !== atividadeAtual);
 
         fecharModal('modalFinalizar');
-
         mostrarToast("CI salva no banco!");
 
         document.getElementById('fRelato').value = "";
         document.getElementById('previewFotos').innerHTML = "";
-        document.getElementById('fFotos').value = "";
 
         atualizarEquipeCampo();
         atualizarHistorico();
@@ -2736,40 +1541,18 @@ async function finalizarAtividade() {
         }
 
         atividadeAtual = null;
-
-    } catch (err) {
-
-        console.error("FINALIZAR ERRO:", err);
-        mostrarToastErro(err);
-
-    } finally {
-
-        // 🔓 SEMPRE libera botão e trava
-        finalizando = false;
-
-        if (botao) {
-            botao.disabled = false;
-            botao.innerText = "Finalizar e Sincronizar";
-        }
-    }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Erro ao salvar atividade!");
+    });
 }
-
-//Historico Ci Registradas
+//Historico
 function abrirHistorico(){
-
-    const permissao = localStorage.getItem('permissao');
-
-    // Permissões permitidas
-    const permissoesPermitidas = ['almoxarifado'];
-
-    if (!permissoesPermitidas.includes(permissao)) {
-        mostrarToastErro("Acesso negado!");
-        return;
-    }
 
     abrirModal('modalHistorico');
 
-    fetch(`${API_BASE}/atividades`)
+   fetch(`${API_BASE}/atividades`)
         .then(r=>r.json())
         .then(data=>{
             atividadesConcluidas = data;
@@ -2787,14 +1570,8 @@ function atualizarHistorico() {
     const filtroAno = document.getElementById('filtroAnoHistorico').value;
     const filtroServico = document.getElementById('filtroServicoHistorico').value;
 
-    // 🔎 NOVO FILTRO CI
-    const filtroCI = document.getElementById('filtroCIHistorico').value
-                        .trim()
-                        .toUpperCase();
-
     // Filtra atividades concluídas
     let filtradas = atividadesConcluidas.filter(a => {
-
         let dataOk = true;
         const dataFim = new Date(a.fim);
 
@@ -2808,20 +1585,14 @@ function atualizarHistorico() {
             servicoOk = normalizar(a.servico) === filtroServicoNormalizado;
         }
 
-        // 🔎 FILTRO POR CI
-        let ciOk = true;
-        if (filtroCI) {
-            ciOk = String(a.ci).toUpperCase().includes(filtroCI);
-        }
-
-        return dataOk && servicoOk && ciOk;
+        return dataOk && servicoOk;
     });
 
     // ✅ Ordena do mais recente para o mais antigo
     filtradas.sort((a, b) => new Date(b.fim) - new Date(a.fim));
 
     if (filtradas.length === 0) {
-        lista.innerHTML = "Nenhuma CI encontrada.";
+        lista.innerHTML = "Nenhuma CI finalizada.";
         return;
     }
 
@@ -2832,8 +1603,7 @@ function atualizarHistorico() {
             pintura: "card-pintura",
             eletrica: "card-eletrica",
             hidraulica: "card-hidraulica",
-            pedreiro: "card-pedreiro",
-            marcenaria: "card-marcenaria"
+            civil: "card-civil"
         };
 
         const classeServico = mapa[serv] || "";
@@ -2841,15 +1611,29 @@ function atualizarHistorico() {
         const card = document.createElement('div');
         card.className = `card-lista card-concluido ${classeServico}`;
 
-        let fotosHTML = '';
-        if (a.fotos.length) {
-            fotosHTML = `<div class="img-container">` + 
-                a.fotos.map((f,i) => 
-                    `<img src="${f}" class="img-preview"
-                     onclick="abrirImagemModal('${f}','CI-${a.ci}-foto${i+1}.jpg')">`
-                ).join('') + 
-                `</div>`;
-        }
+        // Adiciona fotos
+       // NORMALIZA FOTOS (array ou string)
+// ===============================
+let fotos = [];
+
+try {
+    fotos = Array.isArray(a.fotos) ? a.fotos : JSON.parse(a.fotos || "[]");
+} catch {
+    fotos = [];
+}
+
+// Render fotos
+let fotosHTML = '';
+
+if (fotos.length > 0) {
+    fotosHTML =
+        `<div class="img-container">` +
+        fotos.map((f,i) =>
+            `<img src="${f}" class="img-preview"
+             onclick="abrirImagemModal('${f}','CI-${a.ci}-foto${i+1}.jpg')">`
+        ).join("") +
+        `</div>`;
+}
 
         card.innerHTML = `
             <strong>CI ${a.ci}</strong><br>
@@ -2879,6 +1663,50 @@ function previewImages(input){
     });
 }
 
+// RestaurarCi
+async function restaurarCI() {
+
+    const input = document.getElementById("restoreZip");
+    const file = input.files[0];
+
+    if (!file) return;
+
+    const zip = await JSZip.loadAsync(file);
+
+    const cis = [];
+
+    for (const nome in zip.files) {
+
+        if (!nome.endsWith(".txt")) continue;
+
+        const txt = await zip.files[nome].async("string");
+
+        try {
+            const ci = JSON.parse(txt);
+            cis.push(ci);
+        } catch(e){
+            console.error("CI inválida:", nome);
+        }
+    }
+
+    if (!cis.length) {
+        alert("Nenhuma CI encontrada");
+        return;
+    }
+
+    await fetch(`${API_BASE}/atividades/restaurar`,{
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify({ cis })
+    });
+
+    alert("CIs restauradas com sucesso!");
+
+    fecharModal("modalRestore");
+    atualizarHistorico();
+}
+
+
 // TOAST
 function mostrarToast(msg){ const t=document.getElementById('toastSucesso'); document.getElementById('toastTexto').textContent=msg; t.style.display='block'; t.classList.add('animar-entrada'); setTimeout(()=>t.style.display='none',2000); }
 
@@ -2895,119 +1723,7 @@ function baixarImagem(){
     link.download = imagemAtual || 'imagem.jpg';
     link.click();
 }
-
-
 carregarAtividades();
-window.addEventListener("DOMContentLoaded", () => {
-
-    // 🔴 SEMPRE começa bloqueado até novo login
-    localStorage.removeItem('permissao');
-
-    aplicarControleVisualPermissao();
-
-    // 🔹 Recuperar login salvo
-    const lembrar = localStorage.getItem("loginLembrar");
-
-    if (lembrar === "true") {
-        document.getElementById("username").value =
-            localStorage.getItem("loginSalvoUsuario") || "";
-
-        document.getElementById("password").value =
-            localStorage.getItem("loginSalvoSenha") || "";
-
-        document.getElementById("lembrarLogin").checked = true;
-    }
-
-});
-
-
-/* ========================= */
-/* GERAR PARTICULAS */
-/* ========================= */
-
-document.querySelectorAll(".particles").forEach(container => {
-
-    for (let i = 0; i < 25; i++) {
-        const particle = document.createElement("span");
-
-        particle.style.left = Math.random() * 100 + "%";
-        particle.style.animationDuration = (3 + Math.random() * 4) + "s";
-        particle.style.animationDelay = Math.random() * 5 + "s";
-
-        container.appendChild(particle);
-    }
-
-});
-
-document.addEventListener("click", criarOndaLiquida);
-document.addEventListener("touchstart", criarOndaLiquida);
-
-function criarOndaLiquida(e) {
-
-    let x, y;
-
-    if (e.touches) {
-        x = e.touches[0].clientX;
-        y = e.touches[0].clientY;
-    } else {
-        x = e.clientX;
-        y = e.clientY;
-    }
-
-    const onda = document.createElement("span");
-    onda.classList.add("onda-liquida");
-
-    onda.style.left = x + "px";
-    onda.style.top = y + "px";
-
-    document.body.appendChild(onda);
-
-    setTimeout(() => {
-        onda.remove();
-    }, 800);
-}
-
-
-document.addEventListener("DOMContentLoaded", () => {
-    const nomeUsuario = localStorage.getItem("loginSalvoUsuario") || "Usuário";
-    const usuarioDiv = document.getElementById("usuarioLogado");
-    if (!usuarioDiv) return;
-
-    // Atualiza só o texto do usuário
-    const nomeSpan = usuarioDiv.querySelector(".nome-usuario");
-    if (nomeSpan) nomeSpan.textContent = `Olá, ${nomeUsuario}`;
-});
-
-
-
-function atualizarDataHora() {
-    const textoData = document.getElementById("textoData");
-    const data = new Date();
-
-    const diasSemana = [
-        "Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira",
-        "Quinta-feira", "Sexta-feira", "Sábado"
-    ];
-    const meses = [
-        "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
-        "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
-    ];
-
-    const diaSemana = diasSemana[data.getDay()];
-    const dia = data.getDate();
-    const mes = meses[data.getMonth()];
-    const horas = String(data.getHours()).padStart(2,"0");
-    const minutos = String(data.getMinutes()).padStart(2,"0");
-
-    textoData.textContent = `${diaSemana}, ${dia} de ${mes}, ${horas}:${minutos}`;
-}
-
-// Atualiza imediatamente e depois a cada segundo
-atualizarDataHora();
-setInterval(atualizarDataHora, 1000);
-
 </script>
-
-   
 </body>
 </html>
