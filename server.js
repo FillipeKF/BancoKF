@@ -109,11 +109,7 @@ initDB();
 // Espera { usuario } no body e consulta o banco
 // =======================
 async function checkAlmoxarifado(req, res, next) {
-  const usuario = req.body?.usuario || req.query?.usuario;
-  
-  console.log("checkAlmoxarifado usuario recebido:", usuario); // ← LOG
-  console.log("body:", req.body);                               // ← LOG
-  
+  const { usuario } = req.body;
   if (!usuario) return res.status(400).json({ ok: false, error: "Usuário não informado" });
 
   try {
@@ -224,41 +220,22 @@ app.post("/atividades/inicio", async (req, res) => {
 // Finalizar atividade
 app.post("/atividades/finalizar", upload.array("fotos"), async (req, res) => {
   try {
-    const idAtiva = parseInt(req.body.idAtiva, 10);
-    if (!idAtiva || isNaN(idAtiva)) throw "ID ATIVA NÃO RECEBIDO OU INVÁLIDO";
+    const idAtiva = Number(req.body.idAtiva);
+    if (!idAtiva) throw "ID ATIVA NÃO RECEBIDO";
 
     const { ci, servico, local, equipe, inicio, relato, fim } = req.body;
-
-    // ✅ Valida campos obrigatórios
-    if (!ci || !servico || !local || !equipe || !inicio || !fim) {
-      return res.status(400).json({ error: "Campos obrigatórios faltando", detalhe: { ci, servico, local, equipe, inicio, fim } });
-    }
 
     let fotosURLs = [];
     if (req.files && req.files.length > 0) {
       for (const file of req.files) {
-
-        // ✅ Nome do arquivo sem caracteres especiais
-        const ext = file.originalname.split('.').pop().toLowerCase() || 'jpg';
-        const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-
-        console.log("UPLOADING:", fileName, "size:", file.buffer.length);
-
-        const { error: uploadError } = await supabase.storage
-          .from("uploads")
-          .upload(fileName, file.buffer, { contentType: file.mimetype });
-
-        if (uploadError) {
-          console.error("SUPABASE UPLOAD ERROR:", JSON.stringify(uploadError));
-          throw `Supabase erro: ${uploadError.message}`;
-        }
+        const fileName = `${Date.now()}-${file.originalname}`;
+        const { error } = await supabase.storage.from("uploads").upload(fileName, file.buffer, { contentType: file.mimetype });
+        if (error) throw error;
 
         const { data } = supabase.storage.from("uploads").getPublicUrl(fileName);
         fotosURLs.push(data.publicUrl);
       }
     }
-
-    console.log("INSERINDO NO BANCO:", { ci, servico, local, equipe, inicio, relato, fim, fotos: fotosURLs.length });
 
     await pool.query(`
       INSERT INTO atividades(ci, servico, local, equipe, inicio, relato, fotos, fim)
@@ -267,10 +244,7 @@ app.post("/atividades/finalizar", upload.array("fotos"), async (req, res) => {
 
     await pool.query("DELETE FROM atividades_ativas WHERE id = $1", [idAtiva]);
 
-    console.log("FINALIZAR OK — id ativa deletada:", idAtiva);
-
     res.json({ ok: true, fotos: fotosURLs });
-
   } catch (err) {
     console.error("FINALIZAR ERRO REAL:", err);
     res.status(500).json({ error: "Falha ao finalizar atividade", detalhe: String(err) });
