@@ -41,6 +41,7 @@ const upload = multer({ storage });
 // POSTGRES (NEON)
 // =======================
 const pool = new Pool({
+  connectionString: "postgresql://neondb_owner:npg_ojkm7E2ZpMHn@ep-rapid-pine-acre78eh-pooler.sa-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require",
   connectionString: "postgresql://neondb_owner:npg_tgWsRev2Kh7o@ep-rapid-pine-acre78eh-pooler.sa-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require",
   ssl: true
 });
