@@ -2207,48 +2207,40 @@ function normalizar(texto) {
 }
 // Substitui confirm antigo
 // 6️⃣ Excluir Item
-async function excluirItem(id) {
-    if (!confirm("Deseja realmente excluir este item?")) return;
- 
+function excluirItem(id) {
+    itemAtualExcluir = itensRegistrados.find(i => i.id === id);
+    if (!itemAtualExcluir) return;
+    abrirModal('modalExcluirItem');
+}
+async function confirmarExclusaoItem() {
+    if (!itemAtualExcluir) return;
+
     try {
-        const res = await fetch(`${API_BASE}/itens/${id}`, {
-            method: "DELETE",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                usuario: localStorage.getItem('usuarioNome') // ← ADICIONADO
-            })
+        const usuario = encodeURIComponent(localStorage.getItem('usuarioNome') || '');
+        const res = await fetch(`${API_BASE}/itens/${itemAtualExcluir.id}?usuario=${usuario}`, {
+            method: "DELETE"
         });
- 
+
         const contentType = res.headers.get("content-type") || "";
         if (!contentType.includes("application/json")) {
             const text = await res.text();
-            console.error("Resposta inesperada do backend:", text);
-            throw "Resposta do servidor não é JSON. Verifique a URL/API_BASE.";
+            console.error("Resposta inesperada:", text);
+            throw "Resposta do servidor não é JSON";
         }
- 
+
         const data = await res.json();
-        if (!data.ok) throw data.error || "Erro ao excluir item";
- 
-        itensRegistrados = itensRegistrados.filter(i => i.id !== id);
+        if (!data.ok) throw data.error || "Erro ao excluir";
+
+        itensRegistrados = itensRegistrados.filter(i => i.id !== itemAtualExcluir.id);
         atualizarListaItens();
         mostrarToast("Item excluído!");
- 
+        fecharModal('modalExcluirItem');
+        itemAtualExcluir = null;
+
     } catch (err) {
-        mostrarToastErro("Falha ao excluir item: " + err);
+        mostrarToastErro("Falha ao excluir: " + err);
         console.error(err);
     }
-}
-function confirmarExclusaoItem() {
-    if (!itemAtualExcluir) return;
-
-    fetch(`${API_BASE}/itens/${itemAtualExcluir.id}`, { method: "DELETE" })
-    .then(() => {
-        mostrarToast("Item excluído do banco!");
-        fecharModal('modalExcluirItem');
-        carregarItens();   // recarrega direto do SQLite
-        itemAtualExcluir = null;
-    })
-    .catch(err => console.error(err));
 }
 
 
